@@ -5,13 +5,9 @@ import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const dbFilePath = path.join(__dirname, '..', 'data', 'career_companion.sqlite');
-
-// Ensure data directory exists
-const dataDir = path.dirname(dbFilePath);
-if (!fs.existsSync(dataDir)) {
-  fs.mkdirSync(dataDir, { recursive: true });
-}
+const isServerless = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.VERCEL_ENV);
+const localDbPath = path.join(__dirname, '..', 'data', 'career_companion.sqlite');
+const dbFilePath = isServerless ? path.join('/tmp', 'career_companion.sqlite') : localDbPath;
 
 let dbInstance = null;
 let SQL = null;
@@ -21,15 +17,35 @@ export async function getDatabase() {
 
   SQL = await initSqlJs();
 
-  if (fs.existsSync(dbFilePath)) {
-    const fileBuffer = fs.readFileSync(dbFilePath);
-    dbInstance = new SQL.Database(fileBuffer);
-  } else {
+  try {
+    if (fs.existsSync(dbFilePath)) {
+      const fileBuffer = fs.readFileSync(dbFilePath);
+      dbInstance = new SQL.Database(fileBuffer);
+    } else if (isServerless && fs.existsSync(localDbPath)) {
+      const fileBuffer = fs.readFileSync(localDbPath);
+      dbInstance = new SQL.Database(fileBuffer);
+      saveDatabase();
+    } else {
+      dbInstance = new SQL.Database();
+      const schemaPath = path.join(__dirname, 'schema.sql');
+      if (fs.existsSync(schemaPath)) {
+        const schemaSql = fs.readFileSync(schemaPath, 'utf-8');
+        dbInstance.run(schemaSql);
+      }
+      saveDatabase();
+    }
+  } catch (err) {
+    console.warn('[Database] Error loading database file, initializing in-memory fallback:', err.message);
     dbInstance = new SQL.Database();
-    // Initialize schema
-    const schemaSql = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf-8');
-    dbInstance.run(schemaSql);
-    saveDatabase();
+    try {
+      const schemaPath = path.join(__dirname, 'schema.sql');
+      if (fs.existsSync(schemaPath)) {
+        const schemaSql = fs.readFileSync(schemaPath, 'utf-8');
+        dbInstance.run(schemaSql);
+      }
+    } catch (schemaErr) {
+      console.error('[Database] Failed to initialize schema:', schemaErr.message);
+    }
   }
 
   return dbInstance;
@@ -37,9 +53,17 @@ export async function getDatabase() {
 
 export function saveDatabase() {
   if (!dbInstance) return;
-  const data = dbInstance.export();
-  const buffer = Buffer.from(data);
-  fs.writeFileSync(dbFilePath, buffer);
+  try {
+    const data = dbInstance.export();
+    const buffer = Buffer.from(data);
+    const dir = path.dirname(dbFilePath);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    fs.writeFileSync(dbFilePath, buffer);
+  } catch (err) {
+    console.warn('[Database] Notice: disk write skipped/failed:', err.message);
+  }
 }
 
 // Helper wrapper for clean SQL queries

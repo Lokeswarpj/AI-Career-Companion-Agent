@@ -28,6 +28,21 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// Database bootstrap middleware for serverless cold-starts
+let isDbBootstrapped = false;
+app.use(async (req, res, next) => {
+  if (!isDbBootstrapped) {
+    try {
+      await getDatabase();
+      await seedInternshipsIfNeeded();
+      isDbBootstrapped = true;
+    } catch (err) {
+      console.error('[Server DB Init Error]', err);
+    }
+  }
+  next();
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({
@@ -55,11 +70,12 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Bootstrap Database & Start Server
+// Bootstrap Database & Start Server in Standalone Mode
 async function startServer() {
   try {
     await getDatabase();
     await seedInternshipsIfNeeded();
+    isDbBootstrapped = true;
 
     app.listen(PORT, () => {
       console.log(`=======================================================`);
@@ -73,6 +89,9 @@ async function startServer() {
   }
 }
 
-startServer();
+const isStandalone = !process.env.VERCEL && !process.env.AWS_LAMBDA_FUNCTION_NAME && !process.env.VERCEL_ENV && process.env.NODE_ENV !== 'test';
+if (isStandalone) {
+  startServer();
+}
 
 export default app;

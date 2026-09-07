@@ -2,15 +2,30 @@
   "name": "careerpulse-ai",
   "version": "1.0.0",
   "description": "AI Career Companion Agent for Internship Matching and Interview Preparation",
+  "type": "module",
   "scripts": {
+    "dev": "npm run dev:client",
     "dev:backend": "npm run dev --prefix backend",
     "dev:frontend": "npm run dev --prefix frontend",
     "dev:server": "npm run dev --prefix backend",
     "dev:client": "npm run dev --prefix frontend",
-    "start": "npm run start --prefix backend",
-    "test": "npm run test --prefix backend",
+    "build": "npm run build --prefix frontend",
     "build:frontend": "npm run build --prefix frontend",
-    "build:client": "npm run build --prefix frontend"
+    "build:client": "npm run build --prefix frontend",
+    "start": "npm run start --prefix backend",
+    "test": "npm run test --prefix backend"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "mammoth": "^1.9.0",
+    "multer": "^1.4.5-lts.1",
+    "pdf-parse": "^1.1.1",
+    "sql.js": "^1.12.0",
+    "uuid": "^11.1.0"
   },
   "keywords": [
     "infosys",
@@ -24,3 +39,4 @@
   "author": "Infosys Virtual Intern",
   "license": "MIT"
 }
+
