@@ -3,15 +3,19 @@
   "version": "1.0.0",
   "description": "AI Career Companion Agent for Internship Matching and Interview Preparation",
   "type": "module",
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
   "scripts": {
     "dev": "npm run dev:client",
     "dev:backend": "npm run dev --prefix backend",
     "dev:frontend": "npm run dev --prefix frontend",
     "dev:server": "npm run dev --prefix backend",
     "dev:client": "npm run dev --prefix frontend",
-    "build": "npm run build --prefix frontend",
-    "build:frontend": "npm run build --prefix frontend",
-    "build:client": "npm run build --prefix frontend",
+    "build": "cd frontend && npm install && npm run build",
+    "build:frontend": "cd frontend && npm install && npm run build",
+    "build:client": "cd frontend && npm install && npm run build",
     "start": "npm run start --prefix backend",
     "test": "npm run test --prefix backend"
   },
