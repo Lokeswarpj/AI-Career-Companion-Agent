@@ -117,7 +117,7 @@ export default function Navbar({ activeTab, setActiveTab }) {
 
         {/* User Profile / Auth State & Mobile Menu Button */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          {isAuthenticated ? (
+          {isAuthenticated && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <button
                 onClick={() => setActiveTab('profile')}
@@ -153,13 +153,6 @@ export default function Navbar({ activeTab, setActiveTab }) {
                 <LogOut size={16} />
               </button>
             </div>
-          ) : (
-            <button
-              onClick={() => setActiveTab('auth')}
-              className="btn btn-primary btn-sm"
-            >
-              Get Started
-            </button>
           )}
 
           {/* Mobile hamburger toggle */}
