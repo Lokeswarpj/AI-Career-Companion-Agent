@@ -1,4 +1,3 @@
-import initSqlJs from 'sql.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -12,10 +11,44 @@ const dbFilePath = isServerless ? path.join('/tmp', 'career_companion.sqlite') :
 let dbInstance = null;
 let SQL = null;
 
+async function loadSqlEngine() {
+  if (SQL) return SQL;
+
+  // Primary: sql-asm (Pure JS engine, 100% serverless/cloud safe without WASM file path dependencies)
+  try {
+    const initSqlAsm = (await import('sql.js/dist/sql-asm.js')).default;
+    SQL = await initSqlAsm();
+    return SQL;
+  } catch (asmErr) {
+    console.warn('[Database] sql-asm fallback notice:', asmErr.message);
+  }
+
+  // Fallback: Standard initSqlJs
+  try {
+    const initSqlJs = (await import('sql.js')).default;
+    SQL = await initSqlJs({
+      locateFile: (file) => {
+        const potentialPaths = [
+          path.join(process.cwd(), 'node_modules', 'sql.js', 'dist', file),
+          path.join(__dirname, '..', '..', 'node_modules', 'sql.js', 'dist', file)
+        ];
+        for (const p of potentialPaths) {
+          if (fs.existsSync(p)) return p;
+        }
+        return file;
+      }
+    });
+    return SQL;
+  } catch (wasmErr) {
+    console.error('[Database] Failed to initialize SQL engine:', wasmErr.message);
+    throw wasmErr;
+  }
+}
+
 export async function getDatabase() {
   if (dbInstance) return dbInstance;
 
-  SQL = await initSqlJs();
+  SQL = await loadSqlEngine();
 
   try {
     if (fs.existsSync(dbFilePath)) {
