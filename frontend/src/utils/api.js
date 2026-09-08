@@ -55,6 +55,11 @@ export const api = {
     const query = new URLSearchParams(params).toString();
     return apiRequest(`/internships${query ? `?${query}` : ''}`);
   },
+  searchInternshipsRag: (query, params = {}) => {
+    const searchParams = new URLSearchParams({ query, ...params }).toString();
+    return apiRequest(`/internships/rag/search?${searchParams}`);
+  },
+  getInternshipStats: () => apiRequest('/internships/stats'),
   getInternship: (id) => apiRequest(`/internships/${id}`),
   getSavedInternships: () => apiRequest('/internships/saved/all'),
   saveInternship: (id, payload) => apiRequest(`/internships/saved/${id}`, { method: 'POST', body: JSON.stringify(payload) }),
@@ -63,6 +68,7 @@ export const api = {
   // Matching & Recommendations
   getRecommendations: () => apiRequest('/matching/recommendations'),
   evaluateMatch: (internshipId) => apiRequest(`/matching/evaluate/${internshipId}`),
+  evaluateProfile: (profile, limit = 20) => apiRequest('/matching/evaluate-profile', { method: 'POST', body: JSON.stringify({ profile, limit }) }),
 
   // Mock Interview
   startInterview: (payload) => apiRequest('/interview/start', { method: 'POST', body: JSON.stringify(payload) }),

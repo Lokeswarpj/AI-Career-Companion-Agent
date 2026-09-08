@@ -53,16 +53,32 @@ CREATE TABLE IF NOT EXISTS internships (
     location TEXT NOT NULL,
     remote_type TEXT NOT NULL, -- 'Remote' | 'Hybrid' | 'On-site'
     description TEXT NOT NULL,
+    responsibilities_json TEXT, -- JSON array of key responsibilities
     required_skills_json TEXT NOT NULL, -- JSON array of strings
+    preferred_skills_json TEXT, -- JSON array of preferred/nice-to-have skills
     preferred_qualifications TEXT,
+    experience_requirements TEXT,
+    education_requirements TEXT,
     duration TEXT, -- e.g. '3 Months', '6 Months'
     stipend TEXT, -- e.g. '$2,500/month' or '₹25,000/month'
     apply_url TEXT,
-    source TEXT NOT NULL, -- 'Infosys Springboard', 'RemoteOK', 'Adzuna', 'Campus Portal'
+    source TEXT NOT NULL, -- 'Infosys Springboard', 'RemoteOK', 'Adzuna', 'Campus Portal', etc.
     posted_date TEXT,
     deadline TEXT,
     industry TEXT DEFAULT 'Technology',
     is_demo INTEGER DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS internship_chunks (
+    id TEXT PRIMARY KEY,
+    internship_id TEXT NOT NULL,
+    chunk_index INTEGER NOT NULL,
+    chunk_type TEXT NOT NULL, -- 'overview' | 'responsibilities' | 'requirements_skills' | 'qualifications'
+    chunk_text TEXT NOT NULL,
+    metadata_json TEXT,
+    embedding_json TEXT, -- Serialized JSON array of float vector embeddings
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(internship_id) REFERENCES internships(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS saved_internships (
@@ -134,3 +150,5 @@ CREATE INDEX IF NOT EXISTS idx_saved_user_id ON saved_internships(user_id);
 CREATE INDEX IF NOT EXISTS idx_interview_sessions_user_id ON interview_sessions(user_id);
 CREATE INDEX IF NOT EXISTS idx_interview_exchanges_session ON interview_exchanges(session_id);
 CREATE INDEX IF NOT EXISTS idx_chat_messages_user_id ON chat_messages(user_id);
+CREATE INDEX IF NOT EXISTS idx_chunks_internship_id ON internship_chunks(internship_id);
+CREATE INDEX IF NOT EXISTS idx_chunks_type ON internship_chunks(chunk_type);

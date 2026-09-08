@@ -34,6 +34,37 @@ export async function getDatabase() {
       }
       saveDatabase();
     }
+
+    // Run non-destructive schema migrations (Milestone 2 support)
+    try {
+      dbInstance.run(`
+        CREATE TABLE IF NOT EXISTS internship_chunks (
+          id TEXT PRIMARY KEY,
+          internship_id TEXT NOT NULL,
+          chunk_index INTEGER NOT NULL,
+          chunk_type TEXT NOT NULL,
+          chunk_text TEXT NOT NULL,
+          metadata_json TEXT,
+          embedding_json TEXT,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY(internship_id) REFERENCES internships(id) ON DELETE CASCADE
+        );
+        CREATE INDEX IF NOT EXISTS idx_chunks_internship_id ON internship_chunks(internship_id);
+        CREATE INDEX IF NOT EXISTS idx_chunks_type ON internship_chunks(chunk_type);
+      `);
+
+      // Add columns to internships if missing
+      const cols = ['responsibilities_json', 'preferred_skills_json', 'experience_requirements', 'education_requirements'];
+      for (const col of cols) {
+        try {
+          dbInstance.run(`ALTER TABLE internships ADD COLUMN ${col} TEXT;`);
+        } catch (alterErr) {
+          // Column already exists, ignore
+        }
+      }
+    } catch (migErr) {
+      console.warn('[Database] Schema migration notice:', migErr.message);
+    }
   } catch (err) {
     console.warn('[Database] Error loading database file, initializing in-memory fallback:', err.message);
     dbInstance = new SQL.Database();

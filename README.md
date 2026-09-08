@@ -6,19 +6,13 @@
 
 ---
 
-## 📌 Executive Summary & Problem Statement
+## 📌 Executive Summary & Project Milestones
 
-University students seeking software and AI internships face three primary challenges:
-1. **Resume Blindness**: Generic resumes lack targeted alignment with industry expectations and job descriptions.
-2. **Opaque Job Matching**: Students apply blindly to hundreds of portals without understanding why they are qualified or which core prerequisites they lack.
-3. **Interview Anxiety & Lack of Mentorship**: Access to realistic, personalized technical and behavioral mock interview practice with actionable, constructive feedback is scarce.
+**CareerPulse AI** is an intelligent, end-to-end AI Career Companion Agent designed to revolutionize student internship matching, skill-gap analysis, and interview preparation.
 
-**CareerPulse AI** solves this with an intelligent, end-to-end career companion agent that:
-- Performs deep **Gemini AI Resume Screening & Competency Extraction** across 6 distinct technical and soft skill domains.
-- Uses a **Transparent Hybrid Matching Algorithm** (combining deterministic mathematical weights with semantic AI insights).
-- Generates an actionable **Skill-Gap Matrix** (Strong vs. Moderate vs. Missing competencies with priority ratings and learning roadmaps).
-- Provides an **Interactive AI Mock Interview Simulator** with voice dictation, real-time multidimensional grading (Technical, Clarity, Relevance), and comprehensive scorecard generation.
-- Features a **Context-Aware AI Career Assistant** maintaining persistent student background memory.
+### 🏆 Completed Project Milestones
+- ✅ **Milestone 1**: System Architecture, Student Profile Management, Multi-Format Resume Parsing (PDF/DOCX), Structured Competency Extraction, and Multi-Agent Design.
+- ✅ **Milestone 2**: Curated Internship Knowledge Base (180 standardized postings), RAG Dense Vector Pipeline (720 semantic chunks), Job-Resume Matching Agent (multi-factor scoring with reasoning), and 6-Profile Automated Evaluation Benchmark (MRR: 1.000, 100% Top-1 Accuracy).
 
 ---
 

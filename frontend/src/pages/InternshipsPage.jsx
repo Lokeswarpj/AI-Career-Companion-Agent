@@ -16,26 +16,53 @@ import {
   Mic, 
   Layers,
   Building,
-  Check
+  Check,
+  Cpu,
+  Database,
+  ArrowRight,
+  Sliders
 } from 'lucide-react';
 
 export default function InternshipsPage({ setActiveTab, setSelectedInternshipId }) {
   const notify = useNotification();
   const [loading, setLoading] = useState(true);
+  const [searchMode, setSearchMode] = useState('semantic'); // 'semantic' | 'filter'
   const [internships, setInternships] = useState([]);
   const [savedMap, setSavedMap] = useState({});
   const [selectedItem, setSelectedItem] = useState(null);
+  const [stats, setStats] = useState(null);
 
   // Search & Filter state
   const [search, setSearch] = useState('');
+  const [semanticQuery, setSemanticQuery] = useState('remote AI machine learning internship with PyTorch');
   const [remoteFilter, setRemoteFilter] = useState('All');
   const [industryFilter, setIndustryFilter] = useState('All');
   const [sourceFilter, setSourceFilter] = useState('All');
 
+  const sampleQueries = [
+    { label: "⚡ Remote AI & LLMs", query: "remote generative AI machine learning with PyTorch and LLMs" },
+    { label: "🌐 Full-Stack React & Node", query: "full-stack React web developer with Node.js and PostgreSQL" },
+    { label: "☁️ Cloud & DevOps", query: "cloud infrastructure DevOps containerization Docker Kubernetes" },
+    { label: "🛡️ Cybersecurity SOC", query: "cybersecurity analyst threat hunting penetration testing Wireshark" },
+    { label: "📊 Data Analytics & BI", query: "data analytics SQL Tableau dashboards business metrics" }
+  ];
+
   useEffect(() => {
-    loadInternships();
+    loadStats();
     loadSavedStatus();
-  }, [remoteFilter, industryFilter, sourceFilter]);
+    if (searchMode === 'semantic') {
+      handleSemanticSearch(semanticQuery);
+    } else {
+      loadInternships();
+    }
+  }, [searchMode, remoteFilter, industryFilter, sourceFilter]);
+
+  async function loadStats() {
+    try {
+      const res = await api.getInternshipStats();
+      setStats(res);
+    } catch (err) {}
+  }
 
   async function loadInternships() {
     try {
@@ -55,6 +82,24 @@ export default function InternshipsPage({ setActiveTab, setSelectedInternshipId 
     }
   }
 
+  async function handleSemanticSearch(queryToRun) {
+    const q = queryToRun || semanticQuery;
+    if (!q.trim()) return;
+    try {
+      setLoading(true);
+      const params = {};
+      if (remoteFilter !== 'All') params.remote = remoteFilter;
+      if (industryFilter !== 'All') params.industry = industryFilter;
+
+      const res = await api.searchInternshipsRag(q, params);
+      setInternships(res.results || []);
+    } catch (err) {
+      notify.error('Semantic RAG search failed.');
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function loadSavedStatus() {
     try {
       const res = await api.getSavedInternships();
@@ -68,7 +113,11 @@ export default function InternshipsPage({ setActiveTab, setSelectedInternshipId 
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    loadInternships();
+    if (searchMode === 'semantic') {
+      handleSemanticSearch(semanticQuery);
+    } else {
+      loadInternships();
+    }
   };
 
   const handleToggleSave = async (id) => {
@@ -94,36 +143,121 @@ export default function InternshipsPage({ setActiveTab, setSelectedInternshipId 
       
       {/* Page Header */}
       <div style={{ marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '2rem', fontWeight: 800 }}>Internship Discovery Engine</h1>
-        <p style={{ color: 'var(--text-secondary)', fontSize: '0.92rem' }}>
-          Explore curated campus opportunities, Infosys Springboard programs, and live remote technology internships.
+        <div style={{ display: 'inline-flex', marginBottom: '0.5rem' }}>
+          <span className="badge badge-indigo">Milestone 2 • 180 Curated Postings & Vector Store</span>
+        </div>
+        <h1 style={{ fontSize: '2rem', fontWeight: 800 }}>Internship Knowledge Base & RAG Engine</h1>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.92rem', maxWidth: '750px' }}>
+          Query over 180 curated, standardized industry internship postings indexed into 720 semantic vector chunks with dual-mode dense embeddings and cosine similarity retrieval.
         </p>
+      </div>
+
+      {/* Dataset Statistics Metric Bar */}
+      {stats && (
+        <div className="glass-panel" style={{
+          padding: '1.25rem 1.5rem',
+          marginBottom: '2rem',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+          gap: '1rem',
+          background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(6, 182, 212, 0.05) 100%)',
+          border: '1px solid rgba(99, 102, 241, 0.2)'
+        }}>
+          <div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>Knowledge Base</div>
+            <div style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--accent-primary)' }}>{stats.totalInternships} Postings</div>
+          </div>
+          <div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>Vector Index</div>
+            <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#22d3ee' }}>{stats.totalIndexedChunks} Chunks</div>
+          </div>
+          <div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>Tech Tracks</div>
+            <div style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--accent-emerald)' }}>15+ Domains</div>
+          </div>
+          <div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>Embedding Engine</div>
+            <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#fbbf24', marginTop: '0.35rem' }}>Dual Gemini / High-Dim Vector</div>
+          </div>
+        </div>
+      )}
+
+      {/* Mode Switcher Tabs */}
+      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
+        <button
+          onClick={() => setSearchMode('semantic')}
+          className={`btn ${searchMode === 'semantic' ? 'btn-primary' : 'btn-secondary'} btn-sm`}
+          style={{ gap: '0.4rem' }}
+        >
+          <Sparkles size={16} />
+          <span>Natural Language RAG Search</span>
+        </button>
+        <button
+          onClick={() => setSearchMode('filter')}
+          className={`btn ${searchMode === 'filter' ? 'btn-primary' : 'btn-secondary'} btn-sm`}
+          style={{ gap: '0.4rem' }}
+        >
+          <Sliders size={16} />
+          <span>Keyword & Multi-Filter Catalog</span>
+        </button>
       </div>
 
       {/* Search and Filters Bar */}
       <div className="glass-panel" style={{ padding: '1.5rem', marginBottom: '2.5rem' }}>
-        <form onSubmit={handleSearchSubmit} style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
-          <div style={{ position: 'relative', flex: '1 1 300px' }}>
-            <input
-              type="text"
-              className="form-input"
-              placeholder="Search by role title, company, or skills (e.g. Python, React)..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              style={{ paddingLeft: '2.6rem' }}
-            />
+        <form onSubmit={handleSearchSubmit} style={{ display: 'flex', gap: '0.75rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
+          <div style={{ position: 'relative', flex: '1 1 320px' }}>
+            {searchMode === 'semantic' ? (
+              <input
+                type="text"
+                className="form-input"
+                placeholder="Describe your target role in plain English (e.g. remote machine learning with PyTorch and NLP)..."
+                value={semanticQuery}
+                onChange={(e) => setSemanticQuery(e.target.value)}
+                style={{ paddingLeft: '2.6rem' }}
+              />
+            ) : (
+              <input
+                type="text"
+                className="form-input"
+                placeholder="Search by role title, company, or skills (e.g. Python, React)..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                style={{ paddingLeft: '2.6rem' }}
+              />
+            )}
             <Search size={18} style={{ position: 'absolute', left: '0.9rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
           </div>
 
           <button type="submit" className="btn btn-primary" style={{ gap: '0.4rem' }}>
-            <Search size={16} /> Search
+            <Search size={16} /> {searchMode === 'semantic' ? 'Semantic Retrieve' : 'Filter Search'}
           </button>
         </form>
+
+        {/* Quick query chips in semantic mode */}
+        {searchMode === 'semantic' && (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1.25rem' }}>
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', alignSelf: 'center' }}>Sample Prompts:</span>
+            {sampleQueries.map((sq, idx) => (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => {
+                  setSemanticQuery(sq.query);
+                  handleSemanticSearch(sq.query);
+                }}
+                className="badge badge-cyan"
+                style={{ cursor: 'pointer', border: 'none', padding: '0.35rem 0.65rem' }}
+              >
+                {sq.label}
+              </button>
+            ))}
+          </div>
+        )}
 
         <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
             <Filter size={16} />
-            <span>Filters:</span>
+            <span>Predicates:</span>
           </div>
 
           {/* Work Mode */}
@@ -147,27 +281,30 @@ export default function InternshipsPage({ setActiveTab, setSelectedInternshipId 
             style={{ width: 'auto', padding: '0.45rem 0.85rem', fontSize: '0.85rem' }}
           >
             <option value="All">Industry: All</option>
-            <option value="Artificial Intelligence">Artificial Intelligence</option>
-            <option value="Software Engineering">Software Engineering</option>
-            <option value="Cloud & DevOps">Cloud & DevOps</option>
-            <option value="Data Science">Data Science</option>
-            <option value="Cybersecurity">Cybersecurity</option>
-            <option value="FinTech">FinTech</option>
+            <option value="Artificial Intelligence & ML">AI & Machine Learning</option>
+            <option value="Full-Stack & Web Engineering">Full-Stack & Web</option>
+            <option value="Cloud & DevOps Engineering">Cloud & DevOps</option>
+            <option value="Data Engineering & Analytics">Data & Analytics</option>
+            <option value="Cybersecurity & Information Security">Cybersecurity</option>
+            <option value="Mobile Application Development">Mobile Development</option>
+            <option value="Enterprise Software & Java">Enterprise Java</option>
           </select>
 
-          {/* Source */}
-          <select
-            className="form-select"
-            value={sourceFilter}
-            onChange={(e) => setSourceFilter(e.target.value)}
-            style={{ width: 'auto', padding: '0.45rem 0.85rem', fontSize: '0.85rem' }}
-          >
-            <option value="All">Source: All</option>
-            <option value="Infosys Springboard">Infosys Springboard</option>
-            <option value="Campus Portal">Campus Portal</option>
-            <option value="RemoteOK">RemoteOK</option>
-            <option value="Adzuna">Adzuna</option>
-          </select>
+          {/* Source Filter (Only in keyword mode) */}
+          {searchMode === 'filter' && (
+            <select
+              className="form-select"
+              value={sourceFilter}
+              onChange={(e) => setSourceFilter(e.target.value)}
+              style={{ width: 'auto', padding: '0.45rem 0.85rem', fontSize: '0.85rem' }}
+            >
+              <option value="All">Source: All</option>
+              <option value="Infosys Springboard">Infosys Springboard</option>
+              <option value="Campus Portal">Campus Portal</option>
+              <option value="RemoteOK">RemoteOK</option>
+              <option value="Adzuna">Adzuna</option>
+            </select>
+          )}
 
           <span style={{ marginLeft: 'auto', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
             Showing {internships.length} opportunities
@@ -176,7 +313,7 @@ export default function InternshipsPage({ setActiveTab, setSelectedInternshipId 
       </div>
 
       {loading ? (
-        <LoadingSpinner message="Querying live internship directory..." />
+        <LoadingSpinner message={searchMode === 'semantic' ? "Executing dense vector cosine similarity search across 720 chunks..." : "Querying internship knowledge base..."} />
       ) : internships.length === 0 ? (
         <div className="glass-panel" style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
           <Briefcase size={40} style={{ margin: '0 auto 1rem auto', color: 'var(--text-muted)' }} />
@@ -187,6 +324,7 @@ export default function InternshipsPage({ setActiveTab, setSelectedInternshipId 
         <div className="grid-2" style={{ gap: '1.5rem' }}>
           {internships.map((item) => {
             const isSaved = !!savedMap[item.id];
+            const semScore = item.semanticScore;
             return (
               <div 
                 key={item.id}
@@ -196,15 +334,21 @@ export default function InternshipsPage({ setActiveTab, setSelectedInternshipId 
                   display: 'flex',
                   flexDirection: 'column',
                   gap: '1rem',
-                  position: 'relative'
+                  position: 'relative',
+                  borderLeft: semScore ? `4px solid ${semScore >= 60 ? '#10b981' : '#6366f1'}` : '1px solid var(--border-card)'
                 }}
               >
                 {/* Header info */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem' }}>
                   <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem', flexWrap: 'wrap' }}>
                       <span className="badge badge-indigo" style={{ fontSize: '0.7rem' }}>{item.source}</span>
                       <span className="badge badge-cyan" style={{ fontSize: '0.7rem' }}>{item.remote_type}</span>
+                      {semScore && (
+                        <span className="badge badge-emerald" style={{ fontSize: '0.7rem' }}>
+                          ⚡ {semScore}% Semantic Alignment
+                        </span>
+                      )}
                     </div>
                     <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-primary)' }}>
                       {item.title}
@@ -242,13 +386,33 @@ export default function InternshipsPage({ setActiveTab, setSelectedInternshipId 
                   {item.description}
                 </p>
 
+                {/* Matched Chunk Highlight (If Semantic Search) */}
+                {item.bestMatchedChunk && (
+                  <div style={{
+                    padding: '0.6rem 0.85rem',
+                    background: 'rgba(99, 102, 241, 0.08)',
+                    borderRadius: 'var(--radius-sm)',
+                    borderLeft: '3px solid var(--accent-primary)',
+                    fontSize: '0.78rem',
+                    color: 'var(--text-secondary)'
+                  }}>
+                    <span style={{ fontWeight: 700, color: 'var(--accent-primary)' }}>Matched Chunk ({item.bestMatchedChunk.type}): </span>
+                    <span>{item.bestMatchedChunk.text.slice(0, 140)}...</span>
+                  </div>
+                )}
+
                 {/* Skills tags */}
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
-                  {(item.required_skills_json || []).map((skill, idx) => (
+                  {(item.required_skills_json || []).slice(0, 5).map((skill, idx) => (
                     <span key={idx} className="badge badge-indigo" style={{ fontSize: '0.72rem' }}>
                       {skill}
                     </span>
                   ))}
+                  {(item.required_skills_json || []).length > 5 && (
+                    <span className="badge" style={{ fontSize: '0.72rem', background: 'var(--bg-tertiary)' }}>
+                      +{(item.required_skills_json || []).length - 5} more
+                    </span>
+                  )}
                 </div>
 
                 {/* Card footer with stipend and action buttons */}
@@ -333,6 +497,17 @@ export default function InternshipsPage({ setActiveTab, setSelectedInternshipId 
               <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>{selectedItem.description}</p>
             </div>
 
+            {selectedItem.responsibilities_json && selectedItem.responsibilities_json.length > 0 && (
+              <div>
+                <h4 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.4rem' }}>Core Responsibilities</h4>
+                <ul style={{ paddingLeft: '1.25rem', fontSize: '0.88rem', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                  {selectedItem.responsibilities_json.map((r, idx) => (
+                    <li key={idx}>{r}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
             <div>
               <h4 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.5rem' }}>Required Skills</h4>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
@@ -342,10 +517,21 @@ export default function InternshipsPage({ setActiveTab, setSelectedInternshipId 
               </div>
             </div>
 
-            {selectedItem.preferred_qualifications && (
+            {selectedItem.preferred_skills_json && selectedItem.preferred_skills_json.length > 0 && (
               <div>
-                <h4 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.4rem' }}>Preferred Qualifications</h4>
-                <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)' }}>{selectedItem.preferred_qualifications}</p>
+                <h4 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.5rem' }}>Preferred / Nice-to-Have Skills</h4>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+                  {selectedItem.preferred_skills_json.map((s, idx) => (
+                    <span key={idx} className="badge badge-cyan">{s}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {selectedItem.education_requirements && (
+              <div>
+                <h4 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.4rem' }}>Education & Background Fit</h4>
+                <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)' }}>{selectedItem.education_requirements}</p>
               </div>
             )}
 
