@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
-import { Sparkles, Lock, Mail, User, ArrowRight, ShieldCheck, KeyRound, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { Sparkles, Lock, Mail, User, ArrowRight, ShieldCheck, KeyRound, ArrowLeft, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 
 export default function AuthPage({ onSuccess }) {
   const { login, sendRegistrationOtp, verifyOtpRegister, resendOtp } = useAuth();
@@ -11,6 +11,7 @@ export default function AuthPage({ onSuccess }) {
   const [regStep, setRegStep] = useState('form'); // 'form' | 'otp'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -303,16 +304,39 @@ export default function AuthPage({ onSuccess }) {
               <label className="form-label">Password</label>
               <div style={{ position: 'relative' }}>
                 <input
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   className="form-input"
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  style={{ paddingLeft: '2.5rem' }}
+                  style={{ paddingLeft: '2.5rem', paddingRight: '2.75rem' }}
                   required
                   minLength={6}
                 />
                 <Lock size={18} style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{
+                    position: 'absolute',
+                    right: '0.85rem',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'none',
+                    border: 'none',
+                    padding: '0.2rem',
+                    cursor: 'pointer',
+                    color: showPassword ? 'var(--accent-cyan)' : 'var(--text-muted)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'color 0.2s'
+                  }}
+                  title={showPassword ? 'Hide password' : 'Show password'}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
               </div>
             </div>
 
