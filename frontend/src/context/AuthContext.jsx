@@ -46,13 +46,39 @@ export function AuthProvider({ children }) {
     return data;
   };
 
+  const sendRegistrationOtp = async (email, password, fullName) => {
+    return await api.sendRegistrationOtp({ email, password, full_name: fullName });
+  };
+
+  const verifyOtpRegister = async (email, otp) => {
+    const data = await api.verifyOtpRegister({ email, otp });
+    localStorage.setItem('careerpulse_token', data.token);
+    setUser(data.user);
+    return data;
+  };
+
+  const resendOtp = async (email) => {
+    return await api.resendOtp({ email });
+  };
+
   const logout = () => {
     localStorage.removeItem('careerpulse_token');
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, demoLogin, logout, isAuthenticated: !!user }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      loading, 
+      login, 
+      register, 
+      sendRegistrationOtp, 
+      verifyOtpRegister, 
+      resendOtp, 
+      demoLogin, 
+      logout, 
+      isAuthenticated: !!user 
+    }}>
       {children}
     </AuthContext.Provider>
   );

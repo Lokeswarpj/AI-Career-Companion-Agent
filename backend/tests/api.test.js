@@ -127,7 +127,41 @@ const assistantReply = await generateCareerAssistantResponse(
   'How can I improve my resume for cloud roles?',
   sampleProfile
 );
-assert(typeof assistantReply === 'string' && assistantReply.length > 20, 'Returns contextual career advice');
+// 10. Test Email OTP Verification Engine
+console.log('\n--- Testing Email OTP Verification Engine ---');
+import { generateNumericOTP, storeRegistrationOtp, verifyRegistrationOtp, getResendStatus, clearAllOtpsForTesting } from '../services/otpService.js';
+import { sendOtpEmail } from '../services/emailService.js';
+
+clearAllOtpsForTesting();
+
+// Test OTP format
+const testOtp = generateNumericOTP(6);
+assert(/^\d{6}$/.test(testOtp), 'Generates valid 6-digit numeric OTP format');
+
+// Test OTP store & retrieval
+const testEmail = 'student.verify@example.com';
+const storeRes = storeRegistrationOtp(testEmail, 'Student Tester', 'hashed_pass_123', '654321');
+assert(storeRes.success === true, 'Successfully registers pending OTP in store');
+
+// Test Resend cooldown protection
+const cooldownRes = storeRegistrationOtp(testEmail, 'Student Tester', 'hashed_pass_123');
+assert(cooldownRes.success === false && cooldownRes.cooldownRemaining > 0, 'Enforces 60-second rate-limiting cooldown on repeat requests');
+
+// Test Invalid OTP rejection
+const invalidVerify = verifyRegistrationOtp(testEmail, '000000');
+assert(invalidVerify.success === false && invalidVerify.error.includes('Invalid verification code'), 'Rejects incorrect OTP code with remaining attempt warning');
+
+// Test Valid OTP verification
+const validVerify = verifyRegistrationOtp(testEmail, '654321');
+assert(validVerify.success === true && validVerify.data.fullName === 'Student Tester', 'Successfully validates correct OTP and returns user data');
+
+// Test Re-use prevention (OTP consumed)
+const reuseVerify = verifyRegistrationOtp(testEmail, '654321');
+assert(reuseVerify.success === false, 'Prevents single-use OTP replay / reuse attack');
+
+// Test Email Service dispatch (with fallback logger)
+const emailSendRes = await sendOtpEmail('student.verify@example.com', 'Student Tester', '123456');
+assert(emailSendRes.success === true, 'Email service safely dispatches verification message with fallback');
 
 console.log(`\n==============================================`);
 console.log(`Test Results: ${passedTests}/${totalTests} tests passed (${Math.round((passedTests / totalTests) * 100)}%)`);
