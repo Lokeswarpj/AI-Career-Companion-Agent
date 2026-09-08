@@ -45,7 +45,7 @@ export function storeRegistrationOtp(email, fullName, passwordHash, customOtp = 
 
   pendingRegistrations.set(normalizedEmail, {
     otp,
-    fullName: fullName.trim(),
+    fullName: (fullName || 'Student').trim(),
     passwordHash,
     expiresAt,
     createdAt: now,

@@ -59,7 +59,7 @@ router.post('/send-registration-otp', async (req, res) => {
     });
   } catch (err) {
     console.error('[Auth Error] Send Registration OTP:', err);
-    return res.status(500).json({ error: 'Internal server error while sending verification email.' });
+    return res.status(500).json({ error: err.message || 'Internal server error while sending verification email.' });
   }
 });
 
