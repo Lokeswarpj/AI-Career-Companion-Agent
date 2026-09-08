@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
-import { Sparkles, Lock, Mail, User, ArrowRight, Zap, ShieldCheck, KeyRound, RefreshCw, ArrowLeft, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Sparkles, Lock, Mail, User, ArrowRight, ShieldCheck, KeyRound, ArrowLeft, CheckCircle2 } from 'lucide-react';
 
 export default function AuthPage({ onSuccess }) {
-  const { login, demoLogin, sendRegistrationOtp, verifyOtpRegister, resendOtp } = useAuth();
+  const { login, sendRegistrationOtp, verifyOtpRegister, resendOtp } = useAuth();
   const notify = useNotification();
 
   const [isRegister, setIsRegister] = useState(false);
@@ -155,20 +155,6 @@ export default function AuthPage({ onSuccess }) {
     }
   };
 
-  // Instant Demo Login
-  const handleDemoLogin = async () => {
-    setLoading(true);
-    try {
-      await demoLogin();
-      notify.success('Logged in as Demo Student (Aarav Sharma)!');
-      if (onSuccess) onSuccess();
-    } catch (err) {
-      notify.error(err.message || 'Demo login failed.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // Autofill OTP helper
   const handleAutofillPreviewOtp = () => {
     if (previewOtp && previewOtp.length === 6) {
@@ -195,7 +181,7 @@ export default function AuthPage({ onSuccess }) {
         }}
       >
         {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: '1.75rem' }}>
+        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <div style={{
             width: '3.2rem',
             height: '3.2rem',
@@ -215,7 +201,7 @@ export default function AuthPage({ onSuccess }) {
             {regStep === 'otp' 
               ? 'Verify Your Email' 
               : isRegister 
-                ? 'Create Student Account' 
+                ? 'Create Account' 
                 : 'Welcome Back'}
           </h2>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: '0.25rem' }}>
@@ -227,32 +213,6 @@ export default function AuthPage({ onSuccess }) {
           </p>
         </div>
 
-        {/* 1-Click Demo Login Banner for Evaluators (Shown only in standard view) */}
-        {regStep === 'form' && (
-          <div style={{
-            background: 'rgba(99, 102, 241, 0.1)',
-            border: '1px solid rgba(99, 102, 241, 0.3)',
-            borderRadius: 'var(--radius-md)',
-            padding: '1rem',
-            marginBottom: '1.5rem',
-            textAlign: 'center'
-          }}>
-            <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#818cf8', marginBottom: '0.5rem' }}>
-              ✨ For Mentors, Evaluators & Live Demonstration
-            </div>
-            <button
-              type="button"
-              onClick={handleDemoLogin}
-              disabled={loading}
-              className="btn btn-primary btn-sm"
-              style={{ width: '100%', gap: '0.5rem' }}
-            >
-              <Zap size={16} />
-              <span>1-Click Instant Demo Login</span>
-            </button>
-          </div>
-        )}
-
         {/* Mode Toggle Tabs (Shown only when in initial form) */}
         {regStep === 'form' && (
           <div style={{
@@ -260,7 +220,7 @@ export default function AuthPage({ onSuccess }) {
             background: 'var(--bg-secondary)',
             padding: '0.3rem',
             borderRadius: 'var(--radius-md)',
-            marginBottom: '1.5rem',
+            marginBottom: '1.75rem',
             border: '1px solid var(--border-card)'
           }}>
             <button
@@ -360,7 +320,7 @@ export default function AuthPage({ onSuccess }) {
               type="submit"
               disabled={loading}
               className="btn btn-primary"
-              style={{ width: '100%', marginTop: '1rem', padding: '0.8rem', gap: '0.5rem' }}
+              style={{ width: '100%', marginTop: '1.25rem', padding: '0.8rem', gap: '0.5rem' }}
             >
               <span>
                 {loading 
@@ -414,7 +374,7 @@ export default function AuthPage({ onSuccess }) {
               </button>
             </div>
 
-            {/* Dev Mode Sandbox Notice / One-Click Autofill */}
+            {/* Dev Mode Sandbox Notice / One-Click Autofill (if present) */}
             {previewOtp && (
               <div style={{
                 background: 'rgba(99, 102, 241, 0.12)',

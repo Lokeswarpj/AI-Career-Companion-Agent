@@ -84,19 +84,10 @@ export default function LandingPage({ onGetStarted, onDemoLogin }) {
             <button 
               onClick={onGetStarted}
               className="btn btn-primary btn-lg"
-              style={{ gap: '0.75rem', fontSize: '1.1rem' }}
+              style={{ gap: '0.75rem', fontSize: '1.1rem', padding: '0.85rem 2rem' }}
             >
-              <span>Explore Platform</span>
+              <span>Explore Platform & Get Started</span>
               <ArrowRight size={20} />
-            </button>
-
-            <button 
-              onClick={onDemoLogin}
-              className="btn btn-secondary btn-lg"
-              style={{ gap: '0.65rem', border: '1px solid rgba(99, 102, 241, 0.4)' }}
-            >
-              <Zap size={18} color="#818cf8" />
-              <span>🚀 1-Click Demo Experience</span>
             </button>
           </div>
 
@@ -426,14 +417,9 @@ export default function LandingPage({ onGetStarted, onDemoLogin }) {
               <button 
                 onClick={onGetStarted}
                 className="btn btn-primary btn-lg"
+                style={{ padding: '0.85rem 2.5rem' }}
               >
                 Create Free Student Account
-              </button>
-              <button 
-                onClick={onDemoLogin}
-                className="btn btn-secondary btn-lg"
-              >
-                🚀 Test Demo Account Immediately
               </button>
             </div>
           </div>

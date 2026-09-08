@@ -34,15 +34,6 @@ export default function App() {
     }
   };
 
-  const handleDemoLogin = async () => {
-    try {
-      await demoLogin();
-      setActiveTab('dashboard');
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       {/* Navigation */}
@@ -51,7 +42,7 @@ export default function App() {
       {/* Main Routed Content */}
       <main style={{ flex: 1 }}>
         {currentTab === 'landing' && (
-          <LandingPage onGetStarted={handleGetStarted} onDemoLogin={handleDemoLogin} />
+          <LandingPage onGetStarted={handleGetStarted} />
         )}
 
         {currentTab === 'auth' && (
