@@ -72,6 +72,13 @@ export const api = {
   getRecommendations: () => apiRequest('/matching/recommendations'),
   evaluateMatch: (internshipId) => apiRequest(`/matching/evaluate/${internshipId}`),
   evaluateProfile: (profile, limit = 20) => apiRequest('/matching/evaluate-profile', { method: 'POST', body: JSON.stringify({ profile, limit }) }),
+  getKaggleCandidates: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return apiRequest(`/matching/kaggle-candidates${query ? `?${query}` : ''}`);
+  },
+  getKaggleCandidate: (id) => apiRequest(`/matching/kaggle-candidates/${id}`),
+  evaluateKaggleCandidate: (id, limit = 10) => apiRequest(`/matching/kaggle-candidates/${id}/evaluate?limit=${limit}`),
+  runKaggleBenchmark: (sampleSize = 40) => apiRequest('/matching/kaggle-benchmark', { method: 'POST', body: JSON.stringify({ sampleSize }) }),
 
   // Mock Interview
   startInterview: (payload) => apiRequest('/interview/start', { method: 'POST', body: JSON.stringify(payload) }),

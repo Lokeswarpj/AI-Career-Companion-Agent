@@ -136,24 +136,35 @@ The Matching Agent provides structured qualitative feedback for every recommenda
 
 ---
 
-## 📊 M2.4 — Evaluation Benchmark Results (6 Student Profiles)
+## 📊 M2.4 — Evaluation Benchmark Results (Kaggle 1,000 Candidates & 6 Core Profiles)
 
 ### Automated Test Suite Results (`backend/tests/m2_evaluation.test.js`)
-All **38 automated assertions** passed with **100% accuracy**:
+All **53 automated assertions** passed with **100% accuracy**:
 
 ```
 ============================================================
 📊 BENCHMARK EVALUATION RESULTS:
-   - Knowledge Base Size: 180 Sample Postings (Target: 150-200)
+   - Internship Knowledge Base Size: 180 Sample Postings (Target: 150-200)
    - Total Indexed Semantic Chunks: 720
-   - Top-1 Recommendation Accuracy: 100.0%
-   - Mean Reciprocal Rank (MRR): 1.000 / 1.000
+   - Kaggle Candidate Dataset Size: 1,000 Profiles
+   - Core 6 Profiles Top-1 Accuracy: 100.0%
+   - Core 6 Profiles MRR: 1.000 / 1.000
+   - Kaggle Batch Top-1 Accuracy: 100%
+   - Kaggle Batch MRR: 1.000 / 1.000
+   - Kaggle Batch Avg Fit Score: 66.0%
    - RAG Semantic Query Precision@5: 100%
-   - Total Test Assertions Passed: 38 / 38 (100%)
+   - Total Test Assertions Passed: 53 / 53 (100%)
 ============================================================
 ```
 
-### Detailed Evaluation Profile Breakdown:
+### Kaggle Candidate Dataset Cross-Domain Coverage (1,000 Profiles):
+The system ingests and benchmarks **1,000 real-world candidate profiles** sourced from Kaggle spanning 20+ specialized domains:
+- **Data Science & Analytics**: Data Scientist, Data Analyst (Python, SQL, TensorFlow, Pandas, Tableau).
+- **Engineering & Development**: Frontend Developer (React, TypeScript), Backend Developer (Java, Spring, Node.js), Full Stack Python/Java, Mobile Developer (Swift, Kotlin, Flutter), C# / .NET Developer, PHP / Laravel Developer, Blockchain Developer (Solidity, Web3, Ethereum), Game Developer (C++, Unreal, Unity, VR).
+- **Infrastructure & Security**: DevOps Engineer (Kubernetes, Docker, AWS, Terraform, CI/CD), Kubernetes Operations Engineer, Cybersecurity Engineer (Network Security, Penetration Testing, SIEM, Firewalls).
+- **Design & Management**: UI/UX Designer (Figma, Adobe XD, Prototyping), Software Project Manager (Agile, Scrum, JIRA, Stakeholder Management), Digital Marketing (SEO, Content, Analytics), HR Specialist (Recruitment, Policies, Talent Acquisition), Finance Analyst (Financial Modeling, Excel, Risk Analysis).
+
+### Core Evaluation Profile Breakdown:
 
 | Profile | Name & Track | Target Role | #1 Recommended Job | Match Score | Rank |
 |---|---|---|---|---|---|
@@ -173,9 +184,9 @@ All **38 automated assertions** passed with **100% accuracy**:
 npm test
 ```
 This executes:
-1. Milestone 1 API & Security & Resume Parser Unit Tests (`tests/api.test.js` - 22 tests).
-2. Milestone 2 RAG Pipeline, Semantic Search & 6-Profile Matching Evaluation (`tests/m2_evaluation.test.js` - 38 tests).
-**Total: 60/60 tests passing (100%).**
+1. Milestone 1 API & Security & Resume Parser Unit Tests (`tests/api.test.js` - 28 tests).
+2. Milestone 2 RAG Pipeline, Semantic Search, 6 Core Profiles & Kaggle 1,000 Candidates Batch Benchmark (`tests/m2_evaluation.test.js` - 53 tests).
+**Total: 81/81 tests passing (100%).**
 
 ### 2. Start the Application Locally
 ```bash
@@ -187,4 +198,7 @@ npm run dev
 ### 3. Interactive UI Verification
 - **Internships Page**: Try **Natural Language RAG Search** (e.g. *"remote AI machine learning with PyTorch"* or click sample prompt chips).
 - **Matching Page**: View multi-factor score breakdown bars (40% Skills, 25% Projects, 15% Role, 10% Academic, 10% Location) and AI reasoning cards.
-- **Evaluation Benchmark Lab**: Click the **"Launch Evaluation Benchmark Lab"** button on the Matching page to simulate real-time RAG matching across all 6 sample student profiles interactively!
+- **Evaluation Benchmark Lab**: Click the **"Launch Evaluation Benchmark Lab"** button on the Matching page:
+  - **Kaggle 1,000 Candidates Tab**: Search candidates by skill/role/ID, filter by experience level, view live RAG retrieved matches with fit scores, and click **"Run Batch Benchmark"** to evaluate live cohorts!
+  - **Core 6 Student Benchmarks Tab**: Switch between student personas interactively.
+

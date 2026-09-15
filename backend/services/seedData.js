@@ -9,7 +9,7 @@ import { vectorStore } from './vectorStore.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-export async function seedInternshipsIfNeeded() {
+export async function seedInternshipsIfNeeded(force = false) {
   try {
     const datasetPath = path.join(__dirname, '..', 'data', 'curated_internships.json');
     let curatedList = [];
@@ -22,12 +22,15 @@ export async function seedInternshipsIfNeeded() {
     const countRow = await db.get("SELECT COUNT(*) as count FROM internships");
     const count = countRow ? countRow.count : 0;
 
-    // If dataset is missing or has fewer than 150 items, seed the full curated knowledge base
-    if (count < 150 && curatedList.length > 0) {
+    const isForcedOrNeeded = force || (process.env.AUTO_SEED === 'true' && count < 150) || count === 0;
+
+    // If forced or database needs initial population, seed the full curated knowledge base
+    if (isForcedOrNeeded && curatedList.length > 0) {
       console.log(`[SeedData] Seeding comprehensive internship knowledge base (${curatedList.length} curated postings)...`);
       
-      // Clear legacy items
+      // Clear legacy items and chunks
       await db.run("DELETE FROM internships");
+      await db.run("DELETE FROM internship_chunks");
 
       for (const item of curatedList) {
         await db.run(

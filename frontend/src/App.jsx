@@ -58,7 +58,7 @@ export default function App() {
         )}
 
         {currentTab === 'resume' && (
-          <ResumePage setActiveTab={setActiveTab} />
+          <ResumePage setActiveTab={setActiveTab} setSelectedInternshipId={setSelectedInternshipId} />
         )}
 
         {currentTab === 'internships' && (

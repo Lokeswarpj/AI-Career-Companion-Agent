@@ -12,7 +12,7 @@
 
 ### 🏆 Completed Project Milestones
 - ✅ **Milestone 1**: System Architecture, Student Profile Management, Multi-Format Resume Parsing (PDF/DOCX), Structured Competency Extraction, and Multi-Agent Design.
-- ✅ **Milestone 2**: Curated Internship Knowledge Base (180 standardized postings), RAG Dense Vector Pipeline (720 semantic chunks), Job-Resume Matching Agent (multi-factor scoring with reasoning), and 6-Profile Automated Evaluation Benchmark (MRR: 1.000, 100% Top-1 Accuracy).
+- ✅ **Milestone 2**: Curated Internship Knowledge Base (180 standardized postings), RAG Dense Vector Pipeline (720 semantic chunks), Job-Resume Matching Agent (multi-factor scoring with reasoning), Kaggle 1,000 Candidates Dataset Ingestion & Evaluation, and Automated Evaluation Benchmark Suite (MRR: 1.000, 100% Top-1 Accuracy across 53 assertions).
 
 ---
 

@@ -260,28 +260,45 @@ export default function DashboardPage({ setActiveTab, setSelectedInternshipId })
                   
                   {/* Score badge */}
                   <div style={{
-                    padding: '0.4rem 0.75rem',
+                    padding: '0.45rem 0.85rem',
                     borderRadius: 'var(--radius-md)',
                     background: rec.matchScore >= 80 ? 'rgba(16, 185, 129, 0.15)' : 'rgba(99, 102, 241, 0.15)',
                     border: `1px solid ${rec.matchScore >= 80 ? 'rgba(16, 185, 129, 0.3)' : 'rgba(99, 102, 241, 0.3)'}`,
-                    color: rec.matchScore >= 80 ? '#34d399' : '#818cf8',
-                    fontWeight: 800,
-                    fontSize: '0.95rem'
+                    textAlign: 'right'
                   }}>
-                    {rec.matchScore}% Match
+                    <div style={{
+                      color: rec.matchScore >= 80 ? '#34d399' : '#818cf8',
+                      fontWeight: 900,
+                      fontSize: '1.05rem',
+                      lineHeight: 1
+                    }}>
+                      {rec.matchScore}% Match
+                    </div>
+                    <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>
+                      Resume Match
+                    </div>
                   </div>
                 </div>
 
                 {/* Skills tags */}
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
-                  {rec.internship.required_skills_json.slice(0, 4).map((skill, i) => (
-                    <span key={i} className="badge badge-indigo" style={{ fontSize: '0.72rem' }}>
-                      {skill}
+                  {rec.skillMatrix?.matchingSkills?.slice(0, 3).map((m, i) => (
+                    <span key={`m-${i}`} className="badge badge-emerald" style={{ fontSize: '0.72rem' }}>
+                      ✓ {m.skill}
                     </span>
                   ))}
+                  {rec.internship.required_skills_json.slice(0, 3).map((skill, i) => {
+                    const isAlreadyShown = rec.skillMatrix?.matchingSkills?.some(m => m.skill.toLowerCase() === skill.toLowerCase());
+                    if (isAlreadyShown) return null;
+                    return (
+                      <span key={`r-${i}`} className="badge badge-indigo" style={{ fontSize: '0.72rem' }}>
+                        {skill}
+                      </span>
+                    );
+                  })}
                   {rec.internship.required_skills_json.length > 4 && (
                     <span className="badge badge-cyan" style={{ fontSize: '0.72rem' }}>
-                      +{rec.internship.required_skills_json.length - 4} more
+                      +{rec.internship.required_skills_json.length - 3} more
                     </span>
                   )}
                 </div>

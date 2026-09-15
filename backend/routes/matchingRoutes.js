@@ -2,6 +2,12 @@ import express from 'express';
 import { db } from '../config/database.js';
 import { authenticateToken } from '../middleware/auth.js';
 import { runJobResumeMatchingAgent, evaluateJobResumeMatch } from '../services/matchingAgent.js';
+import { 
+  queryKaggleCandidates, 
+  getKaggleCandidateById, 
+  evaluateKaggleCandidate, 
+  runKaggleBatchBenchmark 
+} from '../services/kaggleCandidateService.js';
 
 const router = express.Router();
 
@@ -133,4 +139,64 @@ router.post('/evaluate-profile', async (req, res) => {
   }
 });
 
+// 4. Query Kaggle candidate dataset (1000 candidates) with pagination & facets
+router.get('/kaggle-candidates', async (req, res) => {
+  try {
+    const { search, role, experienceLevel, domain, page = 1, limit = 20 } = req.query;
+    const result = queryKaggleCandidates({
+      search,
+      role,
+      experienceLevel,
+      domain,
+      page: parseInt(page, 10),
+      limit: parseInt(limit, 10)
+    });
+    return res.json(result);
+  } catch (err) {
+    console.error('Kaggle candidates query error:', err);
+    return res.status(500).json({ error: 'Failed to retrieve Kaggle candidates.' });
+  }
+});
+
+// 5. Get and evaluate a specific Kaggle candidate
+router.get('/kaggle-candidates/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const candidate = getKaggleCandidateById(id);
+    if (!candidate) {
+      return res.status(404).json({ error: 'Kaggle candidate not found.' });
+    }
+    return res.json({ candidate });
+  } catch (err) {
+    console.error('Kaggle candidate detail error:', err);
+    return res.status(500).json({ error: 'Failed to retrieve Kaggle candidate.' });
+  }
+});
+
+// 6. Live evaluate a specific Kaggle candidate against the internship knowledge base
+router.get('/kaggle-candidates/:id/evaluate', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const limit = parseInt(req.query.limit || '10', 10);
+    const result = await evaluateKaggleCandidate(id, limit);
+    return res.json(result);
+  } catch (err) {
+    console.error('Kaggle candidate evaluation error:', err);
+    return res.status(500).json({ error: err.message || 'Failed to evaluate Kaggle candidate.' });
+  }
+});
+
+// 7. Run batch benchmark evaluation on the Kaggle candidate dataset
+router.post('/kaggle-benchmark', async (req, res) => {
+  try {
+    const sampleSize = parseInt(req.body.sampleSize || '40', 10);
+    const result = await runKaggleBatchBenchmark(sampleSize);
+    return res.json(result);
+  } catch (err) {
+    console.error('Kaggle batch benchmark error:', err);
+    return res.status(500).json({ error: 'Failed to execute Kaggle batch benchmark.' });
+  }
+});
+
 export default router;
+

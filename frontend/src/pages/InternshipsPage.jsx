@@ -20,7 +20,8 @@ import {
   Cpu,
   Database,
   ArrowRight,
-  Sliders
+  Sliders,
+  Target
 } from 'lucide-react';
 
 export default function InternshipsPage({ setActiveTab, setSelectedInternshipId }) {
@@ -29,6 +30,7 @@ export default function InternshipsPage({ setActiveTab, setSelectedInternshipId 
   const [searchMode, setSearchMode] = useState('semantic'); // 'semantic' | 'filter'
   const [internships, setInternships] = useState([]);
   const [savedMap, setSavedMap] = useState({});
+  const [resumeMatchMap, setResumeMatchMap] = useState({});
   const [selectedItem, setSelectedItem] = useState(null);
   const [stats, setStats] = useState(null);
 
@@ -50,12 +52,26 @@ export default function InternshipsPage({ setActiveTab, setSelectedInternshipId 
   useEffect(() => {
     loadStats();
     loadSavedStatus();
+    loadResumeMatches();
     if (searchMode === 'semantic') {
       handleSemanticSearch(semanticQuery);
     } else {
       loadInternships();
     }
   }, [searchMode, remoteFilter, industryFilter, sourceFilter]);
+
+  async function loadResumeMatches() {
+    try {
+      const res = await api.getRecommendations();
+      const map = {};
+      (res.recommendations || []).forEach(r => {
+        map[r.internship.id] = r;
+      });
+      setResumeMatchMap(map);
+    } catch (err) {
+      // User might not have a profile or resume yet
+    }
+  }
 
   async function loadStats() {
     try {
@@ -325,6 +341,10 @@ export default function InternshipsPage({ setActiveTab, setSelectedInternshipId 
           {internships.map((item) => {
             const isSaved = !!savedMap[item.id];
             const semScore = item.semanticScore;
+            const resumeMatch = resumeMatchMap[item.id];
+            const matchScore = resumeMatch ? resumeMatch.matchScore : null;
+            const cardBorderColor = matchScore ? (matchScore >= 80 ? '#10b981' : matchScore >= 65 ? '#6366f1' : '#f59e0b') : (semScore ? (semScore >= 60 ? '#10b981' : '#6366f1') : null);
+
             return (
               <div 
                 key={item.id}
@@ -335,7 +355,7 @@ export default function InternshipsPage({ setActiveTab, setSelectedInternshipId 
                   flexDirection: 'column',
                   gap: '1rem',
                   position: 'relative',
-                  borderLeft: semScore ? `4px solid ${semScore >= 60 ? '#10b981' : '#6366f1'}` : '1px solid var(--border-card)'
+                  borderLeft: cardBorderColor ? `5px solid ${cardBorderColor}` : '1px solid var(--border-card)'
                 }}
               >
                 {/* Header info */}
@@ -344,8 +364,13 @@ export default function InternshipsPage({ setActiveTab, setSelectedInternshipId 
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem', flexWrap: 'wrap' }}>
                       <span className="badge badge-indigo" style={{ fontSize: '0.7rem' }}>{item.source}</span>
                       <span className="badge badge-cyan" style={{ fontSize: '0.7rem' }}>{item.remote_type}</span>
+                      {matchScore !== null && (
+                        <span className="badge badge-emerald" style={{ fontSize: '0.72rem', display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: 700 }}>
+                          <Target size={12} /> {matchScore}% Resume Match
+                        </span>
+                      )}
                       {semScore && (
-                        <span className="badge badge-emerald" style={{ fontSize: '0.7rem' }}>
+                        <span className="badge badge-cyan" style={{ fontSize: '0.7rem' }}>
                           ⚡ {semScore}% Semantic Alignment
                         </span>
                       )}
@@ -491,6 +516,57 @@ export default function InternshipsPage({ setActiveTab, setSelectedInternshipId 
                 <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Duration: {selectedItem.duration}</div>
               </div>
             </div>
+
+            {/* Resume Match Box if user has match score */}
+            {resumeMatchMap[selectedItem.id] && (
+              <div style={{
+                padding: '1.1rem 1.25rem',
+                background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(16, 185, 129, 0.08) 100%)',
+                borderRadius: 'var(--radius-md)',
+                border: '1px solid rgba(16, 185, 129, 0.35)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.75rem'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 800, fontSize: '0.95rem', color: '#10b981' }}>
+                    <Target size={16} />
+                    <span>Your Resume Match Compatibility</span>
+                  </div>
+                  <div style={{
+                    fontSize: '1.25rem',
+                    fontWeight: 900,
+                    color: resumeMatchMap[selectedItem.id].matchScore >= 80 ? '#10b981' : '#6366f1'
+                  }}>
+                    {resumeMatchMap[selectedItem.id].matchScore}% Match
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: '0.5rem', fontSize: '0.78rem' }}>
+                  <div style={{ padding: '0.4rem 0.6rem', background: 'var(--bg-secondary)', borderRadius: '4px' }}>
+                    Skills: <strong style={{ color: '#818cf8' }}>{resumeMatchMap[selectedItem.id].breakdown?.skillScore || 0}%</strong>
+                  </div>
+                  <div style={{ padding: '0.4rem 0.6rem', background: 'var(--bg-secondary)', borderRadius: '4px' }}>
+                    Projects: <strong style={{ color: '#22d3ee' }}>{resumeMatchMap[selectedItem.id].breakdown?.experienceAndProjectsScore || 0}%</strong>
+                  </div>
+                  <div style={{ padding: '0.4rem 0.6rem', background: 'var(--bg-secondary)', borderRadius: '4px' }}>
+                    Role Fit: <strong style={{ color: '#34d399' }}>{resumeMatchMap[selectedItem.id].breakdown?.roleScore || 0}%</strong>
+                  </div>
+                  <div style={{ padding: '0.4rem 0.6rem', background: 'var(--bg-secondary)', borderRadius: '4px' }}>
+                    Academic: <strong style={{ color: '#fbbf24' }}>{resumeMatchMap[selectedItem.id].breakdown?.educationScore || 0}%</strong>
+                  </div>
+                  <div style={{ padding: '0.4rem 0.6rem', background: 'var(--bg-secondary)', borderRadius: '4px' }}>
+                    Work Mode: <strong style={{ color: '#f43f5e' }}>{resumeMatchMap[selectedItem.id].breakdown?.locationScore || 0}%</strong>
+                  </div>
+                </div>
+
+                {resumeMatchMap[selectedItem.id].explanation?.whyItMatches && (
+                  <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', background: 'var(--bg-secondary)', padding: '0.6rem 0.8rem', borderRadius: '4px' }}>
+                    <strong style={{ color: 'var(--text-primary)' }}>AI Insight:</strong> {resumeMatchMap[selectedItem.id].explanation.whyItMatches}
+                  </div>
+                )}
+              </div>
+            )}
 
             <div>
               <h4 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.4rem' }}>Role Description</h4>

@@ -4,6 +4,7 @@ import { vectorStore, cosineSimilarity, getEmbedding } from '../services/vectorS
 import { searchInternshipsSemantic, retrieveRelevantJobsForProfile } from '../services/ragService.js';
 import { runJobResumeMatchingAgent, evaluateJobResumeMatch, AGENT_WEIGHTS } from '../services/matchingAgent.js';
 import { calculateSkillMatrix, calculateRoleScore, calculateLocationScore } from '../services/matchingEngine.js';
+import { getKaggleCandidates, evaluateKaggleCandidate, runKaggleBatchBenchmark } from '../services/kaggleCandidateService.js';
 
 console.log('================================================================');
 console.log('🧪 MILESTONE 2: RAG PIPELINE & MATCHING AGENT EVALUATION SUITE');
@@ -127,7 +128,7 @@ export const sampleStudentProfiles = [
 async function runEvaluationSuite() {
   console.log('📌 [Phase 1] Database Initialization & Knowledge Base Seeding...');
   await getDatabase();
-  await seedInternshipsIfNeeded();
+  await seedInternshipsIfNeeded(true);
 
   const totalInternshipsRow = await db.get("SELECT COUNT(*) as count FROM internships");
   const totalCount = totalInternshipsRow?.count || 0;
@@ -214,18 +215,58 @@ async function runEvaluationSuite() {
   }
 
   // -------------------------------------------------------------
-  // PHASE 4: SUMMARY EVALUATION METRICS
+  // PHASE 4: KAGGLE 1,000 CANDIDATE DATASET BENCHMARK & EVALUATION
   // -------------------------------------------------------------
-  console.log('\n📌 [Phase 4] Summary Benchmark Metrics Calculation...');
+  console.log('\n📌 [Phase 4] Evaluating Kaggle 1,000 Candidate Dataset...');
+
+  const kaggleCandidates = getKaggleCandidates();
+  assert(kaggleCandidates.length === 1000, "Kaggle 1000-Candidate Dataset Ingestion", `Loaded ${kaggleCandidates.length} candidate profiles`);
+
+  // Test individual diverse candidate matching across multiple domains
+  const diverseTestIds = [1, 2, 8, 10, 16, 22, 100, 500, 750, 1000];
+  let diversePassed = 0;
+
+  for (const candId of diverseTestIds) {
+    const res = await evaluateKaggleCandidate(candId, 5);
+    const cand = res.candidate;
+    const topRec = res.recommendations[0];
+    const isMatched = res.recommendations.length > 0 && topRec.matchScore >= 50;
+    
+    assert(
+      isMatched, 
+      `Kaggle Cand #${cand.candidate_id} (${cand.job_role} / ${cand.experience_level})`,
+      `Top Match: "${topRec?.internship?.title}" (${topRec?.matchScore}%) | Skills: ${cand.skills.slice(0, 3).join(', ')}`
+    );
+    if (isMatched) diversePassed++;
+  }
+
+  assert(diversePassed === diverseTestIds.length, "Diverse Kaggle Cross-Domain Evaluation", `${diversePassed}/${diverseTestIds.length} profiles evaluated`);
+
+  // Run automated batch benchmark on representative sample of Kaggle dataset
+  console.log('  ⚡ Running batch benchmark on 40-candidate sample from Kaggle dataset...');
+  const batchResult = await runKaggleBatchBenchmark(40);
+  
+  assert(batchResult.top1Accuracy >= 75.0, "Kaggle Batch Top-1 Accuracy (>= 75%)", `Achieved: ${batchResult.top1Accuracy}%`);
+  assert(batchResult.mrr >= 0.80, "Kaggle Batch MRR (>= 0.80)", `Achieved: ${batchResult.mrr}`);
+  assert(batchResult.avgMatchScore >= 60.0, "Kaggle Batch Avg Match Fit Score (>= 60%)", `Achieved: ${batchResult.avgMatchScore}%`);
+
+  // -------------------------------------------------------------
+  // PHASE 5: SUMMARY EVALUATION METRICS
+  // -------------------------------------------------------------
+  console.log('\n📌 [Phase 5] Summary Benchmark Metrics Calculation...');
   const mrr = (mrrSum / sampleStudentProfiles.length).toFixed(3);
   const top1Accuracy = ((top1DomainMatches / sampleStudentProfiles.length) * 100).toFixed(1);
 
   console.log(`\n============================================================`);
   console.log(`📊 BENCHMARK EVALUATION RESULTS:`);
-  console.log(`   - Knowledge Base Size: ${totalCount} Sample Postings`);
+  console.log(`   - Internship Knowledge Base Size: ${totalCount} Sample Postings`);
   console.log(`   - Total Indexed Semantic Chunks: ${chunkCount}`);
-  console.log(`   - Top-1 Recommendation Accuracy: ${top1Accuracy}%`);
-  console.log(`   - Mean Reciprocal Rank (MRR): ${mrr} / 1.000`);
+  console.log(`   - Kaggle Candidate Dataset Size: ${kaggleCandidates.length} Profiles`);
+  console.log(`   - Core 6 Profiles Top-1 Accuracy: ${top1Accuracy}%`);
+  console.log(`   - Core 6 Profiles MRR: ${mrr} / 1.000`);
+  console.log(`   - Kaggle Batch Top-1 Accuracy: ${batchResult.top1Accuracy}%`);
+  console.log(`   - Kaggle Batch MRR: ${batchResult.mrr} / 1.000`);
+  console.log(`   - Kaggle Batch Avg Fit Score: ${batchResult.avgMatchScore}%`);
   console.log(`   - RAG Semantic Query Precision@5: ${searchPrecision}%`);
   console.log(`   - Total Test Assertions Passed: ${passedTests} / ${totalTests}`);
   console.log(`============================================================\n`);
@@ -242,3 +283,4 @@ async function runEvaluationSuite() {
 
 // Run immediately
 runEvaluationSuite().catch(console.error);
+

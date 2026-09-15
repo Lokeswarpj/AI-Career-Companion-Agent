@@ -376,6 +376,146 @@ const domainTemplates = [
         eduReq: "B.Tech / B.E. / MCA in Computer Science or Information Technology."
       }
     ]
+  },
+  {
+    industry: "Game Development & 3D Interactive",
+    roles: [
+      {
+        title: "Game Developer & Interactive 3D Intern",
+        skills: ["C++", "C#", "Unity", "Unreal Engine", "Game Design", "3D Modeling"],
+        prefSkills: ["Game Physics", "VR Development", "Git", "Shaders", "Animation"],
+        responsibilities: [
+          "Develop gameplay mechanics, character controllers, and interactive 3D physics using Unity and Unreal Engine.",
+          "Optimize rendering performance, memory allocation, and frame rates for multi-platform game titles.",
+          "Collaborate with 3D artists and sound designers to integrate visual assets and audio cues.",
+          "Write clean, object-oriented C++ and C# code for simulation and virtual reality environments."
+        ],
+        description: "Join our game development studio to build immersive interactive entertainment and VR simulations. You will program gameplay systems, implement real-time physics, and optimize graphics pipelines.",
+        qualifications: "Solid understanding of 3D mathematics, vectors, matrices, and game engine architecture.",
+        expReq: "Personal game jam submissions, Unity/Unreal prototypes, or interactive graphics demos.",
+        eduReq: "Degree in Game Development, Computer Science, Animation, or Software Engineering."
+      }
+    ]
+  },
+  {
+    industry: "Enterprise C# & .NET Engineering",
+    roles: [
+      {
+        title: "C# / .NET Core & Azure Cloud Developer Intern",
+        skills: ["C#", ".NET Core", "ASP.NET", "SQL Server", "Azure", "Git"],
+        prefSkills: ["Entity Framework", "Microservices", "REST APIs", "Docker", "CI/CD"],
+        responsibilities: [
+          "Develop enterprise-scale web APIs and microservices using C# and ASP.NET Core.",
+          "Design high-performance relational database schemas and optimized queries in SQL Server.",
+          "Deploy containerized .NET applications to Microsoft Azure cloud infrastructure.",
+          "Implement OAuth2 security, token validation, and unit tests using xUnit."
+        ],
+        description: "Build robust enterprise applications using the modern .NET Core and Microsoft Azure ecosystem. You will architect high-throughput backend services and cloud integrations.",
+        qualifications: "Strong foundation in C# OOP, LINQ, and asynchronous task-based programming.",
+        expReq: "Experience building ASP.NET web applications or C# desktop/backend systems.",
+        eduReq: "B.Tech / B.E. / MCA in Computer Science, IT, or related technical disciplines."
+      }
+    ]
+  },
+  {
+    industry: "PHP & Web Solutions Engineering",
+    roles: [
+      {
+        title: "PHP & Laravel Web Developer Intern",
+        skills: ["PHP", "Laravel", "MySQL", "JavaScript", "HTML", "CSS"],
+        prefSkills: ["Symfony", "WordPress", "REST API", "Git", "Docker"],
+        responsibilities: [
+          "Build scalable dynamic web applications and backend APIs using PHP 8 and Laravel framework.",
+          "Manage MySQL relational database schema migrations, indexing, and complex joins.",
+          "Integrate frontend components with Blade templates and modern JavaScript libraries.",
+          "Maintain application security against SQL injection, CSRF, and XSS vulnerabilities."
+        ],
+        description: "Develop full-stack web applications and CMS platforms with PHP and modern MVC frameworks like Laravel.",
+        qualifications: "Proficiency in PHP, MySQL database management, and web standards.",
+        expReq: "Portfolio of Laravel web projects or responsive PHP applications.",
+        eduReq: "Undergraduate in Computer Science, Information Technology, or BCA."
+      }
+    ]
+  },
+  {
+    industry: "Software Project & Product Management",
+    roles: [
+      {
+        title: "Software Project Management & Agile Delivery Intern",
+        skills: ["Agile", "Scrum", "Project Management", "JIRA", "Stakeholder Management", "Leadership"],
+        prefSkills: ["Sprint Planning", "Confluence", "Risk Analysis", "Communication", "Product Roadmaps"],
+        responsibilities: [
+          "Facilitate agile ceremonies including daily stand-ups, sprint planning, backlog grooming, and retrospectives.",
+          "Track sprint velocity, burndown charts, and project deliverables using JIRA and Confluence.",
+          "Coordinate cross-functional engineering, design, and QA teams to eliminate delivery blockers.",
+          "Create executive project status reports and risk mitigation strategies for stakeholders."
+        ],
+        description: "Guide agile software development teams to deliver world-class digital products. You will learn modern product delivery methodologies, cross-team alignment, and stakeholder communication.",
+        qualifications: "Exceptional organizational, leadership, and interpersonal communication skills.",
+        expReq: "Leadership experience in student clubs, academic projects, or internships.",
+        eduReq: "Master's in Business Administration (MBA), B.Tech in CS/IT with management minor, or equivalent."
+      }
+    ]
+  },
+  {
+    industry: "Digital Marketing & Growth Analytics",
+    roles: [
+      {
+        title: "Digital Marketing & Growth Strategy Intern",
+        skills: ["Marketing Strategy", "SEO", "Content Creation", "Analytics", "Google Analytics", "Social Media"],
+        prefSkills: ["PPC", "Copywriting", "Campaign Management", "Data Analysis", "Email Marketing"],
+        responsibilities: [
+          "Plan and execute organic SEO and content marketing campaigns to boost qualified web traffic.",
+          "Analyze multi-channel conversion funnels and user acquisition costs using Google Analytics.",
+          "Create engaging technical blog posts, social media updates, and customer case studies.",
+          "Conduct keyword research, competitor benchmark audits, and A/B test landing pages."
+        ],
+        description: "Drive customer acquisition and brand growth through data-driven digital marketing campaigns and organic search strategies.",
+        qualifications: "Strong analytical acumen, creative copywriting ability, and familiarity with SEO tools.",
+        expReq: "Experience managing social campaigns, content creation, or digital marketing projects.",
+        eduReq: "Bachelor's / Master's in Marketing, Communications, Business, or related fields."
+      }
+    ]
+  },
+  {
+    industry: "Human Resources & Talent Operations",
+    roles: [
+      {
+        title: "HR & Technical Talent Acquisition Intern",
+        skills: ["Recruitment", "HR Policies", "Communication", "Leadership", "Employee Relations", "Training"],
+        prefSkills: ["Technical Sourcing", "Interview Coordination", "LinkedIn Recruiter", "HR Analytics"],
+        responsibilities: [
+          "Source, screen, and interview candidates for technical engineering and product internships.",
+          "Coordinate candidate onboarding, orientation schedules, and internship mentoring programs.",
+          "Assist in drafting transparent HR workplace policies and employee engagement initiatives.",
+          "Analyze recruitment pipeline metrics including time-to-hire and diversity metrics."
+        ],
+        description: "Shape organizational culture and recruit top technical talent across emerging technology domains.",
+        qualifications: "Passionate about human resources, talent development, and people operations.",
+        expReq: "Demonstrated communication and organizational skills through academic or extracurricular leadership.",
+        eduReq: "Master's in Human Resources (MBA/MS HR), Psychology, or Business Administration."
+      }
+    ]
+  },
+  {
+    industry: "FinTech & Financial Analytics",
+    roles: [
+      {
+        title: "Financial Modeling & FinTech Risk Analyst Intern",
+        skills: ["Financial Modeling", "Excel", "Communication", "Risk Analysis", "Data Analysis", "Statistics"],
+        prefSkills: ["Python", "SQL", "Valuation", "PowerBI", "Accounting Principles"],
+        responsibilities: [
+          "Construct multi-scenario financial forecast models, DCF valuations, and cash flow projections.",
+          "Analyze transaction risk, credit profiles, and regulatory compliance standards for FinTech products.",
+          "Synthesize complex market data into executive slide decks and investment memos.",
+          "Automate repetitive financial reporting workflows using advanced Excel macros and SQL queries."
+        ],
+        description: "Bridge finance and technology! You will evaluate digital payment trends, build predictive revenue models, and assess risk for innovative FinTech solutions.",
+        qualifications: "High quantitative proficiency, deep knowledge of corporate finance principles, and advanced Excel mastery.",
+        expReq: "Coursework or projects in Financial Analysis, Corporate Valuation, or Econometrics.",
+        eduReq: "Master's in Finance, MBA, Economics, or quantitative undergraduate degree."
+      }
+    ]
   }
 ];
 

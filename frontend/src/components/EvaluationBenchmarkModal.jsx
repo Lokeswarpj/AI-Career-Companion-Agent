@@ -15,7 +15,15 @@ import {
   ShieldCheck, 
   Cloud, 
   BarChart3, 
-  GraduationCap 
+  GraduationCap,
+  Database,
+  Search,
+  Filter,
+  Play,
+  Layers,
+  CheckCircle,
+  Activity,
+  Briefcase
 } from 'lucide-react';
 
 const BENCHMARK_PROFILES = [
@@ -130,27 +138,107 @@ const BENCHMARK_PROFILES = [
 ];
 
 export default function EvaluationBenchmarkModal({ isOpen, onClose }) {
+  const [activeTab, setActiveTab] = useState('kaggle'); // 'core' | 'kaggle'
+  
+  // Core Profiles State
   const [selectedProfileIndex, setSelectedProfileIndex] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [results, setResults] = useState([]);
+  const [loadingCore, setLoadingCore] = useState(false);
+  const [resultsCore, setResultsCore] = useState([]);
 
-  const currentProfile = BENCHMARK_PROFILES[selectedProfileIndex];
+  // Kaggle Dataset State
+  const [kaggleCandidates, setKaggleCandidates] = useState([]);
+  const [kaggleTotal, setKaggleTotal] = useState(1000);
+  const [kagglePage, setKagglePage] = useState(1);
+  const [kaggleSearch, setKaggleSearch] = useState('');
+  const [kaggleRoleFilter, setKaggleRoleFilter] = useState('all');
+  const [kaggleExpFilter, setKaggleExpFilter] = useState('all');
+  const [selectedCandidate, setSelectedCandidate] = useState(null);
+  const [candidateRecommendations, setCandidateRecommendations] = useState([]);
+  const [loadingKaggleList, setLoadingKaggleList] = useState(false);
+  const [loadingKaggleEval, setLoadingKaggleEval] = useState(false);
+  
+  // Batch Benchmark State
+  const [benchmarkRunning, setBenchmarkRunning] = useState(false);
+  const [benchmarkResult, setBenchmarkResult] = useState(null);
 
+  const currentCoreProfile = BENCHMARK_PROFILES[selectedProfileIndex];
+
+  // Load Core Profile Evaluation
   useEffect(() => {
-    if (isOpen) {
-      runEvaluation(currentProfile);
+    if (isOpen && activeTab === 'core') {
+      runCoreEvaluation(currentCoreProfile);
     }
-  }, [isOpen, selectedProfileIndex]);
+  }, [isOpen, activeTab, selectedProfileIndex]);
 
-  async function runEvaluation(profile) {
+  // Load Kaggle Candidates List
+  useEffect(() => {
+    if (isOpen && activeTab === 'kaggle') {
+      fetchKaggleCandidates();
+    }
+  }, [isOpen, activeTab, kagglePage, kaggleSearch, kaggleRoleFilter, kaggleExpFilter]);
+
+  // Auto-evaluate first Kaggle candidate when selected
+  useEffect(() => {
+    if (selectedCandidate) {
+      evaluateKaggleProfile(selectedCandidate.candidate_id);
+    }
+  }, [selectedCandidate]);
+
+  async function runCoreEvaluation(profile) {
     try {
-      setLoading(true);
+      setLoadingCore(true);
       const res = await api.evaluateProfile(profile, 5);
-      setResults(res.recommendations || []);
+      setResultsCore(res.recommendations || []);
     } catch (err) {
       console.error(err);
     } finally {
-      setLoading(false);
+      setLoadingCore(false);
+    }
+  }
+
+  async function fetchKaggleCandidates() {
+    try {
+      setLoadingKaggleList(true);
+      const res = await api.getKaggleCandidates({
+        page: kagglePage,
+        limit: 8,
+        search: kaggleSearch,
+        role: kaggleRoleFilter,
+        experienceLevel: kaggleExpFilter
+      });
+      setKaggleCandidates(res.candidates || []);
+      setKaggleTotal(res.total || 0);
+      if (!selectedCandidate && res.candidates && res.candidates.length > 0) {
+        setSelectedCandidate(res.candidates[0]);
+      }
+    } catch (err) {
+      console.error('Failed to fetch Kaggle candidates:', err);
+    } finally {
+      setLoadingKaggleList(false);
+    }
+  }
+
+  async function evaluateKaggleProfile(candidateId) {
+    try {
+      setLoadingKaggleEval(true);
+      const res = await api.evaluateKaggleCandidate(candidateId, 5);
+      setCandidateRecommendations(res.recommendations || []);
+    } catch (err) {
+      console.error('Failed to evaluate Kaggle candidate:', err);
+    } finally {
+      setLoadingKaggleEval(false);
+    }
+  }
+
+  async function handleRunKaggleBenchmark() {
+    try {
+      setBenchmarkRunning(true);
+      const res = await api.runKaggleBenchmark(40);
+      setBenchmarkResult(res);
+    } catch (err) {
+      console.error('Benchmark execution error:', err);
+    } finally {
+      setBenchmarkRunning(false);
     }
   }
 
@@ -158,15 +246,15 @@ export default function EvaluationBenchmarkModal({ isOpen, onClose }) {
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Milestone 2: RAG Retrieval & Matching Agent Evaluation Suite"
-      maxWidth="900px"
+      title="Milestone 2: RAG Retrieval & Job-Resume Matching Evaluation Suite"
+      maxWidth="960px"
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
         
         {/* Metric Summary Ribbon */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
           gap: '0.75rem',
           padding: '1rem',
           background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.12) 0%, rgba(16, 185, 129, 0.08) 100%)',
@@ -182,139 +270,513 @@ export default function EvaluationBenchmarkModal({ isOpen, onClose }) {
             <div style={{ fontSize: '1.2rem', fontWeight: 900, color: 'var(--accent-primary)' }}>100.0%</div>
           </div>
           <div>
+            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>Kaggle Dataset</div>
+            <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#f43f5e' }}>1,000 Candidates</div>
+          </div>
+          <div>
             <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>Knowledge Base</div>
             <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#22d3ee' }}>180 Postings</div>
           </div>
           <div>
-            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>Indexed Chunks</div>
-            <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#fbbf24' }}>720 Vectors</div>
+            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>Indexed Vectors</div>
+            <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#fbbf24' }}>720 Chunks</div>
           </div>
         </div>
 
-        {/* Profile Selector Chips */}
-        <div>
-          <div style={{ fontSize: '0.85rem', fontWeight: 700, marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>
-            SELECT SAMPLE CANDIDATE PROFILE TO BENCHMARK:
-          </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-            {BENCHMARK_PROFILES.map((p, idx) => {
-              const Icon = p.icon;
-              const isSelected = idx === selectedProfileIndex;
-              return (
-                <button
-                  key={p.id}
-                  onClick={() => setSelectedProfileIndex(idx)}
-                  className="btn btn-sm"
+        {/* View Switcher Tabs */}
+        <div style={{ display: 'flex', gap: '0.5rem', borderBottom: '1px solid var(--border-card)', paddingBottom: '0.5rem' }}>
+          <button
+            onClick={() => setActiveTab('kaggle')}
+            className="btn btn-sm"
+            style={{
+              background: activeTab === 'kaggle' ? 'var(--accent-primary)' : 'var(--bg-secondary)',
+              color: activeTab === 'kaggle' ? '#ffffff' : 'var(--text-primary)',
+              borderColor: activeTab === 'kaggle' ? 'var(--accent-primary)' : 'var(--border-card)',
+              fontWeight: 700,
+              gap: '0.5rem'
+            }}
+          >
+            <Database size={15} />
+            <span>Kaggle 1,000 Candidates Dataset</span>
+            <span className="badge badge-rose" style={{ fontSize: '0.65rem', padding: '0.1rem 0.4rem' }}>1,000 Profiles</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('core')}
+            className="btn btn-sm"
+            style={{
+              background: activeTab === 'core' ? 'var(--accent-primary)' : 'var(--bg-secondary)',
+              color: activeTab === 'core' ? '#ffffff' : 'var(--text-primary)',
+              borderColor: activeTab === 'core' ? 'var(--accent-primary)' : 'var(--border-card)',
+              fontWeight: 700,
+              gap: '0.5rem'
+            }}
+          >
+            <Layers size={15} />
+            <span>Core 6 Student Benchmarks</span>
+          </button>
+        </div>
+
+        {/* ========================================================= */}
+        {/* TAB 1: KAGGLE 1,000 CANDIDATE DATASET VIEW */}
+        {/* ========================================================= */}
+        {activeTab === 'kaggle' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            
+            {/* Top Toolbar: Search, Filters & Batch Benchmark Button */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', gap: '0.5rem', flex: 1, minWidth: '260px' }}>
+                <div style={{ position: 'relative', width: '100%' }}>
+                  <Search size={15} style={{ position: 'absolute', left: '10px', top: '10px', color: 'var(--text-muted)' }} />
+                  <input
+                    type="text"
+                    placeholder="Search candidate by skill, role, ID (e.g. Python, Solidity, 10)..."
+                    value={kaggleSearch}
+                    onChange={(e) => {
+                      setKaggleSearch(e.target.value);
+                      setKagglePage(1);
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '0.5rem 0.75rem 0.5rem 2rem',
+                      background: 'var(--bg-secondary)',
+                      border: '1px solid var(--border-card)',
+                      borderRadius: 'var(--radius-md)',
+                      color: 'var(--text-primary)',
+                      fontSize: '0.85rem'
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Role & Experience Filter Selectors */}
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <select
+                  value={kaggleRoleFilter}
+                  onChange={(e) => {
+                    setKaggleRoleFilter(e.target.value);
+                    setKagglePage(1);
+                  }}
                   style={{
-                    background: isSelected ? 'var(--accent-primary)' : 'var(--bg-secondary)',
-                    color: isSelected ? '#ffffff' : 'var(--text-primary)',
-                    borderColor: isSelected ? 'var(--accent-primary)' : 'var(--border-card)',
-                    gap: '0.4rem'
+                    padding: '0.45rem 0.75rem',
+                    background: 'var(--bg-secondary)',
+                    border: '1px solid var(--border-card)',
+                    borderRadius: 'var(--radius-md)',
+                    color: 'var(--text-primary)',
+                    fontSize: '0.8rem'
                   }}
                 >
-                  <Icon size={14} color={isSelected ? '#ffffff' : p.color} />
-                  <span>{p.name} ({p.track.split(' ')[0]})</span>
+                  <option value="all">All Roles (20+ Categories)</option>
+                  <option value="Data Scientist">Data Scientist</option>
+                  <option value="Frontend Developer">Frontend Developer</option>
+                  <option value="Backend Developer">Backend Developer</option>
+                  <option value="Full Stack Python">Full Stack Python</option>
+                  <option value="Full Stack Java">Full Stack Java</option>
+                  <option value="DevOps">DevOps Engineer</option>
+                  <option value="Kubernetes">Kubernetes Operations</option>
+                  <option value="AIML">AIML / Deep Learning</option>
+                  <option value="Cybersecurity">Cybersecurity Engineer</option>
+                  <option value="Blockchain">Blockchain Developer</option>
+                  <option value="Mobile">Mobile Developer</option>
+                  <option value="Game Developer">Game Developer</option>
+                  <option value="Designer">UI/UX Designer</option>
+                  <option value="Project Manager">Software Project Manager</option>
+                  <option value="C#">C# / .NET Developer</option>
+                  <option value="PHP">PHP Developer</option>
+                  <option value="Marketing">Marketing Specialist</option>
+                  <option value="HR">HR Specialist</option>
+                  <option value="Finance">Finance Analyst</option>
+                </select>
+
+                <select
+                  value={kaggleExpFilter}
+                  onChange={(e) => {
+                    setKaggleExpFilter(e.target.value);
+                    setKagglePage(1);
+                  }}
+                  style={{
+                    padding: '0.45rem 0.75rem',
+                    background: 'var(--bg-secondary)',
+                    border: '1px solid var(--border-card)',
+                    borderRadius: 'var(--radius-md)',
+                    color: 'var(--text-primary)',
+                    fontSize: '0.8rem'
+                  }}
+                >
+                  <option value="all">All Experience Levels</option>
+                  <option value="Entry">Entry Level</option>
+                  <option value="Mid">Mid Level</option>
+                  <option value="Senior">Senior Level</option>
+                </select>
+
+                <button
+                  onClick={handleRunKaggleBenchmark}
+                  disabled={benchmarkRunning}
+                  className="btn btn-primary btn-sm"
+                  style={{ gap: '0.4rem', fontSize: '0.8rem' }}
+                >
+                  <Play size={13} />
+                  <span>{benchmarkRunning ? 'Benchmarking Cohort...' : 'Run Batch Benchmark'}</span>
                 </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Selected Profile Card */}
-        <div style={{
-          padding: '1rem 1.25rem',
-          background: 'var(--bg-secondary)',
-          borderRadius: 'var(--radius-md)',
-          border: '1px solid var(--border-card)',
-          fontSize: '0.85rem'
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.5rem' }}>
-            <div>
-              <span style={{ fontWeight: 800, fontSize: '1rem', color: currentProfile.color }}>{currentProfile.name}</span>
-              <span style={{ color: 'var(--text-muted)', marginLeft: '0.5rem' }}>• {currentProfile.degree} ({currentProfile.university})</span>
+              </div>
             </div>
-            <span className="badge badge-indigo" style={{ fontSize: '0.72rem' }}>{currentProfile.preferred_roles[0]}</span>
-          </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginTop: '0.4rem' }}>
-            {currentProfile.skills.map((s, idx) => (
-              <span key={idx} className="badge badge-cyan" style={{ fontSize: '0.7rem' }}>{s}</span>
-            ))}
-          </div>
-        </div>
 
-        {/* Live Matching Agent Ranked Results */}
-        <div>
-          <h4 style={{ fontSize: '1rem', fontWeight: 800, marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Sparkles size={16} color="var(--accent-primary)" />
-            <span>Real-Time Matching Agent Top Recommendations</span>
-          </h4>
-
-          {loading ? (
-            <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-              Executing RAG retrieval and multi-factor scoring...
-            </div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-              {results.map((rec, idx) => {
-                const item = rec.internship;
-                const score = rec.matchScore;
-                const isTop1 = idx === 0;
-                return (
-                  <div
-                    key={item.id}
-                    style={{
-                      padding: '1rem 1.25rem',
-                      background: isTop1 ? 'linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(16, 185, 129, 0.05) 100%)' : 'var(--bg-tertiary)',
-                      borderRadius: 'var(--radius-md)',
-                      border: isTop1 ? '1.5px solid var(--accent-emerald)' : '1px solid var(--border-card)',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '0.5rem'
-                    }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                        <span style={{
-                          width: '24px',
-                          height: '24px',
-                          borderRadius: '50%',
-                          background: isTop1 ? 'var(--accent-emerald)' : 'var(--bg-secondary)',
-                          color: isTop1 ? '#000000' : 'var(--text-primary)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: '0.75rem',
-                          fontWeight: 800
-                        }}>
-                          #{idx + 1}
-                        </span>
-                        <div>
-                          <div style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-primary)' }}>{item.title}</div>
-                          <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{item.company} • {item.location} ({item.remote_type})</div>
-                        </div>
-                      </div>
-
-                      <div style={{ textAlign: 'right' }}>
-                        <div style={{ fontSize: '1.2rem', fontWeight: 900, color: score >= 80 ? '#10b981' : '#6366f1' }}>
-                          {score}%
-                        </div>
-                        <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Fit Score</div>
-                      </div>
-                    </div>
-
-                    {/* Reasoning Snippet */}
-                    {rec.explanation && (
-                      <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', background: 'var(--bg-secondary)', padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-sm)' }}>
-                        <span style={{ fontWeight: 700, color: 'var(--accent-primary)' }}>AI Why It Matches: </span>
-                        {rec.explanation.whyItMatches}
-                      </div>
-                    )}
+            {/* Batch Benchmark Results Card (when triggered) */}
+            {benchmarkResult && (
+              <div style={{
+                padding: '1rem',
+                background: 'rgba(16, 185, 129, 0.08)',
+                border: '1.5px solid var(--accent-emerald)',
+                borderRadius: 'var(--radius-md)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.5rem'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 800, color: 'var(--accent-emerald)' }}>
+                    <CheckCircle size={18} />
+                    <span>Kaggle Dataset Batch Benchmark Complete</span>
                   </div>
-                );
-              })}
+                  <span className="badge badge-emerald" style={{ fontSize: '0.75rem' }}>
+                    {benchmarkResult.evaluatedCohortSize} Candidates Evaluated
+                  </span>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.75rem', marginTop: '0.25rem' }}>
+                  <div>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Top-1 Accuracy</div>
+                    <div style={{ fontSize: '1.1rem', fontWeight: 900, color: 'var(--accent-primary)' }}>{benchmarkResult.top1Accuracy}%</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Mean Reciprocal Rank</div>
+                    <div style={{ fontSize: '1.1rem', fontWeight: 900, color: 'var(--accent-emerald)' }}>{benchmarkResult.mrr} / 1.000</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Average Fit Score</div>
+                    <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#fbbf24' }}>{benchmarkResult.avgMatchScore}%</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Knowledge Base Pool</div>
+                    <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#22d3ee' }}>180 Postings</div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Candidate Selector Grid */}
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                  SELECT A KAGGLE CANDIDATE PROFILE ({kaggleTotal} TOTAL):
+                </span>
+                <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+                  <button
+                    disabled={kagglePage <= 1}
+                    onClick={() => setKagglePage(p => Math.max(1, p - 1))}
+                    className="btn btn-sm"
+                    style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem' }}
+                  >
+                    Prev
+                  </button>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                    Page {kagglePage} of {Math.max(1, Math.ceil(kaggleTotal / 8))}
+                  </span>
+                  <button
+                    disabled={kagglePage >= Math.ceil(kaggleTotal / 8)}
+                    onClick={() => setKagglePage(p => p + 1)}
+                    className="btn btn-sm"
+                    style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem' }}
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+
+              {loadingKaggleList ? (
+                <div style={{ padding: '1.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                  Loading Kaggle candidate profiles...
+                </div>
+              ) : (
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))',
+                  gap: '0.5rem'
+                }}>
+                  {kaggleCandidates.map((cand) => {
+                    const isSelected = selectedCandidate?.candidate_id === cand.candidate_id;
+                    return (
+                      <div
+                        key={cand.candidate_id}
+                        onClick={() => setSelectedCandidate(cand)}
+                        style={{
+                          padding: '0.65rem 0.85rem',
+                          background: isSelected ? 'linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(16, 185, 129, 0.1) 100%)' : 'var(--bg-secondary)',
+                          border: isSelected ? '1.5px solid var(--accent-primary)' : '1px solid var(--border-card)',
+                          borderRadius: 'var(--radius-md)',
+                          cursor: 'pointer',
+                          transition: 'all 0.15s ease'
+                        }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                          <span style={{ fontWeight: 800, fontSize: '0.85rem', color: isSelected ? 'var(--accent-primary)' : 'var(--text-primary)' }}>
+                            #{cand.candidate_id} {cand.name}
+                          </span>
+                          <span className={`badge ${cand.experience_level === 'Senior' ? 'badge-rose' : cand.experience_level === 'Mid' ? 'badge-amber' : 'badge-emerald'}`} style={{ fontSize: '0.65rem', padding: '0.05rem 0.35rem' }}>
+                            {cand.experience_level}
+                          </span>
+                        </div>
+                        <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                          {cand.job_role}
+                        </div>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: '0.2rem' }}>
+                          {cand.skills.join(', ')}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
-          )}
-        </div>
+
+            {/* Active Selected Candidate Card */}
+            {selectedCandidate && (
+              <div style={{
+                padding: '1rem 1.25rem',
+                background: 'var(--bg-secondary)',
+                borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--border-card)',
+                fontSize: '0.85rem'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                  <div>
+                    <span style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--accent-primary)' }}>
+                      Candidate #{selectedCandidate.candidate_id}: {selectedCandidate.name}
+                    </span>
+                    <span style={{ color: 'var(--text-muted)', marginLeft: '0.5rem' }}>
+                      • {selectedCandidate.qualification}
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', gap: '0.4rem' }}>
+                    <span className="badge badge-indigo" style={{ fontSize: '0.72rem' }}>{selectedCandidate.job_role}</span>
+                    <span className="badge badge-cyan" style={{ fontSize: '0.72rem' }}>{selectedCandidate.experience_level} Level</span>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginTop: '0.4rem' }}>
+                  {selectedCandidate.skills.map((s, idx) => (
+                    <span key={idx} className="badge badge-emerald" style={{ fontSize: '0.7rem' }}>{s}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Real-time RAG & Matching Engine Results for Selected Candidate */}
+            <div>
+              <h4 style={{ fontSize: '0.95rem', fontWeight: 800, marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Sparkles size={16} color="var(--accent-primary)" />
+                <span>RAG Retrieval & Matching Agent Top-5 Recommendations</span>
+              </h4>
+
+              {loadingKaggleEval ? (
+                <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                  Executing vector similarity search and multi-factor ranking for candidate...
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  {candidateRecommendations.map((rec, idx) => {
+                    const item = rec.internship;
+                    const score = rec.matchScore;
+                    const isTop1 = idx === 0;
+                    return (
+                      <div
+                        key={item.id}
+                        style={{
+                          padding: '0.85rem 1.15rem',
+                          background: isTop1 ? 'linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(16, 185, 129, 0.05) 100%)' : 'var(--bg-tertiary)',
+                          borderRadius: 'var(--radius-md)',
+                          border: isTop1 ? '1.5px solid var(--accent-emerald)' : '1px solid var(--border-card)',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '0.4rem'
+                        }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                            <span style={{
+                              width: '24px',
+                              height: '24px',
+                              borderRadius: '50%',
+                              background: isTop1 ? 'var(--accent-emerald)' : 'var(--bg-secondary)',
+                              color: isTop1 ? '#000000' : 'var(--text-primary)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontSize: '0.75rem',
+                              fontWeight: 800
+                            }}>
+                              #{idx + 1}
+                            </span>
+                            <div>
+                              <div style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-primary)' }}>{item.title}</div>
+                              <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{item.company} • {item.location} ({item.remote_type})</div>
+                            </div>
+                          </div>
+
+                          <div style={{ textAlign: 'right' }}>
+                            <div style={{ fontSize: '1.2rem', fontWeight: 900, color: score >= 75 ? '#10b981' : score >= 60 ? '#6366f1' : '#f59e0b' }}>
+                              {score}%
+                            </div>
+                            <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Fit Score</div>
+                          </div>
+                        </div>
+
+                        {/* Reasoning Snippet */}
+                        {rec.explanation && (
+                          <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', background: 'var(--bg-secondary)', padding: '0.45rem 0.65rem', borderRadius: 'var(--radius-sm)' }}>
+                            <span style={{ fontWeight: 700, color: 'var(--accent-primary)' }}>AI Match Rationale: </span>
+                            {rec.explanation.whyItMatches}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+          </div>
+        )}
+
+        {/* ========================================================= */}
+        {/* TAB 2: CORE 6 STUDENT BENCHMARKS VIEW */}
+        {/* ========================================================= */}
+        {activeTab === 'core' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            {/* Profile Selector Chips */}
+            <div>
+              <div style={{ fontSize: '0.85rem', fontWeight: 700, marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>
+                SELECT CORE EVALUATION PROFILE:
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                {BENCHMARK_PROFILES.map((p, idx) => {
+                  const Icon = p.icon;
+                  const isSelected = idx === selectedProfileIndex;
+                  return (
+                    <button
+                      key={p.id}
+                      onClick={() => setSelectedProfileIndex(idx)}
+                      className="btn btn-sm"
+                      style={{
+                        background: isSelected ? 'var(--accent-primary)' : 'var(--bg-secondary)',
+                        color: isSelected ? '#ffffff' : 'var(--text-primary)',
+                        borderColor: isSelected ? 'var(--accent-primary)' : 'var(--border-card)',
+                        gap: '0.4rem'
+                      }}
+                    >
+                      <Icon size={14} color={isSelected ? '#ffffff' : p.color} />
+                      <span>{p.name} ({p.track.split(' ')[0]})</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Selected Profile Card */}
+            <div style={{
+              padding: '1rem 1.25rem',
+              background: 'var(--bg-secondary)',
+              borderRadius: 'var(--radius-md)',
+              border: '1px solid var(--border-card)',
+              fontSize: '0.85rem'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                <div>
+                  <span style={{ fontWeight: 800, fontSize: '1rem', color: currentCoreProfile.color }}>{currentCoreProfile.name}</span>
+                  <span style={{ color: 'var(--text-muted)', marginLeft: '0.5rem' }}>• {currentCoreProfile.degree} ({currentCoreProfile.university})</span>
+                </div>
+                <span className="badge badge-indigo" style={{ fontSize: '0.72rem' }}>{currentCoreProfile.preferred_roles[0]}</span>
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginTop: '0.4rem' }}>
+                {currentCoreProfile.skills.map((s, idx) => (
+                  <span key={idx} className="badge badge-cyan" style={{ fontSize: '0.7rem' }}>{s}</span>
+                ))}
+              </div>
+            </div>
+
+            {/* Live Matching Agent Ranked Results */}
+            <div>
+              <h4 style={{ fontSize: '1rem', fontWeight: 800, marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Sparkles size={16} color="var(--accent-primary)" />
+                <span>Real-Time Matching Agent Top Recommendations</span>
+              </h4>
+
+              {loadingCore ? (
+                <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                  Executing RAG retrieval and multi-factor scoring...
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+                  {resultsCore.map((rec, idx) => {
+                    const item = rec.internship;
+                    const score = rec.matchScore;
+                    const isTop1 = idx === 0;
+                    return (
+                      <div
+                        key={item.id}
+                        style={{
+                          padding: '1rem 1.25rem',
+                          background: isTop1 ? 'linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(16, 185, 129, 0.05) 100%)' : 'var(--bg-tertiary)',
+                          borderRadius: 'var(--radius-md)',
+                          border: isTop1 ? '1.5px solid var(--accent-emerald)' : '1px solid var(--border-card)',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '0.5rem'
+                        }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                            <span style={{
+                              width: '24px',
+                              height: '24px',
+                              borderRadius: '50%',
+                              background: isTop1 ? 'var(--accent-emerald)' : 'var(--bg-secondary)',
+                              color: isTop1 ? '#000000' : 'var(--text-primary)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontSize: '0.75rem',
+                              fontWeight: 800
+                            }}>
+                              #{idx + 1}
+                            </span>
+                            <div>
+                              <div style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-primary)' }}>{item.title}</div>
+                              <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{item.company} • {item.location} ({item.remote_type})</div>
+                            </div>
+                          </div>
+
+                          <div style={{ textAlign: 'right' }}>
+                            <div style={{ fontSize: '1.2rem', fontWeight: 900, color: score >= 80 ? '#10b981' : '#6366f1' }}>
+                              {score}%
+                            </div>
+                            <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Fit Score</div>
+                          </div>
+                        </div>
+
+                        {/* Reasoning Snippet */}
+                        {rec.explanation && (
+                          <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', background: 'var(--bg-secondary)', padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-sm)' }}>
+                            <span style={{ fontWeight: 700, color: 'var(--accent-primary)' }}>AI Why It Matches: </span>
+                            {rec.explanation.whyItMatches}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
       </div>
     </Modal>
