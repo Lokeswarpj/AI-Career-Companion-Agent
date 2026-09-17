@@ -2,11 +2,69 @@ import express from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { db } from '../config/database.js';
 import { authenticateToken } from '../middleware/auth.js';
-import { generateInterviewQuestions, evaluateInterviewAnswer } from '../services/geminiService.js';
+import { 
+  generateCategorizedInterviewQuestions, 
+  generatePreInterviewPrepGuide, 
+  evaluateInterviewAnswerM3 
+} from '../services/interviewPrepAgent.js';
 
 const router = express.Router();
 
-// Start a new mock interview session
+// Helper to fetch student profile
+async function getStudentProfile(userId) {
+  const profile = await db.get('SELECT * FROM profiles WHERE user_id = ?', [userId]);
+  const latestResume = await db.get('SELECT * FROM resumes WHERE user_id = ? ORDER BY uploaded_at DESC LIMIT 1', [userId]);
+
+  let skills = [];
+  if (profile && profile.technical_skills) {
+    try { skills = JSON.parse(profile.technical_skills); } catch {}
+  }
+  if (latestResume && latestResume.detected_skills_json) {
+    try {
+      const resumeSkills = JSON.parse(latestResume.detected_skills_json);
+      const combined = [
+        ...(resumeSkills.programming || []),
+        ...(resumeSkills.web || []),
+        ...(resumeSkills.aiData || []),
+        ...(resumeSkills.cloud || []),
+        ...(resumeSkills.tools || [])
+      ];
+      skills = Array.from(new Set([...skills, ...combined]));
+    } catch {}
+  }
+
+  return {
+    skills,
+    technical_skills: skills,
+    degree: profile?.degree || 'Computer Science and Engineering',
+    university: profile?.university || 'University',
+    graduation_year: profile?.graduation_year || 2026,
+    projects: profile?.projects_json ? (typeof profile.projects_json === 'string' ? JSON.parse(profile.projects_json) : profile.projects_json) : [],
+    experience: profile?.experience_json ? (typeof profile.experience_json === 'string' ? JSON.parse(profile.experience_json) : profile.experience_json) : []
+  };
+}
+
+// 1. Get Pre-Interview Prep Guide & Revision Topics Checklist
+router.get('/prep-guide/:internshipId', authenticateToken, async (req, res) => {
+  try {
+    const { internshipId } = req.params;
+    const internship = await db.get('SELECT * FROM internships WHERE id = ?', [internshipId]);
+
+    if (!internship) {
+      return res.status(404).json({ error: 'Internship not found.' });
+    }
+
+    const studentProfile = await getStudentProfile(req.user.id);
+    const guide = await generatePreInterviewPrepGuide(internship, studentProfile);
+
+    return res.json(guide);
+  } catch (err) {
+    console.error('Prep guide error:', err);
+    return res.status(500).json({ error: 'Failed to generate pre-interview preparation guide.' });
+  }
+});
+
+// 2. Start a new mock interview session with 5 categorized questions
 router.post('/start', authenticateToken, async (req, res) => {
   try {
     const { internshipId, roleTitle, difficulty = 'Intermediate', interviewType = 'Technical' } = req.body;
@@ -23,20 +81,18 @@ router.post('/start', authenticateToken, async (req, res) => {
       required_skills_json: JSON.stringify(['JavaScript', 'Python', 'React', 'Node.js', 'System Design'])
     };
 
-    // Get latest resume text for personalized question context if available
-    const latestResume = await db.get('SELECT raw_text FROM resumes WHERE user_id = ? ORDER BY uploaded_at DESC LIMIT 1', [req.user.id]);
+    const studentProfile = await getStudentProfile(req.user.id);
 
-    // 1. Generate questions
-    const generatedQuestions = await generateInterviewQuestions(
+    // Generate 5 categorized questions (Technical, Resume-based, Project-based, Scenario, HR)
+    const generatedQuestions = await generateCategorizedInterviewQuestions(
       dummyInternship,
-      difficulty,
-      interviewType,
-      latestResume?.raw_text || ''
+      studentProfile,
+      difficulty
     );
 
     const sessionId = uuidv4();
 
-    // 2. Insert interview session
+    // Insert interview session
     await db.run(
       `INSERT INTO interview_sessions 
        (id, user_id, internship_id, role_title, difficulty, interview_type, status) 
@@ -44,7 +100,7 @@ router.post('/start', authenticateToken, async (req, res) => {
       [sessionId, req.user.id, internshipId || null, effectiveRole, difficulty, interviewType, 'in_progress']
     );
 
-    // 3. Insert question records
+    // Insert question records
     for (const q of generatedQuestions) {
       const exchangeId = uuidv4();
       await db.run(
@@ -68,7 +124,8 @@ router.post('/start', authenticateToken, async (req, res) => {
       difficulty,
       interviewType,
       totalQuestions: generatedQuestions.length,
-      firstQuestion: generatedQuestions[0]
+      firstQuestion: generatedQuestions[0],
+      allQuestions: generatedQuestions
     });
   } catch (err) {
     console.error('Start interview error:', err);
@@ -76,7 +133,7 @@ router.post('/start', authenticateToken, async (req, res) => {
   }
 });
 
-// Submit answer for a question in real-time
+// 3. Submit answer for a question in real-time with 3-dimensional evaluation
 router.post('/submit-answer', authenticateToken, async (req, res) => {
   try {
     const { sessionId, questionNumber, userAnswer } = req.body;
@@ -99,9 +156,18 @@ router.post('/submit-answer', authenticateToken, async (req, res) => {
       return res.status(404).json({ error: 'Question not found in this session.' });
     }
 
-    // Evaluate answer with Gemini
-    const evaluation = await evaluateInterviewAnswer(
-      exchange.question_text,
+    let expectedPoints = [];
+    try {
+      expectedPoints = JSON.parse(exchange.ideal_answer_points || '[]');
+    } catch {}
+
+    // Evaluate answer with 3-dimensional scoring
+    const evaluation = await evaluateInterviewAnswerM3(
+      {
+        questionText: exchange.question_text,
+        category: exchange.category,
+        expectedKeyPoints: expectedPoints
+      },
       userAnswer,
       session.role_title,
       session.difficulty
@@ -121,13 +187,13 @@ router.post('/submit-answer', authenticateToken, async (req, res) => {
        WHERE id = ?`,
       [
         userAnswer,
-        evaluation.score,
+        evaluation.overallScore,
         evaluation.technicalScore,
         evaluation.communicationScore,
         evaluation.relevanceScore,
         evaluation.feedback,
-        JSON.stringify(evaluation.keyPointsMentioned || []),
-        JSON.stringify(evaluation.missedPoints || []),
+        JSON.stringify(evaluation.strengthsHighlighted || []),
+        JSON.stringify(evaluation.missedConcepts || []),
         exchange.id
       ]
     );
@@ -139,7 +205,16 @@ router.post('/submit-answer', authenticateToken, async (req, res) => {
     );
 
     return res.json({
-      evaluation,
+      evaluation: {
+        score: evaluation.overallScore,
+        technicalScore: evaluation.technicalScore,
+        communicationScore: evaluation.communicationScore,
+        relevanceScore: evaluation.relevanceScore,
+        feedback: evaluation.feedback,
+        keyPointsMentioned: evaluation.strengthsHighlighted,
+        missedPoints: evaluation.missedConcepts,
+        idealAnswerSummary: evaluation.idealModelAnswer
+      },
       isFinished: !nextQuestion,
       nextQuestion: nextQuestion ? {
         questionNumber: nextQuestion.question_number,
@@ -153,7 +228,7 @@ router.post('/submit-answer', authenticateToken, async (req, res) => {
   }
 });
 
-// Finalize and summarize interview session
+// 4. Finalize and summarize interview session
 router.post('/complete/:sessionId', authenticateToken, async (req, res) => {
   try {
     const { sessionId } = req.params;
@@ -179,7 +254,7 @@ router.post('/complete/:sessionId', authenticateToken, async (req, res) => {
     const strengths = [
       avgTech >= 75 ? 'Solid understanding of core software paradigms and syntax' : 'Good foundational awareness of basic problem types',
       avgComm >= 75 ? 'Structured and articulate communication style' : 'Clear and concise responses',
-      'Demonstrated enthusiasm and practical orientation'
+      'Demonstrated structured thinking across technical and behavioral questions'
     ];
 
     const improvements = [
@@ -225,8 +300,6 @@ router.post('/complete/:sessionId', authenticateToken, async (req, res) => {
       scorecard: {
         sessionId,
         roleTitle: session.role_title,
-        difficulty: session.difficulty,
-        interviewType: session.interview_type,
         overallScore: avgOverall,
         technicalScore: avgTech,
         communicationScore: avgComm,
@@ -235,11 +308,7 @@ router.post('/complete/:sessionId', authenticateToken, async (req, res) => {
         strengths,
         improvements,
         recommendations,
-        exchanges: exchanges.map(e => ({
-          ...e,
-          key_points: e.key_points ? JSON.parse(e.key_points) : [],
-          missed_points: e.missed_points ? JSON.parse(e.missed_points) : []
-        }))
+        totalQuestionsAnswered: answeredExchanges.length
       }
     });
   } catch (err) {
@@ -248,47 +317,40 @@ router.post('/complete/:sessionId', authenticateToken, async (req, res) => {
   }
 });
 
-// List all interview history sessions
-router.get('/sessions', authenticateToken, async (req, res) => {
+// 5. Get user's interview history
+router.get('/history', authenticateToken, async (req, res) => {
   try {
     const sessions = await db.all(
-      `SELECT s.*, i.company, i.location 
-       FROM interview_sessions s
-       LEFT JOIN internships i ON s.internship_id = i.id
-       WHERE s.user_id = ?
-       ORDER BY s.created_at DESC`,
+      'SELECT * FROM interview_sessions WHERE user_id = ? AND status = "completed" ORDER BY created_at DESC',
       [req.user.id]
     );
 
-    return res.json({
-      sessions: sessions.map(s => ({
-        ...s,
-        strengths_json: s.strengths_json ? JSON.parse(s.strengths_json) : [],
-        improvements_json: s.improvements_json ? JSON.parse(s.improvements_json) : [],
-        recommendations_json: s.recommendations_json ? JSON.parse(s.recommendations_json) : []
-      }))
-    });
+    const parsed = sessions.map(s => ({
+      ...s,
+      strengths_json: s.strengths_json ? JSON.parse(s.strengths_json) : [],
+      improvements_json: s.improvements_json ? JSON.parse(s.improvements_json) : [],
+      recommendations_json: s.recommendations_json ? JSON.parse(s.recommendations_json) : []
+    }));
+
+    return res.json({ sessions: parsed });
   } catch (err) {
-    console.error('List sessions error:', err);
+    console.error('Get history error:', err);
     return res.status(500).json({ error: 'Failed to retrieve interview history.' });
   }
 });
 
-// Get detailed transcript of a single session
-router.get('/sessions/:sessionId', authenticateToken, async (req, res) => {
+// 6. Get deep detail for a specific completed session
+router.get('/session/:sessionId', authenticateToken, async (req, res) => {
   try {
-    const session = await db.get(
-      'SELECT * FROM interview_sessions WHERE id = ? AND user_id = ?',
-      [req.params.sessionId, req.user.id]
-    );
-
+    const { sessionId } = req.params;
+    const session = await db.get('SELECT * FROM interview_sessions WHERE id = ? AND user_id = ?', [sessionId, req.user.id]);
     if (!session) {
       return res.status(404).json({ error: 'Session not found.' });
     }
 
     const exchanges = await db.all(
       'SELECT * FROM interview_exchanges WHERE session_id = ? ORDER BY question_number ASC',
-      [session.id]
+      [sessionId]
     );
 
     return res.json({
@@ -306,8 +368,8 @@ router.get('/sessions/:sessionId', authenticateToken, async (req, res) => {
       }))
     });
   } catch (err) {
-    console.error('Get session transcript error:', err);
-    return res.status(500).json({ error: 'Failed to retrieve session transcript.' });
+    console.error('Get session detail error:', err);
+    return res.status(500).json({ error: 'Failed to retrieve session details.' });
   }
 });
 

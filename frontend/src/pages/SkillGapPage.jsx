@@ -14,14 +14,22 @@ import {
   Building, 
   MapPin,
   HelpCircle,
-  TrendingUp
+  TrendingUp,
+  FileCheck,
+  Target,
+  Layers,
+  Clock,
+  ExternalLink,
+  ChevronRight,
+  GraduationCap
 } from 'lucide-react';
 
 export default function SkillGapPage({ selectedInternshipId, setSelectedInternshipId, setActiveTab }) {
   const notify = useNotification();
   const [loading, setLoading] = useState(true);
   const [internshipsList, setInternshipsList] = useState([]);
-  const [evaluation, setEvaluation] = useState(null);
+  const [gapData, setGapData] = useState(null);
+  const [activeGapCategory, setActiveGapCategory] = useState('critical'); // 'critical' | 'partial' | 'matching' | 'preferred' | 'experience'
 
   useEffect(() => {
     loadAllInternships();
@@ -29,7 +37,7 @@ export default function SkillGapPage({ selectedInternshipId, setSelectedInternsh
 
   useEffect(() => {
     if (selectedInternshipId) {
-      loadEvaluation(selectedInternshipId);
+      loadGapAnalysis(selectedInternshipId);
     } else if (internshipsList.length > 0) {
       setSelectedInternshipId(internshipsList[0].id);
     }
@@ -47,45 +55,48 @@ export default function SkillGapPage({ selectedInternshipId, setSelectedInternsh
     }
   }
 
-  async function loadEvaluation(id) {
+  async function loadGapAnalysis(id) {
     try {
       setLoading(true);
-      const res = await api.evaluateMatch(id);
-      setEvaluation(res);
+      const res = await api.analyzeSkillGap(id);
+      setGapData(res);
     } catch (err) {
-      notify.error('Failed to evaluate skill gaps for this internship.');
+      notify.error('Failed to analyze skill gaps for this internship.');
     } finally {
       setLoading(false);
     }
   }
 
-  if (loading && !evaluation) {
-    return <LoadingSpinner message="Gemini AI is cross-referencing candidate profile against position requirements..." />;
+  if (loading && !gapData) {
+    return <LoadingSpinner message="Skill Gap Analysis Agent is cross-referencing candidate profile against multi-dimensional role requirements..." />;
   }
 
-  const internship = evaluation?.internship;
-  const matrix = evaluation?.skillMatrix;
-  const explanation = evaluation?.explanation;
-  const score = evaluation?.overallMatchScore || 0;
-  const scoreColor = score >= 80 ? '#10b981' : score >= 60 ? '#6366f1' : '#f59e0b';
+  const internship = gapData?.internship;
+  const metrics = gapData?.metrics;
+  const gaps = gapData?.gapClassifications;
+  const roadmap = gapData?.actionableRoadmap || [];
+  const aiInsights = gapData?.aiInsights;
+
+  const readinessScore = metrics?.readinessScore || metrics?.matchPercentage || 0;
+  const scoreColor = readinessScore >= 80 ? '#10b981' : readinessScore >= 60 ? '#6366f1' : '#f59e0b';
 
   return (
-    <div className="container" style={{ padding: '2.5rem 1.5rem', maxWidth: '1100px' }}>
+    <div className="container" style={{ padding: '2.5rem 1.5rem', maxWidth: '1150px' }}>
       
       {/* Header & Target Selector */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <div style={{ display: 'inline-flex', marginBottom: '0.4rem' }}>
-            <span className="badge badge-indigo">Skill Matrix & Gap Diagnostic</span>
+            <span className="badge badge-indigo">M3.1 Skill Gap Analysis Agent</span>
           </div>
-          <h1 style={{ fontSize: '2rem', fontWeight: 800 }}>Skill-Gap Analysis & Roadmap</h1>
+          <h1 style={{ fontSize: '2rem', fontWeight: 800 }}>Skill-Gap Diagnostic & Learning Roadmap</h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.92rem' }}>
-            Direct comparison between your profile competencies and the selected internship's technical requirements.
+            Multi-dimensional evaluation comparing candidate profile against technical and qualification prerequisites.
           </p>
         </div>
 
         {/* Dropdown to switch internship */}
-        <div style={{ minWidth: '260px' }}>
+        <div style={{ minWidth: '280px' }}>
           <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>
             Select Target Internship:
           </label>
@@ -103,164 +114,385 @@ export default function SkillGapPage({ selectedInternshipId, setSelectedInternsh
         </div>
       </div>
 
-      {loading && <LoadingSpinner message="Re-evaluating position requirements with Gemini AI..." />}
+      {loading && <LoadingSpinner message="Re-evaluating position requirements..." />}
 
-      {evaluation && !loading && (
+      {gapData && !loading && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
           
-          {/* Target Role & Match Summary Banner */}
+          {/* Target Role & Readiness Score Banner */}
           <div className="glass-panel" style={{ padding: '2rem', borderLeft: `6px solid ${scoreColor}` }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1.5rem' }}>
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-                  <span className="badge badge-indigo">{internship?.source}</span>
-                  <span className="badge badge-cyan">{internship?.remote_type}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem' }}>
+                  <span className="badge badge-indigo">{internship?.source || 'Infosys Springboard'}</span>
+                  <span className="badge badge-cyan">{internship?.remote_type || 'Hybrid'}</span>
+                  <span className="badge badge-emerald">{internship?.stipend || 'Competitive'}</span>
                 </div>
-                <h2 style={{ fontSize: '1.6rem', fontWeight: 800 }}>{internship?.title}</h2>
-                <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginTop: '0.3rem' }}>
-                  {internship?.company} • {internship?.location} • {internship?.stipend}
+                <h2 style={{ fontSize: '1.7rem', fontWeight: 800 }}>{internship?.title}</h2>
+                <div style={{ fontSize: '0.92rem', color: 'var(--text-secondary)', marginTop: '0.3rem' }}>
+                  <strong>{internship?.company}</strong> • {internship?.location}
                 </div>
               </div>
 
               {/* Match Gauge */}
               <div style={{
                 textAlign: 'center',
-                padding: '1rem 1.5rem',
+                padding: '1.1rem 1.6rem',
                 background: 'var(--bg-secondary)',
                 borderRadius: 'var(--radius-md)',
-                border: '1px solid var(--border-card)'
+                border: '1px solid var(--border-card)',
+                minWidth: '150px'
               }}>
-                <div style={{ fontSize: '2.2rem', fontWeight: 900, color: scoreColor }}>
-                  {score}%
+                <div style={{ fontSize: '2.4rem', fontWeight: 900, color: scoreColor, lineHeight: 1.1 }}>
+                  {readinessScore}%
                 </div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>
-                  Compatibility Score
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600, marginTop: '0.2rem' }}>
+                  Readiness Score
                 </div>
               </div>
             </div>
 
-            {/* AI Match Qualitative Rationale */}
-            {explanation && (
+            {/* AI Insights & Assessment */}
+            {aiInsights && (
               <div style={{ marginTop: '1.5rem', paddingTop: '1.25rem', borderTop: '1px solid var(--border-subtle)' }}>
-                <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--accent-primary)', marginBottom: '0.4rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <div style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--accent-primary)', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                   <Sparkles size={16} />
-                  <span>Gemini AI Fit Analysis</span>
+                  <span>Agent Diagnostic Assessment</span>
                 </div>
-                <p style={{ color: 'var(--text-primary)', fontSize: '0.92rem', lineHeight: 1.6, marginBottom: '0.75rem' }}>
-                  {explanation.whyItMatches}
+                <p style={{ color: 'var(--text-primary)', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '1rem' }}>
+                  {aiInsights.summaryAssessment}
                 </p>
-                {explanation.potentialConcerns && (
-                  <p style={{ color: 'var(--accent-amber)', fontSize: '0.88rem', lineHeight: 1.5 }}>
-                    <strong>Note:</strong> {explanation.potentialConcerns}
-                  </p>
+
+                {aiInsights.top3ActionPriorities && (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '0.75rem', marginTop: '0.5rem' }}>
+                    {aiInsights.top3ActionPriorities.map((item, idx) => (
+                      <div key={idx} style={{
+                        background: 'rgba(99, 102, 241, 0.06)',
+                        border: '1px solid rgba(99, 102, 241, 0.2)',
+                        borderRadius: 'var(--radius-sm)',
+                        padding: '0.75rem 1rem',
+                        fontSize: '0.85rem'
+                      }}>
+                        <span style={{ fontWeight: 700, color: 'var(--accent-primary)', marginRight: '0.4rem' }}>#{idx + 1} Priority:</span>
+                        <span style={{ color: 'var(--text-secondary)' }}>{item}</span>
+                      </div>
+                    ))}
+                  </div>
                 )}
               </div>
             )}
           </div>
 
-          {/* Skill Gap Comparison Table */}
+          {/* 5-Category Gap Classification Tabs */}
+          <div className="glass-panel" style={{ padding: '2rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Layers size={20} color="var(--accent-primary)" />
+                <span>5-Category Competency Breakdown</span>
+              </h3>
+
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <button
+                  className={`btn ${activeGapCategory === 'critical' ? 'btn-primary' : 'btn-secondary'}`}
+                  style={{ fontSize: '0.82rem', padding: '0.4rem 0.8rem' }}
+                  onClick={() => setActiveGapCategory('critical')}
+                >
+                  <XCircle size={14} style={{ marginRight: '0.3rem' }} />
+                  Critical Missing ({metrics?.criticalMissingCount || 0})
+                </button>
+                <button
+                  className={`btn ${activeGapCategory === 'partial' ? 'btn-primary' : 'btn-secondary'}`}
+                  style={{ fontSize: '0.82rem', padding: '0.4rem 0.8rem' }}
+                  onClick={() => setActiveGapCategory('partial')}
+                >
+                  <AlertTriangle size={14} style={{ marginRight: '0.3rem' }} />
+                  Partially Demonstrated ({metrics?.partiallyDemonstratedCount || 0})
+                </button>
+                <button
+                  className={`btn ${activeGapCategory === 'matching' ? 'btn-primary' : 'btn-secondary'}`}
+                  style={{ fontSize: '0.82rem', padding: '0.4rem 0.8rem' }}
+                  onClick={() => setActiveGapCategory('matching')}
+                >
+                  <CheckCircle2 size={14} style={{ marginRight: '0.3rem' }} />
+                  Verified Matches ({metrics?.matchingCount || 0})
+                </button>
+                <button
+                  className={`btn ${activeGapCategory === 'preferred' ? 'btn-primary' : 'btn-secondary'}`}
+                  style={{ fontSize: '0.82rem', padding: '0.4rem 0.8rem' }}
+                  onClick={() => setActiveGapCategory('preferred')}
+                >
+                  <Sparkles size={14} style={{ marginRight: '0.3rem' }} />
+                  Preferred Gaps ({metrics?.preferredGapsCount || 0})
+                </button>
+                <button
+                  className={`btn ${activeGapCategory === 'experience' ? 'btn-primary' : 'btn-secondary'}`}
+                  style={{ fontSize: '0.82rem', padding: '0.4rem 0.8rem' }}
+                  onClick={() => setActiveGapCategory('experience')}
+                >
+                  <Briefcase size={14} style={{ marginRight: '0.3rem' }} />
+                  Experience & Qualifications ({metrics?.experienceGapsCount + metrics?.qualificationGapsCount || 0})
+                </button>
+              </div>
+            </div>
+
+            {/* Category View: Critical Missing */}
+            {activeGapCategory === 'critical' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                {gaps?.criticalMissing?.length === 0 ? (
+                  <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
+                    <CheckCircle2 size={32} color="#10b981" style={{ marginBottom: '0.5rem' }} />
+                    <p>No critical skill gaps! You satisfy all mandatory technical requirements for this role.</p>
+                  </div>
+                ) : (
+                  gaps?.criticalMissing?.map((s, idx) => (
+                    <div key={idx} style={{
+                      background: 'rgba(244, 63, 94, 0.05)',
+                      border: '1px solid rgba(244, 63, 94, 0.25)',
+                      borderRadius: 'var(--radius-md)',
+                      padding: '1.25rem'
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <span className="badge badge-rose">High Priority Gap</span>
+                          <span style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>{s.skill}</span>
+                        </div>
+                        <span style={{ fontSize: '0.85rem', color: 'var(--accent-primary)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                          <Clock size={14} /> Est. {s.roadmap?.timeEstimate || '1-2 Weeks'}
+                        </span>
+                      </div>
+                      <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', marginBottom: '0.75rem' }}>
+                        {s.gapReason}
+                      </p>
+                      <div style={{ background: 'var(--bg-secondary)', padding: '0.85rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-card)', fontSize: '0.85rem' }}>
+                        <div style={{ fontWeight: 600, color: 'var(--accent-amber)', marginBottom: '0.3rem' }}>💡 Why {internship.company} Requires This:</div>
+                        <div style={{ color: 'var(--text-secondary)' }}>{s.importance}</div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+
+            {/* Category View: Partially Demonstrated */}
+            {activeGapCategory === 'partial' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                {gaps?.partiallyDemonstrated?.length === 0 ? (
+                  <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
+                    <p>No adjacent skills in this bucket.</p>
+                  </div>
+                ) : (
+                  gaps?.partiallyDemonstrated?.map((s, idx) => (
+                    <div key={idx} style={{
+                      background: 'rgba(245, 158, 11, 0.05)',
+                      border: '1px solid rgba(245, 158, 11, 0.25)',
+                      borderRadius: 'var(--radius-md)',
+                      padding: '1.25rem'
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <span className="badge badge-amber">Medium Priority</span>
+                          <span style={{ fontSize: '1.1rem', fontWeight: 700 }}>{s.skill}</span>
+                          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>(Related skill found: {s.relatedSkillFound})</span>
+                        </div>
+                        <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                          <Clock size={14} /> Est. {s.roadmap?.timeEstimate || '1-2 Weeks'}
+                        </span>
+                      </div>
+                      <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', marginBottom: '0.75rem' }}>
+                        {s.gapReason}
+                      </p>
+                      <div style={{ background: 'var(--bg-secondary)', padding: '0.85rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-card)', fontSize: '0.85rem' }}>
+                        <div style={{ fontWeight: 600, color: 'var(--accent-primary)', marginBottom: '0.3rem' }}>🎯 Recommended Bridge Project:</div>
+                        <div style={{ color: 'var(--text-secondary)' }}>{s.roadmap?.projectIdea}</div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+
+            {/* Category View: Verified Matches */}
+            {activeGapCategory === 'matching' && (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1rem' }}>
+                {gaps?.matching?.map((s, idx) => (
+                  <div key={idx} style={{
+                    background: 'rgba(16, 185, 129, 0.05)',
+                    border: '1px solid rgba(16, 185, 129, 0.25)',
+                    borderRadius: 'var(--radius-md)',
+                    padding: '1.25rem'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+                      <span style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-primary)' }}>{s.skill}</span>
+                      <span className="badge badge-emerald">✓ Verified ({s.confidence}%)</span>
+                    </div>
+                    <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '0.6rem' }}>
+                      {s.evidence}
+                    </div>
+                    <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                      <strong>Role Context:</strong> {s.importance}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Category View: Preferred Gaps */}
+            {activeGapCategory === 'preferred' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                {gaps?.preferredGaps?.length === 0 ? (
+                  <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
+                    <p>You satisfy all preferred / bonus skills for this posting.</p>
+                  </div>
+                ) : (
+                  gaps?.preferredGaps?.map((s, idx) => (
+                    <div key={idx} style={{
+                      background: 'rgba(99, 102, 241, 0.05)',
+                      border: '1px solid rgba(99, 102, 241, 0.2)',
+                      borderRadius: 'var(--radius-md)',
+                      padding: '1.25rem'
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <span className="badge badge-indigo">Bonus Advantage</span>
+                          <span style={{ fontSize: '1.05rem', fontWeight: 700 }}>{s.skill}</span>
+                        </div>
+                        <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Est. {s.roadmap?.timeEstimate}</span>
+                      </div>
+                      <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)' }}>{s.advantage}</p>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+
+            {/* Category View: Experience & Qualification Gaps */}
+            {activeGapCategory === 'experience' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <h4 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <Briefcase size={16} /> Practical Experience Analysis
+                </h4>
+                {gaps?.experienceGaps?.length === 0 ? (
+                  <div style={{ padding: '1rem', background: 'rgba(16, 185, 129, 0.05)', borderRadius: 'var(--radius-sm)', color: '#10b981', fontSize: '0.9rem' }}>
+                    ✓ Candidate project portfolio satisfies practical requirements for {internship.title}.
+                  </div>
+                ) : (
+                  gaps?.experienceGaps?.map((eg, idx) => (
+                    <div key={idx} style={{ background: 'var(--bg-secondary)', padding: '1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-card)' }}>
+                      <div style={{ fontWeight: 700, color: 'var(--accent-amber)', marginBottom: '0.25rem' }}>{eg.area}: {eg.gap}</div>
+                      <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}><strong>Action:</strong> {eg.recommendation}</div>
+                    </div>
+                  ))
+                )}
+
+                <h4 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)', marginTop: '1rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <GraduationCap size={16} /> Academic & Degree Prerequisites
+                </h4>
+                {gaps?.qualificationGaps?.length === 0 ? (
+                  <div style={{ padding: '1rem', background: 'rgba(16, 185, 129, 0.05)', borderRadius: 'var(--radius-sm)', color: '#10b981', fontSize: '0.9rem' }}>
+                    ✓ Candidate degree and academic timeline align with {internship.company}'s requirements.
+                  </div>
+                ) : (
+                  gaps?.qualificationGaps?.map((qg, idx) => (
+                    <div key={idx} style={{ background: 'var(--bg-secondary)', padding: '1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-card)' }}>
+                      <div style={{ fontWeight: 700, color: 'var(--accent-amber)', marginBottom: '0.25rem' }}>Requirement: {qg.requirement}</div>
+                      <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}><strong>Mitigation Strategy:</strong> {qg.mitigation}</div>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+
+          </div>
+
+          {/* Actionable Learning Roadmap Cards */}
           <div className="glass-panel" style={{ padding: '2rem' }}>
             <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <TrendingUp size={20} color="#34d399" />
-              <span>Skill Gap Breakdown Matrix</span>
+              <span>Personalized Actionable Learning Roadmap</span>
             </h3>
 
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.9rem' }}>
-                <thead>
-                  <tr style={{ borderBottom: '2px solid var(--border-card)', color: 'var(--text-secondary)' }}>
-                    <th style={{ padding: '0.75rem 1rem' }}>Required Competency</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Candidate Status</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Priority</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Actionable Learning Pathway</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {/* Matching / Strong */}
-                  {(matrix?.matchingSkills || []).map((s, idx) => (
-                    <tr key={`match-${idx}`} style={{ borderBottom: '1px solid var(--border-subtle)', background: 'rgba(16, 185, 129, 0.04)' }}>
-                      <td style={{ padding: '0.85rem 1rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                        {s.skill}
-                      </td>
-                      <td style={{ padding: '0.85rem 1rem' }}>
-                        <span className="badge badge-emerald">✓ Strong Match</span>
-                      </td>
-                      <td style={{ padding: '0.85rem 1rem' }}>
-                        <span className="badge badge-indigo">Low</span>
-                      </td>
-                      <td style={{ padding: '0.85rem 1rem', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
-                        Verified in profile. Prepare 1-2 practical project anecdotes during technical rounds.
-                      </td>
-                    </tr>
-                  ))}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.25rem' }}>
+              {roadmap.map((item, idx) => (
+                <div key={idx} style={{
+                  background: 'var(--bg-secondary)',
+                  borderRadius: 'var(--radius-md)',
+                  padding: '1.5rem',
+                  border: '1px solid var(--border-card)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between'
+                }}>
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                      <span className={`badge ${item.priority === 'High' ? 'badge-rose' : item.priority === 'Medium' ? 'badge-amber' : 'badge-indigo'}`}>
+                        {item.priority} Priority
+                      </span>
+                      <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>⏱ {item.timeEstimate}</span>
+                    </div>
 
-                  {/* Moderate */}
-                  {(matrix?.moderateSkills || []).map((s, idx) => (
-                    <tr key={`mod-${idx}`} style={{ borderBottom: '1px solid var(--border-subtle)', background: 'rgba(245, 158, 11, 0.04)' }}>
-                      <td style={{ padding: '0.85rem 1rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                        {s.skill}
-                      </td>
-                      <td style={{ padding: '0.85rem 1rem' }}>
-                        <span className="badge badge-amber">~ Familiar ({s.matchedWith})</span>
-                      </td>
-                      <td style={{ padding: '0.85rem 1rem' }}>
-                        <span className="badge badge-amber">Medium</span>
-                      </td>
-                      <td style={{ padding: '0.85rem 1rem', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
-                        Brush up on syntax nuances and standard API idioms before interviewing.
-                      </td>
-                    </tr>
-                  ))}
+                    <h4 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '0.5rem', color: 'var(--text-primary)' }}>
+                      {item.skill}
+                    </h4>
 
-                  {/* Missing */}
-                  {(matrix?.missingSkills || []).map((s, idx) => (
-                    <tr key={`miss-${idx}`} style={{ borderBottom: '1px solid var(--border-subtle)', background: 'rgba(244, 63, 94, 0.04)' }}>
-                      <td style={{ padding: '0.85rem 1rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                        {s.skill}
-                      </td>
-                      <td style={{ padding: '0.85rem 1rem' }}>
-                        <span className="badge badge-rose">✕ Missing</span>
-                      </td>
-                      <td style={{ padding: '0.85rem 1rem' }}>
-                        <span className="badge badge-rose">{s.priority} Priority</span>
-                      </td>
-                      <td style={{ padding: '0.85rem 1rem', color: '#fb7185', fontSize: '0.85rem' }}>
-                        {s.learningTrack}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                    <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '0.75rem' }}>
+                      <strong>Key Core Topics:</strong>
+                      <ul style={{ paddingLeft: '1.2rem', marginTop: '0.3rem' }}>
+                        {item.topics?.map((t, i) => (
+                          <li key={i} style={{ marginBottom: '0.2rem' }}>{t}</li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div style={{ background: 'rgba(99, 102, 241, 0.05)', padding: '0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(99, 102, 241, 0.15)', fontSize: '0.82rem' }}>
+                      <strong style={{ color: 'var(--accent-primary)' }}>🚀 Portfolio Project Idea:</strong>
+                      <p style={{ marginTop: '0.2rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>{item.projectIdea}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* Bottom Action Footer */}
+          {/* Action CTAs Footer */}
           <div className="glass-panel" style={{
-            padding: '1.75rem',
+            padding: '2rem',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
             flexWrap: 'wrap',
-            gap: '1rem',
-            background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(16, 185, 129, 0.1) 100%)'
+            gap: '1.25rem',
+            background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.12) 0%, rgba(16, 185, 129, 0.12) 100%)'
           }}>
             <div>
-              <div style={{ fontSize: '1.1rem', fontWeight: 700 }}>Ready to test your readiness for this position?</div>
-              <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                Practice 5 tailored technical & behavioral interview questions specifically configured for {internship?.title}.
+              <div style={{ fontSize: '1.2rem', fontWeight: 800 }}>Ready to close gaps and apply for {internship?.title}?</div>
+              <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
+                Use our specialized M3.2 Customization Agent or launch a 5-category mock interview now.
               </div>
             </div>
 
-            <button
-              onClick={() => {
-                setActiveTab('mock-interview');
-              }}
-              className="btn btn-primary"
-              style={{ gap: '0.5rem' }}
-            >
-              <Mic size={18} />
-              <span>Launch AI Mock Interview</span>
-            </button>
+            <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+              <button
+                onClick={() => {
+                  setActiveTab('customizer');
+                }}
+                className="btn btn-primary"
+                style={{ gap: '0.5rem' }}
+              >
+                <FileCheck size={18} />
+                <span>Tailor Application Materials</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  setActiveTab('mock-interview');
+                }}
+                className="btn btn-secondary"
+                style={{ gap: '0.5rem' }}
+              >
+                <Mic size={18} />
+                <span>Launch Mock Interview</span>
+              </button>
+            </div>
           </div>
 
         </div>

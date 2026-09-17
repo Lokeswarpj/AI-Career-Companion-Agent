@@ -3,12 +3,16 @@ import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
 import { Sparkles, Lock, Mail, User, ArrowRight, ShieldCheck, Eye, EyeOff } from 'lucide-react';
 
-export default function AuthPage({ onSuccess }) {
+export default function AuthPage({ onSuccess, authMode = 'login', setAuthMode }) {
   const { login, register } = useAuth();
   const notify = useNotification();
 
-  const [isRegister, setIsRegister] = useState(false);
+  const [isRegister, setIsRegister] = useState(authMode === 'register');
   const [email, setEmail] = useState('');
+
+  React.useEffect(() => {
+    setIsRegister(authMode === 'register');
+  }, [authMode]);
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [showPassword, setShowPassword] = useState(false);

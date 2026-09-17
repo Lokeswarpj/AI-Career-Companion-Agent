@@ -84,6 +84,21 @@ export async function getDatabase() {
         );
         CREATE INDEX IF NOT EXISTS idx_chunks_internship_id ON internship_chunks(internship_id);
         CREATE INDEX IF NOT EXISTS idx_chunks_type ON internship_chunks(chunk_type);
+
+        CREATE TABLE IF NOT EXISTS tailored_applications (
+          id TEXT PRIMARY KEY,
+          user_id TEXT NOT NULL,
+          internship_id TEXT,
+          role_title TEXT NOT NULL,
+          company TEXT NOT NULL,
+          tailored_resume_json TEXT,
+          cover_letter TEXT,
+          ats_score REAL DEFAULT 0,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+        );
+        CREATE INDEX IF NOT EXISTS idx_tailored_applications_user_id ON tailored_applications(user_id);
       `);
 
       // Add columns to internships if missing

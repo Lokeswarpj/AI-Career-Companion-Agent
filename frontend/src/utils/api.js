@@ -37,9 +37,6 @@ export async function apiRequest(endpoint, options = {}) {
 export const api = {
   // Auth
   register: (payload) => apiRequest('/auth/register', { method: 'POST', body: JSON.stringify(payload) }),
-  sendRegistrationOtp: (payload) => apiRequest('/auth/send-registration-otp', { method: 'POST', body: JSON.stringify(payload) }),
-  verifyOtpRegister: (payload) => apiRequest('/auth/verify-otp-register', { method: 'POST', body: JSON.stringify(payload) }),
-  resendOtp: (payload) => apiRequest('/auth/resend-otp', { method: 'POST', body: JSON.stringify(payload) }),
   login: (payload) => apiRequest('/auth/login', { method: 'POST', body: JSON.stringify(payload) }),
   demoLogin: () => apiRequest('/auth/demo-login', { method: 'POST' }),
   getMe: () => apiRequest('/auth/me'),
@@ -72,22 +69,29 @@ export const api = {
   getRecommendations: () => apiRequest('/matching/recommendations'),
   evaluateMatch: (internshipId) => apiRequest(`/matching/evaluate/${internshipId}`),
   evaluateProfile: (profile, limit = 20) => apiRequest('/matching/evaluate-profile', { method: 'POST', body: JSON.stringify({ profile, limit }) }),
-  getKaggleCandidates: (params = {}) => {
-    const query = new URLSearchParams(params).toString();
-    return apiRequest(`/matching/kaggle-candidates${query ? `?${query}` : ''}`);
-  },
-  getKaggleCandidate: (id) => apiRequest(`/matching/kaggle-candidates/${id}`),
-  evaluateKaggleCandidate: (id, limit = 10) => apiRequest(`/matching/kaggle-candidates/${id}/evaluate?limit=${limit}`),
-  runKaggleBenchmark: (sampleSize = 40) => apiRequest('/matching/kaggle-benchmark', { method: 'POST', body: JSON.stringify({ sampleSize }) }),
 
-  // Mock Interview
+  // M3.1 Skill Gap Analysis
+  analyzeSkillGap: (internshipId) => apiRequest(`/skill-gap/analyze/${internshipId}`),
+  customSkillGap: (payload) => apiRequest('/skill-gap/custom-analyze', { method: 'POST', body: JSON.stringify(payload) }),
+
+  // M3.2 Resume & Cover Letter Customization
+  tailorResume: (payload) => apiRequest('/customization/tailor-resume', { method: 'POST', body: JSON.stringify(payload) }),
+  generateCoverLetter: (payload) => apiRequest('/customization/cover-letter', { method: 'POST', body: JSON.stringify(payload) }),
+  saveApplication: (payload) => apiRequest('/customization/save-application', { method: 'POST', body: JSON.stringify(payload) }),
+  getSavedApplications: () => apiRequest('/customization/applications'),
+  deleteApplication: (id) => apiRequest(`/customization/applications/${id}`, { method: 'DELETE' }),
+
+  // M3.3 Mock Interview & Prep Guide
+  getPrepGuide: (internshipId) => apiRequest(`/interview/prep-guide/${internshipId}`),
   startInterview: (payload) => apiRequest('/interview/start', { method: 'POST', body: JSON.stringify(payload) }),
   submitAnswer: (payload) => apiRequest('/interview/submit-answer', { method: 'POST', body: JSON.stringify(payload) }),
   completeInterview: (sessionId) => apiRequest(`/interview/complete/${sessionId}`, { method: 'POST' }),
-  getInterviewSessions: () => apiRequest('/interview/sessions'),
-  getSessionTranscript: (sessionId) => apiRequest(`/interview/sessions/${sessionId}`),
+  getInterviewSessions: () => apiRequest('/interview/history'),
+  getInterviewHistory: () => apiRequest('/interview/history'),
+  getSessionDetail: (sessionId) => apiRequest(`/interview/session/${sessionId}`),
+  getSessionTranscript: (sessionId) => apiRequest(`/interview/session/${sessionId}`),
 
-  // Career Assistant
+  // M3.4 Career Assistant
   sendChatMessage: (message) => apiRequest('/assistant/chat', { method: 'POST', body: JSON.stringify({ message }) }),
   getChatHistory: () => apiRequest('/assistant/history'),
   clearChatHistory: () => apiRequest('/assistant/history', { method: 'DELETE' })

@@ -220,25 +220,28 @@ button, input, select, textarea {
   color: var(--text-secondary);
 }
 
-.form-input, .form-select, .form-textarea {
+.form-input, .form-select, .form-textarea, .form-control, textarea, input, select {
   width: 100%;
   padding: 0.75rem 1rem;
   background: var(--bg-secondary);
   border: 1px solid var(--border-card);
   border-radius: var(--radius-md);
-  color: var(--text-primary);
+  color: #f9fafb !important;
+  font-family: var(--font-sans);
   outline: none;
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
-.form-input:focus, .form-select:focus, .form-textarea:focus {
+.form-input:focus, .form-select:focus, .form-textarea:focus, .form-control:focus, textarea:focus, input:focus, select:focus {
   border-color: var(--accent-primary);
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+  color: #ffffff !important;
 }
 
-.form-textarea {
+.form-textarea, textarea {
   min-height: 100px;
   resize: vertical;
+  line-height: 1.7;
 }
 
 /* Badges & Tags */
@@ -344,6 +347,15 @@ button, input, select, textarea {
   50% { opacity: 1; transform: scale(1.05); }
 }
 
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 .animate-pulse-glow {
   animation: pulse-glow 3s infinite ease-in-out;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out;
 }

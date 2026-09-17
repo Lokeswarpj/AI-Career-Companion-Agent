@@ -142,6 +142,20 @@ CREATE TABLE IF NOT EXISTS chat_messages (
     FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS tailored_applications (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    internship_id TEXT,
+    role_title TEXT NOT NULL,
+    company TEXT NOT NULL,
+    tailored_resume_json TEXT,
+    cover_letter TEXT,
+    ats_score REAL DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
 -- Indexes for performance
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_profiles_user_id ON profiles(user_id);
@@ -152,3 +166,4 @@ CREATE INDEX IF NOT EXISTS idx_interview_exchanges_session ON interview_exchange
 CREATE INDEX IF NOT EXISTS idx_chat_messages_user_id ON chat_messages(user_id);
 CREATE INDEX IF NOT EXISTS idx_chunks_internship_id ON internship_chunks(internship_id);
 CREATE INDEX IF NOT EXISTS idx_chunks_type ON internship_chunks(chunk_type);
+CREATE INDEX IF NOT EXISTS idx_tailored_applications_user_id ON tailored_applications(user_id);

@@ -2,11 +2,11 @@ import express from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { db } from '../config/database.js';
 import { authenticateToken } from '../middleware/auth.js';
-import { generateCareerAssistantResponse } from '../services/geminiService.js';
+import { runCareerAssistantAgent } from '../services/careerAssistantAgent.js';
 
 const router = express.Router();
 
-// Chat with AI Career Companion
+// Chat with AI Career Companion (M3.4 Multi-Agent Orchestration)
 router.post('/chat', authenticateToken, async (req, res) => {
   try {
     const { message } = req.body;
@@ -28,15 +28,35 @@ router.post('/chat', authenticateToken, async (req, res) => {
       [req.user.id]
     );
 
-    const studentSkills = profile?.technical_skills ? JSON.parse(profile.technical_skills) : [];
-    const studentRoles = profile?.preferred_roles ? JSON.parse(profile.preferred_roles) : [];
+    let studentSkills = [];
+    if (profile && profile.technical_skills) {
+      try { studentSkills = JSON.parse(profile.technical_skills); } catch {}
+    }
+    if (latestResume && latestResume.detected_skills_json) {
+      try {
+        const resumeSkills = JSON.parse(latestResume.detected_skills_json);
+        const combined = [
+          ...(resumeSkills.programming || []),
+          ...(resumeSkills.web || []),
+          ...(resumeSkills.aiData || []),
+          ...(resumeSkills.cloud || []),
+          ...(resumeSkills.tools || [])
+        ];
+        studentSkills = Array.from(new Set([...studentSkills, ...combined]));
+      } catch {}
+    }
+
+    const studentRoles = profile?.preferred_roles ? (typeof profile.preferred_roles === 'string' ? JSON.parse(profile.preferred_roles) : profile.preferred_roles) : [];
 
     const studentContext = {
       name: user?.full_name || req.user.full_name || 'Student',
       degree: profile?.degree,
       university: profile?.university,
+      graduation_year: profile?.graduation_year || 2026,
       skills: studentSkills,
+      technical_skills: studentSkills,
       preferred_roles: studentRoles,
+      projects: profile?.projects_json ? (typeof profile.projects_json === 'string' ? JSON.parse(profile.projects_json) : profile.projects_json) : [],
       hasResume: !!latestResume,
       avgScore: avgScoreRow?.avgScore ? Math.round(avgScoreRow.avgScore) : null,
       savedInternships: savedJobs.map(j => `${j.title} at ${j.company}`)
@@ -55,8 +75,8 @@ router.post('/chat', authenticateToken, async (req, res) => {
       [userMsgId, req.user.id, 'user', message.trim()]
     );
 
-    // 4. Generate AI response
-    const replyText = await generateCareerAssistantResponse(message.trim(), studentContext, history);
+    // 4. Generate AI response with Multi-Agent Orchestrator
+    const replyText = await runCareerAssistantAgent(message.trim(), studentContext, history);
 
     // 5. Save assistant reply
     const botMsgId = uuidv4();

@@ -14,6 +14,8 @@ import internshipRoutes from './routes/internshipRoutes.js';
 import matchingRoutes from './routes/matchingRoutes.js';
 import interviewRoutes from './routes/interviewRoutes.js';
 import assistantRoutes from './routes/assistantRoutes.js';
+import skillGapRoutes from './routes/skillGapRoutes.js';
+import customizationRoutes from './routes/customizationRoutes.js';
 
 dotenv.config();
 
@@ -59,6 +61,8 @@ app.use('/api/profile', profileRoutes);
 app.use('/api/resume', resumeRoutes);
 app.use('/api/internships', internshipRoutes);
 app.use('/api/matching', matchingRoutes);
+app.use('/api/skill-gap', skillGapRoutes);
+app.use('/api/customization', customizationRoutes);
 app.use('/api/interview', interviewRoutes);
 app.use('/api/assistant', assistantRoutes);
 

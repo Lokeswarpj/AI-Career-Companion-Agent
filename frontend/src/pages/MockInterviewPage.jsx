@@ -14,11 +14,14 @@ import {
   Award, 
   TrendingUp, 
   HelpCircle, 
-  Send,
-  Sliders,
-  RotateCcw,
-  History,
-  FileCheck
+  Send, 
+  Sliders, 
+  RotateCcw, 
+  History, 
+  FileCheck,
+  BookOpen,
+  Clock,
+  Check
 } from 'lucide-react';
 
 export default function MockInterviewPage({ selectedInternshipId, setSelectedInternshipId, setActiveTab }) {
@@ -31,6 +34,11 @@ export default function MockInterviewPage({ selectedInternshipId, setSelectedInt
   const [difficulty, setDifficulty] = useState('Intermediate');
   const [interviewType, setInterviewType] = useState('Technical');
   const [loading, setLoading] = useState(false);
+
+  // Pre-Interview Revision Guide state
+  const [showPrepGuide, setShowPrepGuide] = useState(false);
+  const [prepGuideData, setPrepGuideData] = useState(null);
+  const [loadingPrepGuide, setLoadingPrepGuide] = useState(false);
 
   // Active Session state
   const [sessionId, setSessionId] = useState(null);
@@ -62,6 +70,20 @@ export default function MockInterviewPage({ selectedInternshipId, setSelectedInt
         setRoleTitle(res.internships[0].title);
       }
     } catch (err) {}
+  }
+
+  async function loadPrepGuide(id) {
+    if (!id) return;
+    try {
+      setLoadingPrepGuide(true);
+      const res = await api.getPrepGuide(id);
+      setPrepGuideData(res);
+      setShowPrepGuide(true);
+    } catch (err) {
+      notify.error('Failed to load pre-interview prep guide.');
+    } finally {
+      setLoadingPrepGuide(false);
+    }
   }
 
   function setupSpeechRecognition() {
@@ -128,8 +150,9 @@ export default function MockInterviewPage({ selectedInternshipId, setSelectedInt
       setUserAnswer('');
       setCurrentEvaluation(null);
       setIsFinalQuestion(res.totalQuestions <= 1);
+      setShowPrepGuide(false);
       setStage('question');
-      notify.success('Mock interview initialized with 5 tailored questions!');
+      notify.success('Mock interview initialized with 5 categorized questions!');
     } catch (err) {
       notify.error(err.message || 'Failed to start interview.');
     } finally {
@@ -159,11 +182,10 @@ export default function MockInterviewPage({ selectedInternshipId, setSelectedInt
       setCurrentEvaluation(res.evaluation);
       setIsFinalQuestion(res.isFinished);
       if (res.nextQuestion) {
-        // Store for next step
         setCurrentQuestion(res.nextQuestion);
       }
       setStage('evaluated');
-      notify.success('Answer evaluated by Gemini AI!');
+      notify.success('Answer evaluated with 3-dimensional scoring!');
     } catch (err) {
       notify.error(err.message || 'Failed to evaluate answer.');
     } finally {
@@ -213,123 +235,170 @@ export default function MockInterviewPage({ selectedInternshipId, setSelectedInt
   };
 
   return (
-    <div className="container" style={{ padding: '2.5rem 1.5rem', maxWidth: '950px' }}>
+    <div className="container" style={{ padding: '2.5rem 1.5rem', maxWidth: '1000px' }}>
       
       {/* -------------------------------------------------------------
-          STAGE 1: CONFIGURATION SCREEN
+          STAGE 1: CONFIGURATION SCREEN & REVISION TOPICS
          ------------------------------------------------------------- */}
       {stage === 'config' && (
         <div>
           <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
             <div style={{ display: 'inline-flex', marginBottom: '0.75rem' }}>
-              <span className="badge badge-indigo">Interactive Gemini AI Simulator</span>
+              <span className="badge badge-indigo">M3.3 Interview Preparation Agent</span>
             </div>
             <h1 style={{ fontSize: '2.4rem', fontWeight: 800 }}>AI Technical Mock Interview</h1>
-            <p style={{ color: 'var(--text-secondary)', maxWidth: '600px', margin: '0.5rem auto 0 auto', fontSize: '0.95rem' }}>
-              Simulate high-stakes technical, behavioral, and architectural rounds with real-time scoring and constructive coaching.
+            <p style={{ color: 'var(--text-secondary)', maxWidth: '650px', margin: '0.5rem auto 0 auto', fontSize: '0.95rem' }}>
+              Role-specific 5-category interview simulator (Technical, Resume-based, Project-based, Scenario, and Behavioral) with real-time 3D grading.
             </p>
           </div>
 
-          <div className="glass-panel" style={{ padding: '2.5rem', maxWidth: '650px', margin: '0 auto' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: showPrepGuide ? '1fr 1fr' : '1fr', gap: '2rem', maxWidth: showPrepGuide ? '1000px' : '650px', margin: '0 auto' }}>
             
-            {/* Internship Selection */}
-            <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-              <label className="form-label">Select Target Internship (or Custom Role)</label>
-              <select
-                className="form-select"
-                value={selectedInternshipId || ''}
-                onChange={(e) => {
-                  setSelectedInternshipId(e.target.value);
-                  const found = internshipsList.find(i => i.id === e.target.value);
-                  if (found) setRoleTitle(found.title);
-                }}
-              >
-                {internshipsList.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.title} — {item.company}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Custom Role Title */}
-            <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-              <label className="form-label">Interview Role Title</label>
-              <input
-                type="text"
-                className="form-input"
-                value={roleTitle}
-                onChange={(e) => setRoleTitle(e.target.value)}
-                placeholder="e.g. AI & Machine Learning Engineering Intern"
-              />
-            </div>
-
-            {/* Difficulty Setting */}
-            <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-              <label className="form-label">Difficulty Level</label>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                {['Beginner', 'Intermediate', 'Advanced'].map((lvl) => (
-                  <button
-                    key={lvl}
-                    type="button"
-                    onClick={() => setDifficulty(lvl)}
-                    style={{
-                      flex: 1,
-                      padding: '0.65rem',
-                      borderRadius: 'var(--radius-md)',
-                      border: '1px solid var(--border-card)',
-                      background: difficulty === lvl ? 'var(--accent-primary)' : 'var(--bg-secondary)',
-                      color: difficulty === lvl ? '#ffffff' : 'var(--text-secondary)',
-                      fontWeight: 600,
-                      fontSize: '0.85rem',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s'
-                    }}
-                  >
-                    {lvl}
-                  </button>
-                ))}
+            {/* Configuration Form Box */}
+            <div className="glass-panel" style={{ padding: '2.5rem' }}>
+              
+              {/* Internship Selection */}
+              <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                <label className="form-label">Select Target Internship</label>
+                <select
+                  className="form-select"
+                  value={selectedInternshipId || ''}
+                  onChange={(e) => {
+                    setSelectedInternshipId(e.target.value);
+                    const found = internshipsList.find(i => i.id === e.target.value);
+                    if (found) setRoleTitle(found.title);
+                  }}
+                >
+                  {internshipsList.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.title} — {item.company}
+                    </option>
+                  ))}
+                </select>
               </div>
-            </div>
 
-            {/* Interview Type Setting */}
-            <div className="form-group" style={{ marginBottom: '2rem' }}>
-              <label className="form-label">Interview Category</label>
-              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                {['Technical', 'Behavioral', 'System Design', 'HR', 'Mixed'].map((t) => (
-                  <button
-                    key={t}
-                    type="button"
-                    onClick={() => setInterviewType(t)}
-                    style={{
-                      flex: '1 1 100px',
-                      padding: '0.65rem',
-                      borderRadius: 'var(--radius-md)',
-                      border: '1px solid var(--border-card)',
-                      background: interviewType === t ? 'var(--accent-cyan)' : 'var(--bg-secondary)',
-                      color: interviewType === t ? '#000000' : 'var(--text-secondary)',
-                      fontWeight: 700,
-                      fontSize: '0.85rem',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s'
-                    }}
-                  >
-                    {t}
-                  </button>
-                ))}
+              {/* Custom Role Title */}
+              <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                <label className="form-label">Interview Role Title</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  value={roleTitle}
+                  onChange={(e) => setRoleTitle(e.target.value)}
+                  placeholder="e.g. AI & Machine Learning Engineering Intern"
+                />
               </div>
+
+              {/* Difficulty Setting */}
+              <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                <label className="form-label">Difficulty Level</label>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  {['Beginner', 'Intermediate', 'Advanced'].map((lvl) => (
+                    <button
+                      key={lvl}
+                      type="button"
+                      onClick={() => setDifficulty(lvl)}
+                      style={{
+                        flex: 1,
+                        padding: '0.65rem',
+                        borderRadius: 'var(--radius-md)',
+                        border: '1px solid var(--border-card)',
+                        background: difficulty === lvl ? 'var(--accent-primary)' : 'var(--bg-secondary)',
+                        color: difficulty === lvl ? '#ffffff' : 'var(--text-secondary)',
+                        fontWeight: 600,
+                        fontSize: '0.85rem',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s'
+                      }}
+                    >
+                      {lvl}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Question Format Notice */}
+              <div style={{ background: 'rgba(99, 102, 241, 0.05)', padding: '0.85rem', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(99, 102, 241, 0.2)', marginBottom: '1.5rem', fontSize: '0.82rem' }}>
+                <strong style={{ color: 'var(--accent-primary)' }}>5 Categorized Question Types:</strong>
+                <div style={{ color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
+                  1. Technical • 2. Resume-Based • 3. Project-Based • 4. Role Scenario • 5. HR/Behavioral
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                <button
+                  onClick={() => loadPrepGuide(selectedInternshipId)}
+                  disabled={loadingPrepGuide}
+                  type="button"
+                  className="btn btn-secondary"
+                  style={{ gap: '0.4rem', justifyContent: 'center' }}
+                >
+                  <BookOpen size={16} />
+                  <span>{loadingPrepGuide ? 'Loading Guide...' : showPrepGuide ? 'Refresh Revision Topics' : 'View Pre-Interview Revision Guide'}</span>
+                </button>
+
+                <button
+                  onClick={handleStartInterview}
+                  disabled={loading}
+                  className="btn btn-primary btn-lg"
+                  style={{ width: '100%', gap: '0.5rem', justifyContent: 'center' }}
+                >
+                  <Mic size={20} />
+                  <span>{loading ? 'Generating Categorized Questions...' : 'Start 5-Question Mock Interview'}</span>
+                </button>
+              </div>
+
             </div>
 
-            {/* Start Button */}
-            <button
-              onClick={handleStartInterview}
-              disabled={loading}
-              className="btn btn-primary btn-lg"
-              style={{ width: '100%', gap: '0.5rem' }}
-            >
-              <Mic size={20} />
-              <span>{loading ? 'Generating Dynamic Questions...' : 'Start 5-Question Mock Interview'}</span>
-            </button>
+            {/* Pre-Interview Revision Guide Drawer */}
+            {showPrepGuide && prepGuideData && (
+              <div className="glass-panel" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.25rem', overflowY: 'auto', maxHeight: '560px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <h3 style={{ fontSize: '1.15rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <BookOpen size={18} color="var(--accent-primary)" />
+                    <span>Revision Topics Checklist</span>
+                  </h3>
+                  <button
+                    onClick={() => setShowPrepGuide(false)}
+                    style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '0.85rem' }}
+                  >
+                    ✕ Close
+                  </button>
+                </div>
+
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                  Prioritized checklist based on identified skill gaps for <strong>{prepGuideData.company}</strong>.
+                </div>
+
+                {/* Technical Revision Topics */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  {prepGuideData.technicalRevisionTopics?.map((topic, i) => (
+                    <div key={i} style={{ background: 'var(--bg-secondary)', padding: '0.85rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-card)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.3rem' }}>
+                        <span style={{ fontWeight: 700, fontSize: '0.88rem' }}>{topic.topic}</span>
+                        <span className={`badge ${topic.priority === 'Urgent' ? 'badge-rose' : 'badge-indigo'}`} style={{ fontSize: '0.7rem' }}>
+                          {topic.estimatedHours}
+                        </span>
+                      </div>
+                      <ul style={{ paddingLeft: '1.1rem', margin: 0, fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                        {topic.keyConceptsToRevise?.map((concept, cIdx) => (
+                          <li key={cIdx}>{concept}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Behavioral Strategies */}
+                <div style={{ background: 'rgba(16, 185, 129, 0.05)', padding: '0.85rem', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(16, 185, 129, 0.2)', fontSize: '0.82rem' }}>
+                  <strong style={{ color: '#10b981' }}>🎯 Behavioral STAR Strategy:</strong>
+                  <p style={{ marginTop: '0.2rem', color: 'var(--text-secondary)' }}>
+                    {prepGuideData.behavioralStrategies?.[0]?.tip || 'Structure your stories: Situation (20%), Task (10%), Action (50%), Result (20%).'}
+                  </p>
+                </div>
+              </div>
+            )}
 
           </div>
         </div>
@@ -341,13 +410,13 @@ export default function MockInterviewPage({ selectedInternshipId, setSelectedInt
       {stage === 'question' && currentQuestion && (
         <div>
           {/* Header Progress */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-            <div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <span className="badge badge-indigo">
                 Question {currentQuestion.questionNumber || 1} of 5
               </span>
-              <span className="badge badge-cyan" style={{ marginLeft: '0.5rem' }}>
-                {currentQuestion.category || interviewType}
+              <span className="badge badge-cyan">
+                Category: {currentQuestion.category || interviewType}
               </span>
             </div>
             <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
@@ -360,6 +429,13 @@ export default function MockInterviewPage({ selectedInternshipId, setSelectedInt
             <h2 style={{ fontSize: '1.35rem', fontWeight: 700, lineHeight: 1.5, marginBottom: '1rem' }}>
               "{currentQuestion.questionText}"
             </h2>
+
+            {currentQuestion.commonPitfallsToAvoid && (
+              <div style={{ fontSize: '0.84rem', color: 'var(--accent-amber)', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                <AlertCircle size={14} />
+                <span><strong>Pitfall to Avoid:</strong> {currentQuestion.commonPitfallsToAvoid}</span>
+              </div>
+            )}
 
             {currentQuestion.hint && (
               <div>
@@ -425,7 +501,7 @@ export default function MockInterviewPage({ selectedInternshipId, setSelectedInt
             <textarea
               className="form-textarea"
               rows={6}
-              placeholder="Structure your answer with clear concepts, practical architecture examples, or the STAR framework..."
+              placeholder="Structure your answer with clear technical concepts, practical examples, or the STAR framework..."
               value={userAnswer}
               onChange={(e) => setUserAnswer(e.target.value)}
               style={{ fontSize: '0.95rem', lineHeight: 1.6 }}
@@ -439,7 +515,7 @@ export default function MockInterviewPage({ selectedInternshipId, setSelectedInt
                 style={{ gap: '0.5rem' }}
               >
                 <Send size={18} />
-                <span>{loading ? 'Gemini AI is Evaluating...' : 'Submit Answer for AI Grading'}</span>
+                <span>{loading ? 'Evaluating 3D Scoring...' : 'Submit Answer for AI Grading'}</span>
               </button>
             </div>
           </div>
@@ -463,8 +539,8 @@ export default function MockInterviewPage({ selectedInternshipId, setSelectedInt
                 </h2>
               </div>
 
-              {/* Dimension scores */}
-              <div style={{ display: 'flex', gap: '1rem' }}>
+              {/* 3D Dimension scores */}
+              <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
                 <div style={{ textAlign: 'center', padding: '0.5rem 0.85rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)' }}>
                   <div style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--accent-primary)' }}>
                     {currentEvaluation.score}/100
@@ -476,14 +552,21 @@ export default function MockInterviewPage({ selectedInternshipId, setSelectedInt
                   <div style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--accent-cyan)' }}>
                     {currentEvaluation.technicalScore}%
                   </div>
-                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Technical</div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Technical Depth</div>
                 </div>
 
                 <div style={{ textAlign: 'center', padding: '0.5rem 0.85rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)' }}>
                   <div style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--accent-emerald)' }}>
                     {currentEvaluation.communicationScore}%
                   </div>
-                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Clarity</div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Communication</div>
+                </div>
+
+                <div style={{ textAlign: 'center', padding: '0.5rem 0.85rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)' }}>
+                  <div style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--accent-amber)' }}>
+                    {currentEvaluation.relevanceScore || 85}%
+                  </div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Relevance</div>
                 </div>
               </div>
             </div>
@@ -504,7 +587,7 @@ export default function MockInterviewPage({ selectedInternshipId, setSelectedInt
                 <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#34d399', marginBottom: '0.5rem' }}>
                   ✓ Concepts You Articulated Well:
                 </div>
-                <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.4rem', fontSize: '0.85rem' }}>
+                <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.4rem', fontSize: '0.85rem', padding: 0 }}>
                   {(currentEvaluation.keyPointsMentioned || []).map((kp, idx) => (
                     <li key={idx}>• {kp}</li>
                   ))}
@@ -515,7 +598,7 @@ export default function MockInterviewPage({ selectedInternshipId, setSelectedInt
                 <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#fb7185', marginBottom: '0.5rem' }}>
                   ✕ Missed Concepts to Include Next Time:
                 </div>
-                <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.4rem', fontSize: '0.85rem' }}>
+                <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.4rem', fontSize: '0.85rem', padding: 0 }}>
                   {(currentEvaluation.missedPoints || []).map((mp, idx) => (
                     <li key={idx}>• {mp}</li>
                   ))}
@@ -585,7 +668,7 @@ export default function MockInterviewPage({ selectedInternshipId, setSelectedInt
               Mock Interview Complete!
             </h1>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
-              Performance summary for <strong>{finalScorecard.roleTitle}</strong> ({finalScorecard.difficulty} • {finalScorecard.interviewType})
+              Performance summary for <strong>{finalScorecard.roleTitle}</strong>
             </p>
 
             {/* Score Grid */}
@@ -628,7 +711,7 @@ export default function MockInterviewPage({ selectedInternshipId, setSelectedInt
                 <CheckCircle2 size={20} />
                 <span>Observed Key Strengths</span>
               </h3>
-              <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', listStyle: 'none', fontSize: '0.9rem' }}>
+              <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', listStyle: 'none', fontSize: '0.9rem', padding: 0 }}>
                 {(finalScorecard.strengths || []).map((s, idx) => (
                   <li key={idx}>• {s}</li>
                 ))}
@@ -640,44 +723,13 @@ export default function MockInterviewPage({ selectedInternshipId, setSelectedInt
                 <TrendingUp size={20} />
                 <span>Targeted Action Recommendations</span>
               </h3>
-              <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', listStyle: 'none', fontSize: '0.9rem' }}>
+              <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', listStyle: 'none', fontSize: '0.9rem', padding: 0 }}>
                 {(finalScorecard.recommendations || []).map((r, idx) => (
                   <li key={idx}>• {r}</li>
                 ))}
               </ul>
             </div>
 
-          </div>
-
-          {/* Full Question/Answer Transcript Review */}
-          <div className="glass-panel" style={{ padding: '2rem' }}>
-            <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <FileCheck size={20} color="#818cf8" />
-              <span>Full Session Transcript ({finalScorecard.exchanges?.length || 0} Questions)</span>
-            </h3>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-              {(finalScorecard.exchanges || []).map((ex) => (
-                <div key={ex.id} style={{ padding: '1.25rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-card)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                    <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--accent-primary)' }}>
-                      Q{ex.question_number}: {ex.question_text}
-                    </span>
-                    <span className="badge badge-emerald" style={{ fontSize: '0.75rem' }}>
-                      {ex.score}/100
-                    </span>
-                  </div>
-
-                  <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', marginBottom: '0.5rem', fontStyle: 'italic' }}>
-                    Your Answer: "{ex.user_answer}"
-                  </div>
-
-                  <div style={{ fontSize: '0.85rem', color: '#34d399' }}>
-                    Feedback: {ex.feedback}
-                  </div>
-                </div>
-              ))}
-            </div>
           </div>
 
           {/* Bottom Navigation CTAs */}
@@ -700,7 +752,7 @@ export default function MockInterviewPage({ selectedInternshipId, setSelectedInt
               style={{ gap: '0.5rem' }}
             >
               <History size={18} />
-              <span>View Overall Performance History</span>
+              <span>View Performance History</span>
             </button>
           </div>
 

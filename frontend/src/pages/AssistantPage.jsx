@@ -9,9 +9,15 @@ import {
   Trash2, 
   User, 
   Bot, 
-  RefreshCw,
-  HelpCircle,
-  Lightbulb
+  RefreshCw, 
+  HelpCircle, 
+  Lightbulb,
+  Compass,
+  GitPullRequest,
+  CheckCircle,
+  FileText,
+  Mic,
+  TrendingUp
 } from 'lucide-react';
 
 export default function AssistantPage() {
@@ -23,11 +29,12 @@ export default function AssistantPage() {
   const [loadingHistory, setLoadingHistory] = useState(true);
   const messagesEndRef = useRef(null);
 
-  const promptSuggestions = [
-    "How do I crack an Infosys Springboard technical interview?",
-    "What core projects should I build for a Full-Stack developer role?",
-    "How can I optimize my resume bullet points for high ATS match?",
-    "What is the difference between Docker and Kubernetes in simple terms?"
+  const multiAgentSuggestions = [
+    { label: "🎯 Recommend top internships for my profile", query: "Recommend suitable internships based on my profile skills and explain why they match." },
+    { label: "📊 What are my biggest skill gaps?", query: "What are my critical skill gaps for top roles and how should I close them?" },
+    { label: "⚖️ Compare my top internship opportunities", query: "Compare the top matching internships for me side-by-side with decision trade-offs." },
+    { label: "📅 5-Day Interview Prep Blueprint", query: "Generate a 5-day technical and behavioral interview preparation blueprint for my target roles." },
+    { label: "✍️ Tips to optimize resume STAR bullets", query: "How should I structure my project bullet points using the STAR framework to maximize ATS score?" }
   ];
 
   useEffect(() => {
@@ -49,12 +56,11 @@ export default function AssistantPage() {
       if (res.history && res.history.length > 0) {
         setMessages(res.history);
       } else {
-        // Initial welcoming message
         setMessages([
           {
             id: 'welcome-1',
             role: 'assistant',
-            content: `Hello ${user?.full_name?.split(' ')[0] || 'there'}! 👋 I am your **CareerPulse AI Companion**.\n\nI have your student profile, detected skills, and target internships in memory. Ask me anything about resume improvements, missing skill roadmaps, or interview preparation strategies!`
+            content: `Hello ${user?.full_name?.split(' ')[0] || 'there'}! 👋 I am your **CareerPulse AI Companion**.\n\nI am connected to our **Multi-Agent Engine** (Job Matching, Skill Gap Diagnosis, Application Customizer, and Interview Coach).\n\nAsk me anything about finding internships, explaining matches, comparing offers, closing skill gaps, or preparing for interviews!`
           }
         ]);
       }
@@ -101,7 +107,7 @@ export default function AssistantPage() {
         {
           id: Date.now().toString(),
           role: 'assistant',
-          content: 'Chat history cleared. How can I assist you with your career goals today?'
+          content: 'Chat history cleared. How can I assist your career progression today?'
         }
       ]);
       notify.success('Conversation history reset.');
@@ -111,17 +117,17 @@ export default function AssistantPage() {
   };
 
   return (
-    <div className="container" style={{ padding: '2.5rem 1.5rem', maxWidth: '950px' }}>
+    <div className="container" style={{ padding: '2.5rem 1.5rem', maxWidth: '1000px' }}>
       
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <h1 style={{ fontSize: '2rem', fontWeight: 800 }}>AI Career Companion</h1>
-            <span className="badge badge-emerald">Gemini Active</span>
+            <span className="badge badge-indigo">M3.4 Conversational Career Assistant</span>
           </div>
+          <h1 style={{ fontSize: '2rem', fontWeight: 800 }}>AI Career Companion</h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.92rem' }}>
-            Context-aware mentor with real-time knowledge of your profile skills, target internships, and mock scores.
+            Multi-agent guidance orchestrator with real-time knowledge of your profile, live internships, and interview results.
           </p>
         </div>
 
@@ -140,7 +146,7 @@ export default function AssistantPage() {
       <div 
         className="glass-panel"
         style={{
-          height: '620px',
+          height: '640px',
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden'
@@ -149,103 +155,82 @@ export default function AssistantPage() {
         {/* Messages Scroll Area */}
         <div style={{
           flex: 1,
-          padding: '1.5rem',
+          padding: '1.75rem',
           overflowY: 'auto',
           display: 'flex',
           flexDirection: 'column',
           gap: '1.25rem'
         }}>
-          {messages.map((msg, index) => {
-            const isUser = msg.role === 'user';
-            return (
-              <div
-                key={msg.id || index}
-                style={{
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: '0.75rem',
-                  alignSelf: isUser ? 'flex-end' : 'flex-start',
-                  maxWidth: '85%'
-                }}
-              >
-                {!isUser && (
-                  <div style={{
-                    width: '32px',
-                    height: '32px',
-                    borderRadius: '8px',
-                    background: 'linear-gradient(135deg, var(--accent-primary), var(--accent-cyan))',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0,
-                    color: '#ffffff'
-                  }}>
-                    <Sparkles size={16} />
-                  </div>
-                )}
-
-                <div
-                  style={{
-                    padding: '1rem 1.25rem',
-                    borderRadius: 'var(--radius-md)',
-                    background: isUser ? 'var(--accent-primary)' : 'var(--bg-secondary)',
-                    color: isUser ? '#ffffff' : 'var(--text-primary)',
-                    border: isUser ? 'none' : '1px solid var(--border-card)',
-                    fontSize: '0.92rem',
-                    lineHeight: 1.6,
-                    whiteSpace: 'pre-wrap',
-                    boxShadow: isUser ? '0 4px 12px rgba(99, 102, 241, 0.3)' : 'none'
-                  }}
-                >
-                  {msg.content}
-                </div>
-
-                {isUser && (
-                  <div style={{
-                    width: '32px',
-                    height: '32px',
-                    borderRadius: '8px',
-                    background: 'var(--bg-tertiary)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0,
-                    fontSize: '0.8rem',
-                    fontWeight: 700
-                  }}>
-                    {user?.full_name?.charAt(0) || 'U'}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-
-          {sending && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', alignSelf: 'flex-start' }}>
+          {messages.map((msg, idx) => (
+            <div
+              key={msg.id || idx}
+              style={{
+                display: 'flex',
+                gap: '1rem',
+                alignItems: 'flex-start',
+                flexDirection: msg.role === 'user' ? 'row-reverse' : 'row'
+              }}
+            >
+              {/* Avatar Icon */}
               <div style={{
-                width: '32px',
-                height: '32px',
-                borderRadius: '8px',
-                background: 'var(--accent-primary)',
+                width: '2.2rem',
+                height: '2.2rem',
+                borderRadius: '50%',
+                background: msg.role === 'user' ? 'var(--accent-primary)' : 'linear-gradient(135deg, #6366f1, #10b981)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: '#ffffff'
+                color: '#ffffff',
+                flexShrink: 0
               }}>
-                <Sparkles size={16} />
+                {msg.role === 'user' ? <User size={16} /> : <Bot size={16} />}
+              </div>
+
+              {/* Message Content Bubble */}
+              <div style={{
+                maxWidth: '82%',
+                padding: '1.1rem 1.4rem',
+                borderRadius: 'var(--radius-md)',
+                background: msg.role === 'user' ? 'var(--accent-primary)' : 'var(--bg-secondary)',
+                color: msg.role === 'user' ? '#ffffff' : 'var(--text-primary)',
+                fontSize: '0.92rem',
+                lineHeight: 1.65,
+                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                border: msg.role === 'user' ? 'none' : '1px solid var(--border-card)',
+                whiteSpace: 'pre-wrap'
+              }}>
+                {msg.content}
+              </div>
+            </div>
+          ))}
+
+          {sending && (
+            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+              <div style={{
+                width: '2.2rem',
+                height: '2.2rem',
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #6366f1, #10b981)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#ffffff',
+                flexShrink: 0
+              }}>
+                <Bot size={16} />
               </div>
               <div style={{
-                padding: '0.75rem 1rem',
+                padding: '0.75rem 1.25rem',
                 background: 'var(--bg-secondary)',
                 borderRadius: 'var(--radius-md)',
-                fontSize: '0.85rem',
+                fontSize: '0.88rem',
                 color: 'var(--text-secondary)',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.5rem'
               }}>
-                <RefreshCw size={14} style={{ animation: 'spin 1s linear infinite' }} />
-                <span>CareerPulse AI is thinking...</span>
+                <RefreshCw size={14} className="spin-slow" />
+                <span>Multi-Agent Engine is synthesizing personalized career advice...</span>
               </div>
             </div>
           )}
@@ -253,36 +238,40 @@ export default function AssistantPage() {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Suggestion Prompt Chips */}
+        {/* Quick Suggestion Chips */}
         <div style={{
-          padding: '0.75rem 1.25rem',
+          padding: '0.75rem 1.5rem',
+          background: 'rgba(99, 102, 241, 0.03)',
           borderTop: '1px solid var(--border-subtle)',
           display: 'flex',
           gap: '0.5rem',
           overflowX: 'auto',
-          background: 'rgba(0,0,0,0.1)'
+          whiteSpace: 'nowrap'
         }}>
-          {promptSuggestions.map((prompt, idx) => (
+          {multiAgentSuggestions.map((item, idx) => (
             <button
               key={idx}
-              type="button"
-              onClick={() => handleSendMessage(prompt)}
+              disabled={sending}
+              onClick={() => handleSendMessage(item.query)}
               className="btn btn-outline btn-sm"
               style={{
-                fontSize: '0.75rem',
-                whiteSpace: 'nowrap',
+                fontSize: '0.78rem',
                 padding: '0.35rem 0.75rem',
-                gap: '0.35rem'
+                borderRadius: '9999px',
+                borderColor: 'var(--border-card)'
               }}
             >
-              <Lightbulb size={12} color="#f59e0b" />
-              <span>{prompt}</span>
+              {item.label}
             </button>
           ))}
         </div>
 
-        {/* Chat Input Bar */}
-        <div style={{ padding: '1rem 1.25rem', borderTop: '1px solid var(--border-card)', background: 'var(--bg-secondary)' }}>
+        {/* Message Input Box */}
+        <div style={{
+          padding: '1.25rem 1.5rem',
+          background: 'var(--bg-secondary)',
+          borderTop: '1px solid var(--border-card)'
+        }}>
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -293,24 +282,23 @@ export default function AssistantPage() {
             <input
               type="text"
               className="form-input"
-              placeholder="Ask about resume tips, interview prep, skill gaps, or role requirements..."
+              placeholder="Ask about internships, skill gaps, resume bullet enhancements, or interview tips..."
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               disabled={sending}
-              style={{ padding: '0.75rem 1rem' }}
+              style={{ flex: 1 }}
             />
             <button
               type="submit"
               disabled={sending || !inputText.trim()}
               className="btn btn-primary"
-              style={{ padding: '0.75rem 1.25rem', gap: '0.4rem' }}
+              style={{ gap: '0.4rem', padding: '0.65rem 1.4rem' }}
             >
-              <Send size={18} />
+              <Send size={16} />
               <span>Send</span>
             </button>
           </form>
         </div>
-
       </div>
 
     </div>
