@@ -1,0 +1,7 @@
+"Date","Sprint","What did I do yesterday?","What will I do today?","Are there any blockers?"
+"Day 1 (Sprint 1)","Sprint 1","Initialized Vite frontend and Express backend architecture.","Implemented JWT auth and SQLite user profile schemas.","None"
+"Day 3 (Sprint 1)","Sprint 1","Integrated Gemini API for resume parsing and SWOT analysis.","Built deterministic fallback engine for offline reliability.","Handled rate limit handling with fallback heuristics."
+"Day 6 (Sprint 2)","Sprint 2","Curated 180 standardized tech internship postings.","Implemented 4-way semantic chunking and 256-dim vector store.","None"
+"Day 9 (Sprint 2)","Sprint 2","Developed multi-factor matching formula (Skills, Role, Location).","Ran benchmark test suite across 6 multi-domain student profiles.","None"
+"Day 12 (Sprint 3)","Sprint 3","Built 5-category Skill Gap Agent and learning roadmaps.","Developed Resume & Cover Letter Customizer with anti-hallucination check.","None"
+"Day 15 (Sprint 3)","Sprint 3","Built Mock Interview Coach with 3D scoring and Web Speech API.","Implemented Conversational Career Assistant orchestrator and 3D UI.","None"

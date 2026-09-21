@@ -1,0 +1,4 @@
+"Sprint","What Went Well?","What Could Be Improved?","Action Items / Decisions"
+"Sprint 1 (M1)","Clean decoupled architecture; resilient fallback engine prevents Gemini API quota bottlenecks.","File parsing for complex multi-column PDFs needed better normalization.","Added regex-based entity cleaning before LLM prompting."
+"Sprint 2 (M2)","RAG vector search achieved 100% Top-1 accuracy and 1.000 MRR on benchmark tests.","Dense vector serialization in SQLite required optimized JSON parsing.","Cached 720 embedding chunks in memory on backend startup."
+"Sprint 3 (M3)","All 4 multi-agent features delivered with 100% automated test pass rate (31/31 assertions).","UI navigation needed intuitive collapse/expand controls on the left.","Implemented collapsible Left Sidebar with aligned bottom user widget and 3D background."

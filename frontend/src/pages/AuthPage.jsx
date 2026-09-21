@@ -79,12 +79,12 @@ export default function AuthPage({ onSuccess, authMode = 'login', setAuthMode })
             <Sparkles size={24} color="#ffffff" />
           </div>
           <h2 style={{ fontSize: '1.75rem', fontWeight: 800 }}>
-            {isRegister ? 'Create Account' : 'Welcome Back'}
+            {isRegister ? 'Sign Up' : 'Welcome Back'}
           </h2>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: '0.25rem' }}>
             {isRegister 
-              ? 'Join with your email to discover personalized internships and AI mock prep'
-              : 'Sign in to access your career companion and mock sessions'}
+              ? 'Sign up with your email to discover personalized internships and AI mock prep'
+              : 'Log in to access your career companion and mock sessions'}
           </p>
         </div>
 
@@ -99,7 +99,10 @@ export default function AuthPage({ onSuccess, authMode = 'login', setAuthMode })
         }}>
           <button
             type="button"
-            onClick={() => setIsRegister(false)}
+            onClick={() => {
+              setIsRegister(false);
+              if (setAuthMode) setAuthMode('login');
+            }}
             style={{
               flex: 1,
               padding: '0.55rem',
@@ -113,11 +116,14 @@ export default function AuthPage({ onSuccess, authMode = 'login', setAuthMode })
               transition: 'all 0.2s'
             }}
           >
-            Sign In
+            Log In
           </button>
           <button
             type="button"
-            onClick={() => setIsRegister(true)}
+            onClick={() => {
+              setIsRegister(true);
+              if (setAuthMode) setAuthMode('register');
+            }}
             style={{
               flex: 1,
               padding: '0.55rem',
@@ -131,7 +137,7 @@ export default function AuthPage({ onSuccess, authMode = 'login', setAuthMode })
               transition: 'all 0.2s'
             }}
           >
-            Register
+            Sign Up
           </button>
         </div>
 
@@ -217,7 +223,7 @@ export default function AuthPage({ onSuccess, authMode = 'login', setAuthMode })
             className="btn btn-primary"
             style={{ width: '100%', marginTop: '1.25rem', padding: '0.8rem', gap: '0.5rem' }}
           >
-            <span>{loading ? 'Authenticating...' : isRegister ? 'Create Account' : 'Sign In to Dashboard'}</span>
+            <span>{loading ? 'Authenticating...' : isRegister ? 'Sign Up & Create Account' : 'Log In to Dashboard'}</span>
             <ArrowRight size={18} />
           </button>
         </form>

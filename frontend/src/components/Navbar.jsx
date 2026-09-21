@@ -136,7 +136,7 @@ export default function Navbar({ activeTab, setActiveTab, isSidebarCollapsed, se
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           {isLanding ? (
             <>
-              {/* Sign In Button (Left of Log In) */}
+              {/* Sign Up Button (Left of Log In) */}
               <button 
                 className="btn btn-primary btn-sm"
                 onClick={handleOpenRegister}
@@ -149,10 +149,10 @@ export default function Navbar({ activeTab, setActiveTab, isSidebarCollapsed, se
                 }}
               >
                 <UserPlus size={15} />
-                <span>Sign In</span>
+                <span>Sign Up</span>
               </button>
 
-              {/* Log In Button (Right of Sign In) */}
+              {/* Log In Button (Right of Sign Up) */}
               <button 
                 className="btn btn-outline btn-sm"
                 onClick={handleOpenLogin}
@@ -169,7 +169,7 @@ export default function Navbar({ activeTab, setActiveTab, isSidebarCollapsed, se
               </button>
             </>
           ) : isAuth ? (
-            /* On Login / Sign In page: Just show Back to Overview link */
+            /* On Login / Sign Up page: Just show Back to Overview link */
             <button 
               className="btn btn-outline btn-sm"
               onClick={() => setActiveTab('landing')}
@@ -191,7 +191,7 @@ export default function Navbar({ activeTab, setActiveTab, isSidebarCollapsed, se
               <button 
                 className="btn btn-secondary btn-sm"
                 onClick={handleOpenLogin}
-                title="Sign in with another account"
+                title="Log in with another account"
                 style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', padding: '0.4rem 0.7rem' }}
               >
                 <LogIn size={14} color="#818cf8" />

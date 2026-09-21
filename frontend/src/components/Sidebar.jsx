@@ -313,7 +313,7 @@ export default function Sidebar({ activeTab, setActiveTab, isCollapsed, setIsCol
           >
             <div style={{ padding: '0.5rem 0.75rem', borderBottom: '1px solid rgba(255, 255, 255, 0.08)' }}>
               <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Signed In
+                Logged In
               </div>
               <div style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-primary)', marginTop: '2px', wordBreak: 'break-all' }}>
                 {user?.email || user?.full_name}
