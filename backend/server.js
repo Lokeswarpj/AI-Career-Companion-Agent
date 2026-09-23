@@ -250,16 +250,23 @@ app.get('/api', (req, res) => {
   });
 });
 
-// Mount Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/profile', profileRoutes);
-app.use('/api/resume', resumeRoutes);
-app.use('/api/internships', internshipRoutes);
-app.use('/api/matching', matchingRoutes);
-app.use('/api/skill-gap', skillGapRoutes);
-app.use('/api/customization', customizationRoutes);
-app.use('/api/interview', interviewRoutes);
-app.use('/api/assistant', assistantRoutes);
+// Mount Routes (supporting both /api/* and direct subpaths for serverless proxies)
+const routes = [
+  { path: '/auth', handler: authRoutes },
+  { path: '/profile', handler: profileRoutes },
+  { path: '/resume', handler: resumeRoutes },
+  { path: '/internships', handler: internshipRoutes },
+  { path: '/matching', handler: matchingRoutes },
+  { path: '/skill-gap', handler: skillGapRoutes },
+  { path: '/customization', handler: customizationRoutes },
+  { path: '/interview', handler: interviewRoutes },
+  { path: '/assistant', handler: assistantRoutes },
+];
+
+for (const route of routes) {
+  app.use(`/api${route.path}`, route.handler);
+  app.use(route.path, route.handler);
+}
 
 // Global Error Handler
 app.use((err, req, res, next) => {
