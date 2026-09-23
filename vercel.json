@@ -3,19 +3,11 @@
   "buildCommand": "node scripts/build.js",
   "outputDirectory": "dist",
   "functions": {
-    "api/index.js": {
+    "api/**": {
       "includeFiles": "backend/**"
     }
   },
   "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "/api"
-    },
-    {
-      "source": "/api",
-      "destination": "/api"
-    },
     {
       "source": "/(.*)",
       "destination": "/index.html"
