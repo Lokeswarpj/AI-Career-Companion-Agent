@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && node -e \"import('fs').then(fs => { try { fs.default.cpSync('dist', '../dist', { recursive: true }); } catch(e){} });\"",
     "preview": "vite preview"
   },
   "dependencies": {
