@@ -1,23 +1,19 @@
 import app from '../backend/server.js';
 
 export default async function handler(req, res) {
-  try {
-    // 1. Extract path parameter forwarded by Vercel rewrite (?__path=$1)
-    const urlObj = new URL(req.url, 'http://localhost');
-    const pathParam = urlObj.searchParams.get('__path') || req.query?.__path;
-
-    if (pathParam) {
-      const cleanPath = pathParam.startsWith('/') ? pathParam : `/${pathParam}`;
-      req.url = `/api${cleanPath}`;
-    } else if (req.headers['x-forwarded-uri']) {
-      req.url = req.headers['x-forwarded-uri'];
-    } else if (req.headers['x-matched-path'] && req.headers['x-matched-path'] !== '/api/index.js') {
-      req.url = req.headers['x-matched-path'];
+  // If Vercel rewrote req.url to /api/index.js, restore the original path from Vercel headers
+  if (req.url === '/api/index.js' || req.url === '/api' || req.url === '/api/') {
+    const forwardedUri = req.headers['x-forwarded-uri'];
+    const nowMatches = req.headers['x-now-route-matches'];
+    if (forwardedUri && forwardedUri !== '/api/index.js') {
+      req.url = forwardedUri;
+    } else if (nowMatches) {
+      const match = decodeURIComponent(nowMatches).match(/1=([^&]+)/);
+      if (match && match[1]) {
+        req.url = match[1].startsWith('/') ? `/api${match[1]}` : `/api/${match[1]}`;
+      }
     }
-
-    return app(req, res);
-  } catch (err) {
-    console.error('[Vercel Serverless Handler Error]', err);
-    res.status(500).json({ error: 'Internal Serverless Execution Error: ' + err.message });
   }
+
+  return app(req, res);
 }
