@@ -3,6 +3,12 @@ import { api } from '../utils/api';
 import { useNotification } from '../context/NotificationContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { 
+  downloadAsPdf, 
+  downloadAsDocx, 
+  downloadAsMarkdown, 
+  downloadAsText 
+} from '../utils/exportUtils';
+import { 
   FileText, 
   Sparkles, 
   CheckCircle2, 
@@ -18,10 +24,11 @@ import {
   Target, 
   Building, 
   RefreshCw, 
-  Award,
-  Check,
-  Briefcase,
-  PenTool
+  Award, 
+  Check, 
+  Briefcase, 
+  PenTool,
+  Printer
 } from 'lucide-react';
 
 export default function ApplicationCustomizerPage({ selectedInternshipId, setSelectedInternshipId, setActiveTab }) {
@@ -345,6 +352,45 @@ export default function ApplicationCustomizerPage({ selectedInternshipId, setSel
                 </div>
               </div>
 
+              {/* ATS Keyword Alignment & Placement Matrix */}
+              {tailoredResumeData.atsTargetKeywordAlignment && tailoredResumeData.atsTargetKeywordAlignment.length > 0 && (
+                <div className="glass-panel" style={{ padding: '2rem' }}>
+                  <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '0.4rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Target size={20} color="var(--accent-cyan)" />
+                    <span>ATS Target Keyword Alignment & Placement Matrix</span>
+                  </h3>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1.25rem' }}>
+                    Real-time verification of required & preferred job keywords strategically integrated across resume sections.
+                  </p>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '0.75rem' }}>
+                    {tailoredResumeData.atsTargetKeywordAlignment.map((item, idx) => (
+                      <div 
+                        key={idx} 
+                        style={{ 
+                          background: 'var(--bg-secondary)', 
+                          padding: '0.85rem 1rem', 
+                          borderRadius: 'var(--radius-sm)', 
+                          border: '1px solid var(--border-card)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          gap: '0.75rem'
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <CheckCircle2 size={16} color="#10b981" />
+                          <strong style={{ fontSize: '0.88rem', color: 'var(--text-primary)' }}>{item.keyword}</strong>
+                        </div>
+                        <span className="badge badge-emerald" style={{ fontSize: '0.72rem', whiteSpace: 'nowrap' }}>
+                          {item.location || 'Skills & Projects'}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Full Markdown Resume & Export Toolbar */}
               <div className="glass-panel" style={{ padding: '2rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.75rem' }}>
@@ -353,23 +399,61 @@ export default function ApplicationCustomizerPage({ selectedInternshipId, setSel
                     <span>Complete Tailored Resume (Markdown / ATS Ready)</span>
                   </h3>
 
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                     <button
                       onClick={() => handleCopy(tailoredResumeData.fullMarkdownResume, 'resume')}
                       className="btn btn-secondary"
-                      style={{ fontSize: '0.85rem', padding: '0.4rem 0.8rem', gap: '0.4rem' }}
+                      style={{ fontSize: '0.82rem', padding: '0.4rem 0.75rem', gap: '0.35rem' }}
                     >
                       {copiedResume ? <Check size={14} color="#10b981" /> : <Copy size={14} />}
-                      <span>{copiedResume ? 'Copied!' : 'Copy Markdown'}</span>
+                      <span>{copiedResume ? 'Copied!' : 'Copy'}</span>
                     </button>
 
                     <button
-                      onClick={() => handleDownload(`${tailoredResumeData.company}_Tailored_Resume.md`, tailoredResumeData.fullMarkdownResume)}
-                      className="btn btn-secondary"
-                      style={{ fontSize: '0.85rem', padding: '0.4rem 0.8rem', gap: '0.4rem' }}
+                      onClick={() => {
+                        downloadAsPdf(
+                          `${tailoredResumeData.company}_Tailored_Resume`, 
+                          tailoredResumeData.fullMarkdownResume, 
+                          `${tailoredResumeData.internshipTitle} - ${tailoredResumeData.company}`
+                        );
+                        notify.success('Downloading tailored PDF resume...');
+                      }}
+                      className="btn btn-primary"
+                      style={{ fontSize: '0.82rem', padding: '0.4rem 0.75rem', gap: '0.35rem', background: '#dc2626', borderColor: '#b91c1c' }}
+                      title="Export tailored resume as high-resolution PDF"
                     >
                       <Download size={14} />
-                      <span>Download (.md)</span>
+                      <span>Download PDF</span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        downloadAsDocx(
+                          `${tailoredResumeData.company}_Tailored_Resume.docx`, 
+                          tailoredResumeData.fullMarkdownResume, 
+                          `${tailoredResumeData.internshipTitle} - ${tailoredResumeData.company}`
+                        );
+                        notify.success('Downloaded Microsoft Word document (.docx)!');
+                      }}
+                      className="btn btn-primary"
+                      style={{ fontSize: '0.82rem', padding: '0.4rem 0.75rem', gap: '0.35rem', background: '#2563eb', borderColor: '#1d4ed8' }}
+                      title="Export tailored resume as editable Word DOCX"
+                    >
+                      <Download size={14} />
+                      <span>Download DOCX</span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        downloadAsMarkdown(`${tailoredResumeData.company}_Tailored_Resume.md`, tailoredResumeData.fullMarkdownResume);
+                        notify.success('Downloaded Markdown resume (.md)!');
+                      }}
+                      className="btn btn-secondary"
+                      style={{ fontSize: '0.82rem', padding: '0.4rem 0.75rem', gap: '0.35rem' }}
+                      title="Download clean Markdown format"
+                    >
+                      <Download size={14} />
+                      <span>Markdown (.md)</span>
                     </button>
                   </div>
                 </div>
@@ -456,23 +540,61 @@ export default function ApplicationCustomizerPage({ selectedInternshipId, setSel
                     Targeted Cover Letter for {coverLetterData.company}
                   </h3>
 
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                     <button
                       onClick={() => handleCopy(coverLetterText, 'letter')}
                       className="btn btn-secondary"
-                      style={{ fontSize: '0.85rem', padding: '0.4rem 0.8rem', gap: '0.4rem' }}
+                      style={{ fontSize: '0.82rem', padding: '0.4rem 0.75rem', gap: '0.35rem' }}
                     >
                       {copiedLetter ? <Check size={14} color="#10b981" /> : <Copy size={14} />}
-                      <span>{copiedLetter ? 'Copied!' : 'Copy Letter'}</span>
+                      <span>{copiedLetter ? 'Copied!' : 'Copy'}</span>
                     </button>
 
                     <button
-                      onClick={() => handleDownload(`${coverLetterData.company}_Cover_Letter.txt`, coverLetterText)}
-                      className="btn btn-secondary"
-                      style={{ fontSize: '0.85rem', padding: '0.4rem 0.8rem', gap: '0.4rem' }}
+                      onClick={() => {
+                        downloadAsPdf(
+                          `${coverLetterData.company}_Cover_Letter`, 
+                          coverLetterText, 
+                          `Cover Letter - ${coverLetterData.company}`
+                        );
+                        notify.success('Downloading PDF cover letter...');
+                      }}
+                      className="btn btn-primary"
+                      style={{ fontSize: '0.82rem', padding: '0.4rem 0.75rem', gap: '0.35rem', background: '#dc2626', borderColor: '#b91c1c' }}
+                      title="Export Cover Letter as high-resolution PDF"
                     >
                       <Download size={14} />
-                      <span>Download (.txt)</span>
+                      <span>Download PDF</span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        downloadAsDocx(
+                          `${coverLetterData.company}_Cover_Letter.docx`, 
+                          coverLetterText, 
+                          `Cover Letter - ${coverLetterData.company}`
+                        );
+                        notify.success('Downloaded Microsoft Word document (.docx)!');
+                      }}
+                      className="btn btn-primary"
+                      style={{ fontSize: '0.82rem', padding: '0.4rem 0.75rem', gap: '0.35rem', background: '#2563eb', borderColor: '#1d4ed8' }}
+                      title="Export Cover Letter as editable Word DOCX"
+                    >
+                      <Download size={14} />
+                      <span>Download DOCX</span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        downloadAsText(`${coverLetterData.company}_Cover_Letter.txt`, coverLetterText);
+                        notify.success('Downloaded Text (.txt)!');
+                      }}
+                      className="btn btn-secondary"
+                      style={{ fontSize: '0.82rem', padding: '0.4rem 0.75rem', gap: '0.35rem' }}
+                      title="Download clean plain text"
+                    >
+                      <Download size={14} />
+                      <span>Text (.txt)</span>
                     </button>
                   </div>
                 </div>
@@ -551,35 +673,67 @@ export default function ApplicationCustomizerPage({ selectedInternshipId, setSel
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button
-                      onClick={() => {
-                        if (app.tailored_resume_json?.fullMarkdownResume) {
-                          handleDownload(`${app.company}_Resume.md`, app.tailored_resume_json.fullMarkdownResume);
-                        }
-                      }}
-                      className="btn btn-secondary"
-                      style={{ fontSize: '0.8rem', padding: '0.4rem 0.75rem', gap: '0.3rem' }}
-                    >
-                      <Download size={14} /> Resume (.md)
-                    </button>
+                  <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+                    {app.tailored_resume_json?.fullMarkdownResume && (
+                      <>
+                        <button
+                          onClick={() => {
+                            downloadAsPdf(
+                              `${app.company}_Resume`, 
+                              app.tailored_resume_json.fullMarkdownResume, 
+                              `${app.role_title} - ${app.company}`
+                            );
+                            notify.success('Downloading PDF resume...');
+                          }}
+                          className="btn btn-secondary"
+                          style={{ fontSize: '0.78rem', padding: '0.35rem 0.6rem', gap: '0.25rem', color: '#f87171' }}
+                          title="Download Resume as PDF"
+                        >
+                          <Download size={13} /> Resume PDF
+                        </button>
+                        <button
+                          onClick={() => {
+                            downloadAsDocx(
+                              `${app.company}_Resume.docx`, 
+                              app.tailored_resume_json.fullMarkdownResume, 
+                              `${app.role_title} - ${app.company}`
+                            );
+                            notify.success('Downloaded Word document (.docx)!');
+                          }}
+                          className="btn btn-secondary"
+                          style={{ fontSize: '0.78rem', padding: '0.35rem 0.6rem', gap: '0.25rem', color: '#60a5fa' }}
+                          title="Download Resume as Word (.docx)"
+                        >
+                          <Download size={13} /> Resume DOCX
+                        </button>
+                      </>
+                    )}
 
                     {app.cover_letter && (
                       <button
-                        onClick={() => handleDownload(`${app.company}_Cover_Letter.txt`, app.cover_letter)}
+                        onClick={() => {
+                          downloadAsPdf(
+                            `${app.company}_Cover_Letter`, 
+                            app.cover_letter, 
+                            `Cover Letter - ${app.company}`
+                          );
+                          notify.success('Downloading PDF cover letter...');
+                        }}
                         className="btn btn-secondary"
-                        style={{ fontSize: '0.8rem', padding: '0.4rem 0.75rem', gap: '0.3rem' }}
+                        style={{ fontSize: '0.78rem', padding: '0.35rem 0.6rem', gap: '0.25rem' }}
+                        title="Download Cover Letter as PDF"
                       >
-                        <Download size={14} /> Letter (.txt)
+                        <Download size={13} /> Letter PDF
                       </button>
                     )}
 
                     <button
                       onClick={() => handleDeleteSavedApp(app.id)}
                       className="btn btn-secondary"
-                      style={{ fontSize: '0.8rem', padding: '0.4rem 0.6rem', color: 'var(--accent-rose)' }}
+                      style={{ fontSize: '0.78rem', padding: '0.35rem 0.55rem', color: 'var(--accent-rose)' }}
+                      title="Delete Saved Bundle"
                     >
-                      <Trash2 size={14} />
+                      <Trash2 size={13} />
                     </button>
                   </div>
                 </div>

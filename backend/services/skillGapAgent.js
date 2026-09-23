@@ -1,5 +1,6 @@
 import { callGemini } from './geminiService.js';
 import { db } from '../config/database.js';
+import { COMPREHENSIVE_SKILL_ROADMAPS } from './skillRoadmapLibrary.js';
 
 /**
  * Normalizes skill strings for robust fuzzy comparison.
@@ -10,106 +11,51 @@ function normalize(str) {
 }
 
 /**
+ * Pre-build normalized lookup map for O(1) roadmaps retrieval.
+ */
+const NORMALIZED_ROADMAPS = {};
+for (const [key, value] of Object.entries(COMPREHENSIVE_SKILL_ROADMAPS)) {
+  NORMALIZED_ROADMAPS[normalize(key)] = value;
+}
+
+/**
  * Known skill adjacency taxonomy for detecting partially demonstrated / related skills.
  */
 const SKILL_ADJACENCY_MAP = {
-  'react': ['javascript', 'typescript', 'html', 'css', 'frontend', 'vue', 'nextjs', 'redux'],
-  'react native': ['react', 'javascript', 'typescript', 'mobile', 'flutter'],
+  'react': ['javascript', 'typescript', 'html', 'css', 'frontend', 'vue', 'nextjs', 'redux', 'tailwindcss'],
+  'react native': ['react', 'javascript', 'typescript', 'mobile', 'flutter', 'android', 'ios'],
   'flutter': ['dart', 'mobile', 'react native', 'android', 'ios'],
   'nodejs': ['javascript', 'typescript', 'express', 'backend', 'rest api', 'nestjs'],
   'node.js': ['javascript', 'typescript', 'express', 'backend', 'rest api', 'nestjs'],
   'fastapi': ['python', 'rest api', 'flask', 'django', 'backend', 'pydantic'],
-  'django': ['python', 'backend', 'sql', 'rest api', 'flask'],
-  'flask': ['python', 'backend', 'rest api', 'fastapi'],
+  'django': ['python', 'backend', 'sql', 'rest api', 'flask', 'postgresql'],
+  'flask': ['python', 'backend', 'rest api', 'fastapi', 'django'],
   'pytorch': ['python', 'machine learning', 'deep learning', 'numpy', 'scikit-learn', 'tensorflow', 'keras'],
   'tensorflow': ['python', 'machine learning', 'deep learning', 'numpy', 'scikit-learn', 'pytorch', 'keras'],
   'docker': ['linux', 'cloud', 'devops', 'kubernetes', 'containers', 'ci/cd', 'bash'],
   'kubernetes': ['docker', 'linux', 'cloud', 'aws', 'devops', 'helm'],
   'aws': ['cloud', 'linux', 'docker', 'devops', 'azure', 'gcp', 'serverless'],
+  'azure': ['cloud', 'aws', 'docker', 'devops', 'gcp', 'linux'],
   'postgresql': ['sql', 'database', 'mysql', 'sqlite', 'mongodb', 'prisma', 'backend'],
   'mongodb': ['nosql', 'database', 'sql', 'backend', 'nodejs', 'mongoose'],
   'sql': ['database', 'postgresql', 'mysql', 'sqlite', 'data analysis', 'queries'],
   'typescript': ['javascript', 'react', 'nodejs', 'frontend', 'type safety'],
   'graphql': ['rest api', 'backend', 'nodejs', 'apollo', 'apis'],
   'pandas': ['python', 'data analysis', 'numpy', 'data science', 'analytics'],
-  'tableau': ['powerbi', 'data visualization', 'sql', 'business intelligence', 'analytics'],
-  'powerbi': ['tableau', 'data visualization', 'sql', 'business intelligence', 'analytics'],
-  'figma': ['ui/ux', 'wireframing', 'prototyping', 'design', 'user research', 'css'],
-  'cybersecurity': ['network security', 'linux', 'ethical hacking', 'information security', 'soc', 'wireshark'],
-  'testing': ['jest', 'pytest', 'cypress', 'playwright', 'selenium', 'unit testing', 'qa'],
-  'spring boot': ['java', 'backend', 'microservices', 'hibernate', 'rest api', 'sql']
-};
-
-/**
- * Standard learning roadmap resources and project suggestions per technology.
- */
-const ROADMAP_LIBRARY = {
-  'docker': {
-    timeEstimate: '1 - 2 Weeks',
-    topics: ['Dockerfiles & Multi-stage Builds', 'Docker Compose Multi-Container Setup', 'Volume Persistence & Networking'],
-    projectIdea: 'Containerize a full-stack React + Node.js + PostgreSQL app with Docker Compose and health check scripts.',
-    importance: 'Modern engineering teams deploy containerized microservices; Docker ensures consistent development and production environments.'
-  },
-  'kubernetes': {
-    timeEstimate: '2 - 3 Weeks',
-    topics: ['Pods, Deployments & Services', 'ConfigMaps & Secrets', 'Ingress Controllers & Helm Charts'],
-    projectIdea: 'Deploy a multi-service microservice application on local Minikube with automated self-healing and load balancing.',
-    importance: 'Essential for scalable cloud orchestration, automated rollouts, and container lifecycle management.'
-  },
-  'fastapi': {
-    timeEstimate: '1 - 2 Weeks',
-    topics: ['Pydantic Data Validation & Async Defs', 'Dependency Injection System', 'Interactive OpenAPI (Swagger) Documentation'],
-    projectIdea: 'Build a high-throughput async REST API serving a machine learning inference model with background task queues.',
-    importance: 'Standard high-performance Python framework for modern AI, microservices, and asynchronous web backends.'
-  },
-  'pytorch': {
-    timeEstimate: '3 - 4 Weeks',
-    topics: ['Tensors, Autograd & Custom Modules', 'DataLoader Pipelines & Transfer Learning', 'Model Evaluation, Checkpoints & Export (ONNX)'],
-    projectIdea: 'Fine-tune a pre-trained Vision Transformer or BERT model on a custom dataset and benchmark latency.',
-    importance: 'Industry-standard research and production framework for Deep Learning, NLP, and Generative AI systems.'
-  },
-  'react': {
-    timeEstimate: '2 - 3 Weeks',
-    topics: ['Custom Hooks & Context API', 'Component Lifecycle & Virtual DOM', 'Performance Optimization (useMemo, useCallback)'],
-    projectIdea: 'Create an interactive real-time dashboard with state management, client-side routing, and responsive design.',
-    importance: 'Dominant frontend library worldwide, powering responsive, scalable user interfaces.'
-  },
-  'nodejs': {
-    timeEstimate: '2 Weeks',
-    topics: ['Event Loop & Non-blocking I/O', 'Express / Fastify Middleware Architecture', 'JWT Authentication & REST API Security'],
-    projectIdea: 'Develop a secure backend API with token authentication, rate limiting, and relational database indexing.',
-    importance: 'Core engine for modern full-stack web architectures and high-concurrency cloud services.'
-  },
-  'aws': {
-    timeEstimate: '2 - 3 Weeks',
-    topics: ['S3, EC2 & IAM Security Policies', 'Serverless Functions (AWS Lambda + API Gateway)', 'CloudWatch Monitoring & Cost Optimization'],
-    projectIdea: 'Deploy an automated serverless image processing pipeline using AWS Lambda triggered by S3 uploads.',
-    importance: 'Leading enterprise cloud infrastructure platform; cloud proficiency is highly valued by hiring managers.'
-  },
-  'sql': {
-    timeEstimate: '1 - 2 Weeks',
-    topics: ['Complex JOINs, Subqueries & CTEs', 'Database Indexing & Query Plan Optimization', 'ACID Transactions & Normalization'],
-    projectIdea: 'Design a normalized e-commerce database schema with optimized indexing for multi-table analytics queries.',
-    importance: 'Universal foundational requirement for storing, querying, and analyzing structured business data.'
-  },
-  'pandas': {
-    timeEstimate: '1 - 2 Weeks',
-    topics: ['Data Wrangling & Missing Value Imputation', 'Grouping, Aggregations & Pivot Tables', 'Time Series Analysis & Feature Engineering'],
-    projectIdea: 'Perform exploratory data analysis on a real-world dataset, uncovering business insights and statistical trends.',
-    importance: 'Core data manipulation tool in Python, essential for data science, data engineering, and analytics roles.'
-  },
-  'typescript': {
-    timeEstimate: '1 - 2 Weeks',
-    topics: ['Generics & Utility Types', 'Strict Null Checks & Union Types', 'Interface vs Type Aliases in Large Codebases'],
-    projectIdea: 'Refactor an existing JavaScript React or Node project into strict TypeScript with custom type definitions.',
-    importance: 'Drastically reduces production bugs and provides enterprise-grade developer tooling and maintainability.'
-  },
-  'default': {
-    timeEstimate: '1 - 2 Weeks',
-    topics: ['Core Architecture & Syntax Fundamentals', 'Practical Hands-on Projects', 'Best Practices & Security Considerations'],
-    projectIdea: 'Build an end-to-end mini application implementing this technology with clean git commits and documentation.',
-    importance: 'Key skill directly specified in the job description to handle core day-to-day engineering responsibilities.'
-  }
+  'tableau': ['powerbi', 'data visualization', 'sql', 'business intelligence', 'analytics', 'excel'],
+  'powerbi': ['tableau', 'data visualization', 'sql', 'business intelligence', 'analytics', 'excel'],
+  'figma': ['ui/ux', 'wireframing', 'prototyping', 'design', 'user research', 'css', 'design systems'],
+  'wireframing': ['figma', 'ui/ux design', 'prototyping', 'user research', 'design systems'],
+  'prototyping': ['figma', 'wireframing', 'ui/ux design', 'design systems'],
+  'ui/ux design': ['figma', 'wireframing', 'prototyping', 'user research', 'usability testing'],
+  'cybersecurity': ['network security', 'linux', 'ethical hacking', 'information security', 'soc', 'wireshark', 'owasp'],
+  'ethical hacking': ['cybersecurity', 'penetration testing', 'nmap', 'burp suite', 'metasploit', 'linux'],
+  'testing': ['jest', 'pytest', 'cypress', 'playwright', 'selenium', 'unit testing', 'qa', 'automation testing'],
+  'automation testing': ['testing', 'selenium', 'cypress', 'playwright', 'jest', 'pytest'],
+  'spring boot': ['java', 'backend', 'microservices', 'hibernate', 'rest api', 'sql'],
+  'agile': ['scrum', 'jira', 'sprint planning', 'confluence', 'project management'],
+  'scrum': ['agile', 'jira', 'sprint planning', 'confluence'],
+  'jira': ['agile', 'scrum', 'confluence', 'project management']
 };
 
 /**
@@ -453,23 +399,55 @@ Provide structured JSON:
 
 function getRoadmapForSkill(skillName) {
   const norm = normalize(skillName);
-  for (const [key, value] of Object.entries(ROADMAP_LIBRARY)) {
-    if (norm.includes(key) || key.includes(norm)) {
+
+  // 1. Direct O(1) exact normalized match
+  if (NORMALIZED_ROADMAPS[norm]) {
+    return NORMALIZED_ROADMAPS[norm];
+  }
+
+  // 2. Fuzzy substring or key match
+  for (const [key, value] of Object.entries(COMPREHENSIVE_SKILL_ROADMAPS)) {
+    const normKey = normalize(key);
+    if (norm === normKey || norm.includes(normKey) || normKey.includes(norm)) {
       return value;
     }
   }
+
+  // 3. Intelligent Domain Category Heuristics for novel or unlisted skills
+  let estimatedTime = '2 - 3 Weeks';
+  const lower = (skillName || '').toLowerCase();
+
+  if (/(agile|scrum|jira|confluence|miro|git|sprint|standup|notion|markdown|trello|slack|teams|communication|leadership)/i.test(lower)) {
+    estimatedTime = '3 - 5 Days';
+  } else if (/(deep learning|pytorch|tensorflow|vision|nlp|transformer|yolo|cuda|rag|huggingface|llm|generative ai)/i.test(lower)) {
+    estimatedTime = '4 - 6 Weeks';
+  } else if (/(cloud|aws|azure|gcp|kubernetes|docker|terraform|ansible|devops|microservice|kafka|spark|system design)/i.test(lower)) {
+    estimatedTime = '3 - 4 Weeks';
+  } else if (/(cybersecurity|ethical hacking|penetration|soc|siem|metasploit|wireshark|cryptography|blockchain|solidity)/i.test(lower)) {
+    estimatedTime = '3 - 4 Weeks';
+  } else if (/(test|jest|pytest|cypress|selenium|playwright|qa|html|css|tailwind|figma|wireframe|prototype|redux|sql|excel)/i.test(lower)) {
+    estimatedTime = '1 - 2 Weeks';
+  }
+
   return {
-    timeEstimate: '1 - 2 Weeks',
-    topics: [`${skillName} Core Syntax & APIs`, 'Industry Design Patterns', 'Testing & Error Handling'],
+    timeEstimate: estimatedTime,
+    topics: [`${skillName} Core Concepts & Architectural Patterns`, 'Production Implementation & Best Practices', 'Error Handling, Testing & Optimization'],
     projectIdea: `Implement a feature module using ${skillName} within a practical full-stack or standalone application.`,
-    importance: `Directly specified in the job posting to ensure smooth day-to-day execution on team projects.`
+    importance: `Directly required to ensure high code velocity, reliability, and standards compliance on engineering teams.`
   };
 }
 
 function getSkillImportance(skillName, roleTitle) {
   const norm = normalize(skillName);
-  if (ROADMAP_LIBRARY[norm]) {
-    return ROADMAP_LIBRARY[norm].importance;
+  if (NORMALIZED_ROADMAPS[norm]?.importance) {
+    return NORMALIZED_ROADMAPS[norm].importance;
   }
-  return `Proficiency in ${skillName} enables the team to maintain high code velocity, reliability, and code quality in the ${roleTitle || 'software engineering'} domain.`;
+  for (const [key, value] of Object.entries(COMPREHENSIVE_SKILL_ROADMAPS)) {
+    const normKey = normalize(key);
+    if (norm === normKey || norm.includes(normKey) || normKey.includes(norm)) {
+      if (value.importance) return value.importance;
+    }
+  }
+  return `Proficiency in ${skillName} enables the team to maintain high velocity, technical accuracy, and robust system performance in the ${roleTitle || 'software engineering'} domain.`;
 }
+

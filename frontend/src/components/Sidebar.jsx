@@ -84,25 +84,22 @@ export default function Sidebar({ activeTab, setActiveTab, isCollapsed, setIsCol
               onClick={() => setActiveTab('dashboard')}
               style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', cursor: 'pointer' }}
             >
-              <div style={{
-                width: '2.3rem',
-                height: '2.3rem',
-                borderRadius: '10px',
-                background: 'linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-cyan) 100%)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: 'var(--shadow-glow)'
-              }}>
-                <Sparkles size={18} color="#ffffff" />
-              </div>
+              <img 
+                src="/careerpulse_logo.png" 
+                alt="CareerPulse AI Logo" 
+                style={{
+                  width: '2.4rem',
+                  height: '2.4rem',
+                  borderRadius: '10px',
+                  objectFit: 'cover',
+                  boxShadow: '0 0 14px rgba(99, 102, 241, 0.45)',
+                  border: '1px solid rgba(255, 255, 255, 0.15)'
+                }}
+              />
               <div>
-                <div style={{ fontSize: '1.1rem', fontWeight: 800, letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                <div style={{ fontSize: '1.15rem', fontWeight: 800, letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
                   <span>CareerPulse</span>
                   <span className="gradient-text">AI</span>
-                </div>
-                <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 500, marginTop: '-3px' }}>
-                  Infosys Project
                 </div>
               </div>
             </div>
@@ -110,20 +107,21 @@ export default function Sidebar({ activeTab, setActiveTab, isCollapsed, setIsCol
             /* Icon Logo when collapsed */
             <div 
               onClick={() => setActiveTab('dashboard')}
-              style={{
-                width: '2.4rem',
-                height: '2.4rem',
-                borderRadius: '10px',
-                background: 'linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-cyan) 100%)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: 'var(--shadow-glow)',
-                cursor: 'pointer'
-              }}
+              style={{ cursor: 'pointer' }}
               title="CareerPulse AI Dashboard"
             >
-              <Sparkles size={18} color="#ffffff" />
+              <img 
+                src="/careerpulse_logo.png" 
+                alt="CareerPulse AI Logo" 
+                style={{
+                  width: '2.4rem',
+                  height: '2.4rem',
+                  borderRadius: '10px',
+                  objectFit: 'cover',
+                  boxShadow: '0 0 14px rgba(99, 102, 241, 0.45)',
+                  border: '1px solid rgba(255, 255, 255, 0.15)'
+                }}
+              />
             </div>
           )}
 

@@ -109,6 +109,7 @@ router.get('/evaluate/:internshipId', authenticateToken, async (req, res) => {
         preferred_skills_json: internship.preferred_skills_json ? JSON.parse(internship.preferred_skills_json) : [],
         responsibilities_json: internship.responsibilities_json ? JSON.parse(internship.responsibilities_json) : []
       },
+      matchScore: result.overallMatchScore,
       ...result
     });
   } catch (err) {

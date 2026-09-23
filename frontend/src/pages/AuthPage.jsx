@@ -65,19 +65,20 @@ export default function AuthPage({ onSuccess, authMode = 'login', setAuthMode })
       >
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <div style={{
-            width: '3.2rem',
-            height: '3.2rem',
-            borderRadius: '14px',
-            background: 'linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-cyan) 100%)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            margin: '0 auto 1rem auto',
-            boxShadow: 'var(--shadow-glow)'
-          }}>
-            <Sparkles size={24} color="#ffffff" />
-          </div>
+          <img 
+            src="/careerpulse_logo.png" 
+            alt="CareerPulse AI Logo" 
+            style={{
+              width: '3.6rem',
+              height: '3.6rem',
+              borderRadius: '14px',
+              objectFit: 'cover',
+              margin: '0 auto 1rem auto',
+              display: 'block',
+              boxShadow: '0 0 20px rgba(99, 102, 241, 0.5)',
+              border: '1px solid rgba(255, 255, 255, 0.2)'
+            }}
+          />
           <h2 style={{ fontSize: '1.75rem', fontWeight: 800 }}>
             {isRegister ? 'Sign Up' : 'Welcome Back'}
           </h2>

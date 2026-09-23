@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "node server.js",
-    "dev": "node --watch server.js",
+    "dev": "node --watch --watch-path=server.js --watch-path=routes --watch-path=services --watch-path=middleware --watch-path=config server.js",
     "test": "node tests/api.test.js && node tests/m2_evaluation.test.js && node tests/m3_evaluation.test.js"
   },
   "dependencies": {
