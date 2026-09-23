@@ -13,9 +13,9 @@
     "dev:frontend": "npm run dev --prefix frontend",
     "dev:server": "npm run dev --prefix backend",
     "dev:client": "npm run dev --prefix frontend",
-    "build": "cd frontend && npm install && npm run build",
-    "build:frontend": "cd frontend && npm install && npm run build",
-    "build:client": "cd frontend && npm install && npm run build",
+    "build": "cd frontend && npm install && npm run build && cd .. && node -e \"const fs=require('fs'); fs.cpSync('frontend/dist', 'dist', {recursive:true});\"",
+    "build:frontend": "cd frontend && npm install && npm run build && cd .. && node -e \"const fs=require('fs'); fs.cpSync('frontend/dist', 'dist', {recursive:true});\"",
+    "build:client": "cd frontend && npm install && npm run build && cd .. && node -e \"const fs=require('fs'); fs.cpSync('frontend/dist', 'dist', {recursive:true});\"",
     "start": "npm run start --prefix backend",
     "test": "npm run test --prefix backend"
   },
