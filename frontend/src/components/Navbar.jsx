@@ -75,11 +75,10 @@ export default function Navbar({ activeTab, setActiveTab, isSidebarCollapsed, se
         {/* Right Side: Header actions based on page context */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           {isLanding ? (
-            <>
-              {/* Sign Up Button (Left of Log In) */}
+            isAuthenticated ? (
               <button 
                 className="btn btn-primary btn-sm"
-                onClick={handleOpenRegister}
+                onClick={() => setActiveTab('dashboard')}
                 style={{ 
                   display: 'flex', 
                   alignItems: 'center', 
@@ -88,26 +87,44 @@ export default function Navbar({ activeTab, setActiveTab, isSidebarCollapsed, se
                   boxShadow: '0 2px 10px rgba(99, 102, 241, 0.35)'
                 }}
               >
-                <UserPlus size={15} />
-                <span>Sign Up</span>
+                <Sparkles size={15} />
+                <span>Go to Dashboard →</span>
               </button>
+            ) : (
+              <>
+                {/* Sign Up Button (Left of Log In) */}
+                <button 
+                  className="btn btn-primary btn-sm"
+                  onClick={handleOpenRegister}
+                  style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '0.45rem',
+                    fontWeight: 700,
+                    boxShadow: '0 2px 10px rgba(99, 102, 241, 0.35)'
+                  }}
+                >
+                  <UserPlus size={15} />
+                  <span>Sign Up</span>
+                </button>
 
-              {/* Log In Button (Right of Sign Up) */}
-              <button 
-                className="btn btn-outline btn-sm"
-                onClick={handleOpenLogin}
-                style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  gap: '0.45rem',
-                  borderColor: 'rgba(255, 255, 255, 0.2)',
-                  fontWeight: 600
-                }}
-              >
-                <LogIn size={15} color="#818cf8" />
-                <span>Log In</span>
-              </button>
-            </>
+                {/* Log In Button (Right of Sign Up) */}
+                <button 
+                  className="btn btn-outline btn-sm"
+                  onClick={handleOpenLogin}
+                  style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '0.45rem',
+                    borderColor: 'rgba(255, 255, 255, 0.2)',
+                    fontWeight: 600
+                  }}
+                >
+                  <LogIn size={15} color="#818cf8" />
+                  <span>Log In</span>
+                </button>
+              </>
+            )
           ) : isAuth ? (
             /* On Login / Sign Up page: Just show Back to Overview link */
             <button 

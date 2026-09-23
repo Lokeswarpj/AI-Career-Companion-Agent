@@ -34,7 +34,14 @@ export default function App() {
     localStorage.setItem('careerpulse_sidebar_collapsed', isSidebarCollapsed.toString());
   }, [isSidebarCollapsed]);
 
-  // If user is authenticated and starts on landing, redirect to dashboard
+  // When user is authenticated, redirect landing/auth to dashboard
+  useEffect(() => {
+    if (isAuthenticated && (activeTab === 'landing' || activeTab === 'auth')) {
+      setActiveTab('dashboard');
+    }
+  }, [isAuthenticated]);
+
+  // Safety fallback for unauthenticated users accessing protected tabs
   const currentTab = !isAuthenticated && !['landing', 'auth'].includes(activeTab) 
     ? 'landing' 
     : activeTab;
