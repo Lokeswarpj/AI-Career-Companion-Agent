@@ -1,5 +1,6 @@
-import app from '../backend/server.js';
+import handler from './index.js';
 
-export default function handler(req, res) {
-  return app(req, res);
+export default async function catchAllHandler(req, res) {
+  return handler(req, res);
 }
+
