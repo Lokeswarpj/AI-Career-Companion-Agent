@@ -124,7 +124,7 @@ export default function SkillGapPage({ selectedInternshipId, setSelectedInternsh
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1.5rem' }}>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem' }}>
-                  <span className="badge badge-indigo">{internship?.source || 'Infosys Springboard'}</span>
+                  <span className="badge badge-indigo">{internship?.source || 'Verified Partner'}</span>
                   <span className="badge badge-cyan">{internship?.remote_type || 'Hybrid'}</span>
                   <span className="badge badge-emerald">{internship?.stipend || 'Competitive'}</span>
                 </div>

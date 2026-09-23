@@ -19,7 +19,7 @@ const BENCHMARK_PROFILES = [
     icon: Cpu,
     color: "#818cf8",
     degree: "B.Tech in Artificial Intelligence & Data Science",
-    university: "Infosys Institute of Technology",
+    university: "Institute of Technology",
     graduation_year: 2026,
     skills: ["Python", "PyTorch", "TensorFlow", "Scikit-Learn", "Machine Learning", "NLP", "Pandas", "Git", "FastAPI"],
     preferred_roles: ["AI & Machine Learning Engineering Intern", "Generative AI Intern"],

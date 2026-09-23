@@ -55,13 +55,13 @@ export default function Footer() {
 
             <div>
               <div style={{ fontWeight: 700, fontSize: '0.9rem', marginBottom: '0.75rem', color: 'var(--text-primary)' }}>
-                INFOSYS DELIVERABLE
+                PLATFORM STACK
               </div>
               <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                <li>Infosys Springboard AI Track</li>
-                <li>Full-Stack Monorepo Architecture</li>
-                <li>Offline Heuristic AI Fallback</li>
-                <li>Zero-Config SQLite Persistence</li>
+                <li>⚡ Vite + React Modern UI</li>
+                <li>🧠 RAG Vector Intelligence Engine</li>
+                <li>🛡️ Serverless REST API Backend</li>
+                <li>🚀 Zero-Config SQLite Persistence</li>
               </ul>
             </div>
           </div>
