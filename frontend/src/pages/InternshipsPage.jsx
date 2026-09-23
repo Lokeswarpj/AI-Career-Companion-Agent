@@ -315,7 +315,7 @@ export default function InternshipsPage({ setActiveTab, setSelectedInternshipId 
               style={{ width: 'auto', padding: '0.45rem 0.85rem', fontSize: '0.85rem' }}
             >
               <option value="All">Source: All</option>
-              <option value="Infosys Springboard">Infosys Springboard</option>
+              <option value="Partner Portal">Partner Portal</option>
               <option value="Campus Portal">Campus Portal</option>
               <option value="RemoteOK">RemoteOK</option>
               <option value="Adzuna">Adzuna</option>
