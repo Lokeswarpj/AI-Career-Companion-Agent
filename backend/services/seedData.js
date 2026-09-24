@@ -17,38 +17,6 @@ export async function seedDefaultAccountsIfNeeded() {
   try {
     const defaultAccounts = [
       {
-        email: 'lokeswarpj4@gmail.com',
-        password: 'Lokeswar@26',
-        full_name: 'Lokeswar',
-        degree: 'B.Tech in Computer Science & Engineering',
-        university: 'Infosys Springboard Virtual Internship',
-        graduation_year: 2026,
-        gpa: '8.9 / 10.0',
-        preferred_roles: ['AI & Machine Learning Engineering Intern', 'Full-Stack Web Developer Intern', 'Cloud & DevOps Intern'],
-        technical_skills: ['Python', 'JavaScript', 'React', 'Node.js', 'FastAPI', 'Docker', 'SQL', 'Git', 'Machine Learning'],
-        soft_skills: ['Problem Solving', 'Analytical Thinking', 'Team Collaboration', 'Communication'],
-        experience: [
-          {
-            title: 'AI Engineering & Applied Cloud Intern',
-            company: 'Infosys Springboard Virtual Internship',
-            duration: '2026 - Present',
-            description: 'Built and evaluated multi-agent AI Career Companion for internship matching, skill-gap analysis, and interview simulations.'
-          }
-        ],
-        projects: [
-          {
-            title: 'CareerPulse AI Platform',
-            tech: 'React 18, Vite, Express, SQLite, Google Gemini AI, RAG Vector Search',
-            description: 'Full-stack AI Career Companion with multi-factor matching, STAR resume tailoring, and 3D mock interview simulator.'
-          }
-        ],
-        certifications: [
-          'Infosys Springboard Applied Generative AI Specialist',
-          'Cloud Native Full-Stack Development'
-        ],
-        preferred_industries: ['Artificial Intelligence & ML', 'Full-Stack & Web Engineering', 'Cloud & DevOps Engineering']
-      },
-      {
         email: 'student.demo@infosys.com',
         password: 'DemoPass@123',
         full_name: 'Aanya Sharma',
@@ -98,7 +66,48 @@ export async function seedDefaultAccountsIfNeeded() {
             JSON.stringify(acc.preferred_industries || [])
           ]
         );
-        console.log(`[SeedData] ✅ Auto-seeded permanent student account: ${acc.email}`);
+        console.log(`[SeedData] ✅ Auto-seeded demo student account: ${acc.email}`);
+      }
+    }
+
+    // 🧹 Auto-clean any previously hardcoded mock profile data from real user accounts (e.g. lokeswarpj4@gmail.com or newly registered users)
+    // if they have not yet uploaded an authentic resume.
+    const nonDemoUsers = await db.all("SELECT id, email FROM users WHERE email != 'student.demo@infosys.com'");
+    if (Array.isArray(nonDemoUsers)) {
+      for (const u of nonDemoUsers) {
+        const resumeRow = await db.get("SELECT COUNT(*) as count FROM resumes WHERE user_id = ?", [u.id]);
+        const resumeCount = resumeRow ? resumeRow.count : 0;
+        if (resumeCount === 0) {
+          const prof = await db.get("SELECT * FROM profiles WHERE user_id = ?", [u.id]);
+          if (prof) {
+            let tech = [];
+            try { tech = JSON.parse(prof.technical_skills || '[]'); } catch {}
+            // If the profile matches the old mock internship or default 4 skills array
+            const isOldMockProfile = prof.university === 'Infosys Springboard Virtual Internship' ||
+              prof.degree === 'B.Tech in Computer Science & Engineering' ||
+              (tech.length === 4 && tech.includes('JavaScript') && tech.includes('React') && tech.includes('Python') && tech.includes('Git'));
+            
+            if (isOldMockProfile) {
+              await db.run(
+                `UPDATE profiles SET
+                  degree = NULL,
+                  university = NULL,
+                  graduation_year = NULL,
+                  preferred_roles = '[]',
+                  technical_skills = '[]',
+                  soft_skills = '[]',
+                  experience_json = '[]',
+                  projects_json = '[]',
+                  certifications_json = '[]',
+                  preferred_industries = '[]',
+                  updated_at = CURRENT_TIMESTAMP
+                 WHERE user_id = ?`,
+                [u.id]
+              );
+              console.log(`[SeedData] 🧹 Reset fresh clean profile for real user: ${u.email}`);
+            }
+          }
+        }
       }
     }
   } catch (err) {

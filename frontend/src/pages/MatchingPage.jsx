@@ -121,6 +121,44 @@ export default function MatchingPage({ setActiveTab, setSelectedInternshipId }) 
         </div>
       </div>
 
+      {/* Fresh Account Notification Banner */}
+      {topSkillCount === 0 && (
+        <div style={{
+          background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(6, 182, 212, 0.08) 100%)',
+          border: '1px solid rgba(99, 102, 241, 0.3)',
+          borderRadius: 'var(--radius-md)',
+          padding: '1.25rem 1.5rem',
+          marginBottom: '1.5rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '1rem',
+          flexWrap: 'wrap'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+            <Sparkles size={22} color="#818cf8" style={{ flexShrink: 0 }} />
+            <div>
+              <div style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.95rem' }}>
+                No Verified Resume or Skills Added Yet
+              </div>
+              <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+                Showing baseline general internship matches. Upload your resume or tag your skills in your Profile to generate personalized AI compatibility scores.
+              </div>
+            </div>
+          </div>
+          {setActiveTab && (
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button onClick={() => setActiveTab('resume')} className="btn btn-primary btn-sm">
+                Upload Resume
+              </button>
+              <button onClick={() => setActiveTab('profile')} className="btn btn-outline btn-sm">
+                Edit Profile
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Ranked Listings */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
         {recommendations.map((rec, index) => {

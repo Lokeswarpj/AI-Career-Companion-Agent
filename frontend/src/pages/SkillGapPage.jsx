@@ -162,6 +162,54 @@ export default function SkillGapPage({ selectedInternshipId, setSelectedInternsh
       {gapData && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
           
+          {/* Empty Profile / No Resume Uploaded Alert Banner */}
+          {gapData.hasProfileSkills === false && (
+            <div style={{
+              background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(234, 88, 12, 0.08) 100%)',
+              border: '1px solid rgba(245, 158, 11, 0.35)',
+              borderRadius: 'var(--radius-md)',
+              padding: '1.25rem 1.5rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '1.25rem',
+              flexWrap: 'wrap'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+                <AlertTriangle size={24} color="#f59e0b" style={{ flexShrink: 0 }} />
+                <div>
+                  <div style={{ fontWeight: 700, color: '#f59e0b', fontSize: '0.98rem' }}>
+                    Fresh Account: No Resume or Profile Skills Detected Yet
+                  </div>
+                  <div style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', marginTop: '0.15rem' }}>
+                    You have not uploaded a resume or added skills to your profile yet. We are displaying baseline role prerequisites below. Upload your resume or add your skills to unlock personalized gap diagnostic and custom learning roadmaps!
+                  </div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
+                {setActiveTab && (
+                  <>
+                    <button
+                      onClick={() => setActiveTab('resume')}
+                      className="btn btn-primary"
+                      style={{ padding: '0.5rem 1.1rem', fontSize: '0.86rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+                    >
+                      <Sparkles size={14} />
+                      <span>Upload Resume</span>
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('profile')}
+                      className="btn btn-outline"
+                      style={{ padding: '0.5rem 1.1rem', fontSize: '0.86rem' }}
+                    >
+                      Edit Profile
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Target Role & Readiness Score Banner */}
           <div className="glass-panel" style={{ padding: '2rem', borderLeft: `6px solid ${scoreColor}` }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1.5rem' }}>

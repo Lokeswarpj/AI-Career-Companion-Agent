@@ -68,8 +68,13 @@ router.get('/analyze/:internshipId', authenticateToken, async (req, res) => {
       certifications: safeArray(profile?.certifications_json)
     };
 
+    const hasProfileSkills = studentSkills.length > 0 || !!latestResume || safeArray(profile?.projects_json).length > 0;
+
     const analysis = await runSkillGapAnalysisAgent(studentProfile, internship);
-    return res.json(analysis);
+    return res.json({
+      ...analysis,
+      hasProfileSkills
+    });
   } catch (err) {
     console.error('Skill gap analysis error:', err);
     return res.status(500).json({ error: 'Failed to execute skill gap analysis.' });
@@ -106,8 +111,12 @@ router.post('/custom-analyze', authenticateToken, async (req, res) => {
       description: description || ''
     };
 
+    const hasProfileSkills = studentSkills.length > 0 || safeArray(profile?.projects_json).length > 0;
     const analysis = await runSkillGapAnalysisAgent(studentProfile, customInternship);
-    return res.json(analysis);
+    return res.json({
+      ...analysis,
+      hasProfileSkills
+    });
   } catch (err) {
     console.error('Custom skill gap error:', err);
     return res.status(500).json({ error: 'Failed to analyze custom job requirements.' });

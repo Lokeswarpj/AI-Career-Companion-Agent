@@ -35,7 +35,7 @@ router.post('/register', async (req, res) => {
       [userId, normalizedEmail, password_hash, full_name.trim()]
     );
 
-    // Initialize empty profile
+    // Initialize completely clean empty profile for new student
     await db.run(
       `INSERT INTO profiles 
        (id, user_id, preferred_roles, technical_skills, soft_skills, experience_json, projects_json, certifications_json, preferred_industries) 
@@ -43,13 +43,13 @@ router.post('/register', async (req, res) => {
       [
         profileId,
         userId,
-        JSON.stringify(['Full-Stack Web Developer', 'Software Engineer Intern']),
-        JSON.stringify(['JavaScript', 'React', 'Python', 'Git']),
-        JSON.stringify(['Communication', 'Problem Solving']),
         JSON.stringify([]),
         JSON.stringify([]),
         JSON.stringify([]),
-        JSON.stringify(['Technology', 'FinTech'])
+        JSON.stringify([]),
+        JSON.stringify([]),
+        JSON.stringify([]),
+        JSON.stringify([])
       ]
     );
 
