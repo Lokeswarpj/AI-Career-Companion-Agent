@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import compression from 'compression';
 import dotenv from 'dotenv';
 import path from 'path';
 import fs from 'fs';
@@ -26,6 +27,9 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// High-speed HTTP Gzip/Deflate compression for all assets & JSON responses
+app.use(compression());
+
 // Security & Middleware
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
@@ -46,7 +50,7 @@ app.use(async (req, res, next) => {
   next();
 });
 
-// Serve static frontend assets if built
+// Serve static frontend assets if built with high-efficiency browser caching
 const distCandidates = [
   path.resolve(__dirname, '../dist'),
   path.resolve(__dirname, '../frontend/dist'),
@@ -55,7 +59,16 @@ const distCandidates = [
 const distPath = distCandidates.find(d => fs.existsSync(path.join(d, 'index.html')));
 
 if (distPath) {
-  app.use(express.static(distPath));
+  app.use(express.static(distPath, {
+    maxAge: '7d',
+    setHeaders: (res, filePath) => {
+      if (filePath.endsWith('.html')) {
+        res.setHeader('Cache-Control', 'no-cache, must-revalidate');
+      } else if (filePath.match(/\.(js|css|png|jpg|jpeg|gif|ico|svg|woff2|woff)$/)) {
+        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      }
+    }
+  }));
 }
 
 // Root endpoint & API status dashboard

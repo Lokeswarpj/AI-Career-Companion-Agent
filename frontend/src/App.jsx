@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { useAuth } from './context/AuthContext';
 
 import Navbar from './components/Navbar';
@@ -6,18 +6,37 @@ import Sidebar from './components/Sidebar';
 import Background3D from './components/Background3D';
 import Footer from './components/Footer';
 
+// Core entry pages (bundled for instant first-paint)
 import LandingPage from './pages/LandingPage';
 import AuthPage from './pages/AuthPage';
 import DashboardPage from './pages/DashboardPage';
-import ProfilePage from './pages/ProfilePage';
-import ResumePage from './pages/ResumePage';
-import InternshipsPage from './pages/InternshipsPage';
-import MatchingPage from './pages/MatchingPage';
-import SkillGapPage from './pages/SkillGapPage';
-import ApplicationCustomizerPage from './pages/ApplicationCustomizerPage';
-import MockInterviewPage from './pages/MockInterviewPage';
-import InterviewHistoryPage from './pages/InterviewHistoryPage';
-import AssistantPage from './pages/AssistantPage';
+
+// Lazy-loaded secondary pages (code-split for ultra-fast initial page download)
+const ProfilePage = lazy(() => import('./pages/ProfilePage'));
+const ResumePage = lazy(() => import('./pages/ResumePage'));
+const InternshipsPage = lazy(() => import('./pages/InternshipsPage'));
+const MatchingPage = lazy(() => import('./pages/MatchingPage'));
+const SkillGapPage = lazy(() => import('./pages/SkillGapPage'));
+const ApplicationCustomizerPage = lazy(() => import('./pages/ApplicationCustomizerPage'));
+const MockInterviewPage = lazy(() => import('./pages/MockInterviewPage'));
+const InterviewHistoryPage = lazy(() => import('./pages/InterviewHistoryPage'));
+const AssistantPage = lazy(() => import('./pages/AssistantPage'));
+
+// Fallback loader during initial lazy chunk fetch
+function PageLoader() {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+      <div style={{
+        width: '36px',
+        height: '36px',
+        border: '3px solid rgba(99, 102, 241, 0.2)',
+        borderTopColor: '#6366f1',
+        borderRadius: '50%',
+        animation: 'spin 0.7s linear infinite'
+      }} />
+    </div>
+  );
+}
 
 export default function App() {
   const { isAuthenticated } = useAuth();
@@ -110,7 +129,7 @@ export default function App() {
         />
       </div>
 
-      {/* 3. Main Routed Content Area with Instant 0ms Tab Switching */}
+      {/* 3. Main Routed Content Area with Instant 0ms Tab Switching & Lazy Code Splitting */}
       <main 
         style={{ 
           flex: 1,
@@ -132,9 +151,9 @@ export default function App() {
           />
         )}
 
-        {/* Authenticated Pages - Retained in DOM for 0ms Zero-Lag Tab Switching */}
+        {/* Authenticated Pages */}
         {isAuthenticated && (
-          <>
+          <Suspense fallback={<PageLoader />}>
             {visitedTabs.has('dashboard') && (
               <div style={{ display: currentTab === 'dashboard' ? 'block' : 'none' }}>
                 <DashboardPage setActiveTab={setActiveTab} setSelectedInternshipId={setSelectedInternshipId} />
@@ -206,7 +225,7 @@ export default function App() {
                 <AssistantPage />
               </div>
             )}
-          </>
+          </Suspense>
         )}
       </main>
 
