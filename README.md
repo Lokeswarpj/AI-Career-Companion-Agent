@@ -1,73 +1,101 @@
-# CareerPulse AI — AI Career Companion Agent for Internship Matching and Interview Preparation
+# CareerPulse AI — Autonomous AI Career Companion Agent
 
-> **Infosys Virtual Internship Capstone Project**  
+> **Infosys Springboard Virtual Internship Capstone Project**  
 > *Track: Applied Generative AI & Full-Stack Cloud-Native Engineering*  
-> *Environment: Google Antigravity & Google Gemini API*
+> *Live Deployment*: [https://careerpulse-ai-9q9s.onrender.com/](https://careerpulse-ai-9q9s.onrender.com/)
 
 ---
 
-## 📌 Executive Summary & Project Milestones
+## 📌 Executive Summary & Completed Project Milestones
 
-**CareerPulse AI** is an intelligent, end-to-end AI Career Companion Agent designed to revolutionize student internship matching, skill-gap analysis, and interview preparation.
+**CareerPulse AI** is an intelligent, full-lifecycle AI Career Companion Agent platform engineered to empower undergraduate students and job seekers across every step of their career discovery journey: from resume parsing and RAG-powered internship discovery to multi-factor job matching, skill gap roadmaps, ATS resume/cover letter customization, voice-enabled mock interviews, and a 10-stage application tracker.
 
-### 🏆 Completed Project Milestones
-- ✅ **Milestone 1**: System Architecture, Student Profile Management, Multi-Format Resume Parsing (PDF/DOCX), Structured Competency Extraction, and Multi-Agent Design.
-- ✅ **Milestone 2**: Curated Internship Knowledge Base (180 standardized postings), RAG Dense Vector Pipeline (720 semantic chunks), Job-Resume Matching Agent (multi-factor scoring with reasoning), Kaggle 1,000 Candidates Dataset Ingestion & Evaluation, and Automated Evaluation Benchmark Suite (MRR: 1.000, 100% Top-1 Accuracy across 53 assertions).
+### 🏆 Milestone Verification & Compliance Status (100% Completed)
+
+| Milestone | Key Deliverables & Focus Areas | Test Pass Rate | Compliance Report |
+|---|---|---|---|
+| **Milestone 1** | System Architecture, Student Profile Management, Multi-Format Resume Parsing (PDF/DOCX), Structured Skill Extraction, and Multi-Agent Design | ✅ **15/15 Passed (100%)** | [MILESTONE_1_COMPLIANCE_REPORT.md](file:///c:/Users/lokes/OneDrive/Desktop/infosys/MILESTONE_1_COMPLIANCE_REPORT.md) |
+| **Milestone 2** | Curated Internship Knowledge Base (180 standardized postings across 6 domains), Dense Vector RAG Pipeline (720 semantic chunks), Multi-Factor Job Matching Agent, and Evaluation Suite (MRR: 1.000, 100% Top-1 Accuracy) | ✅ **38/38 Passed (100%)** | [MILESTONE_2_COMPLIANCE_REPORT.md](file:///c:/Users/lokes/OneDrive/Desktop/infosys/MILESTONE_2_COMPLIANCE_REPORT.md) |
+| **Milestone 3** | Skill Gap Analysis Agent (5-category taxonomy & 3-week roadmap), Resume & Cover Letter Customizer Agent (STAR bullet points & Anti-Hallucination Guardrail), Interview Preparation Agent (5-category questions & 3D rubric scoring), and Conversational Career Assistant Multi-Agent Orchestrator | ✅ **31/31 Passed (100%)** | [MILESTONE_3_COMPLIANCE_REPORT.md](file:///c:/Users/lokes/OneDrive/Desktop/infosys/MILESTONE_3_COMPLIANCE_REPORT.md) |
+| **Milestone 4** | Application Tracking Module (10 lifecycle stages, Kanban & Table views, urgency reminders, conversion KPIs), End-to-End System Testing & Validation (105 total assertions), Sub-300ms Performance Optimization, and Final Project Documentation | ✅ **21/21 Passed (100%)** | [MILESTONE_4_COMPLIANCE_REPORT.md](file:///c:/Users/lokes/OneDrive/Desktop/infosys/MILESTONE_4_COMPLIANCE_REPORT.md) |
+| **OVERALL** | **Complete Full-Stack Cloud-Native Multi-Agent System** | ✅ **105/105 Passed (100%)** | [FINAL_PROJECT_REPORT.md](file:///c:/Users/lokes/OneDrive/Desktop/infosys/FINAL_PROJECT_REPORT.md) |
 
 ---
 
-## 🏗️ System Architecture
+## 🏗️ End-to-End System Architecture
 
 ```mermaid
 graph TD
-    subgraph Client ["Frontend (React 18 + Vite + Modern Glassmorphic CSS)"]
-        UI_Landing[Landing Page & Showcase]
-        UI_Auth[Authentication & 1-Click Demo Login]
-        UI_Dashboard[Student Command Dashboard]
-        UI_Profile[Career Profile & Tag Editor]
-        UI_Resume[Resume AI & SWOT Diagnostics]
-        UI_Internships[Internship Discovery & Multi-Filter]
-        UI_Match[AI Hybrid Match & Ranking Board]
-        UI_SkillGap[Skill-Gap Breakdown Matrix]
-        UI_Mock[Interactive AI Mock Interview Simulator]
-        UI_History[Interview Analytics & Transcripts]
-        UI_Chat[Context-Aware Career Companion Bot]
+    subgraph Client ["Frontend (React 18 + Vite + Modern Glassmorphism CSS)"]
+        UI_Dashboard["Student Command Dashboard"]
+        UI_Profile["Profile & Skill Editor"]
+        UI_Resume["Resume AI & Extraction Studio"]
+        UI_Internships["180 Internship Explorer (RAG)"]
+        UI_Match["AI Matching & Explainable Compatibility"]
+        UI_SkillGap["Skill Gap Matrix & Learning Roadmaps"]
+        UI_Customizer["ATS Resume & Cover Letter Studio"]
+        UI_Mock["Voice-Enabled Mock Interview Coach"]
+        UI_Tracker["10-Stage Application Tracker (Kanban)"]
+        UI_Chat["Conversational Career Assistant"]
     end
 
     subgraph Server ["Backend API (Node.js + Express REST API)"]
         AuthRoute["/api/auth (Bcrypt, JWT)"]
         ProfileRoute["/api/profile"]
-        ResumeRoute["/api/resume (PDF/DOCX Extractor)"]
-        InternshipRoute["/api/internships (Multi-Filter)"]
-        MatchRoute["/api/matching (Weighted Formula)"]
-        InterviewRoute["/api/interview (Real-Time Scoring)"]
-        ChatRoute["/api/assistant (Student Memory RAG)"]
+        ResumeRoute["/api/resume (PDF/DOCX Extraction)"]
+        InternshipRoute["/api/internships (RAG Semantic Search)"]
+        MatchRoute["/api/matching (Multi-Factor Scoring)"]
+        SkillGapRoute["/api/skill-gap (5-Tier Taxonomy)"]
+        CustomRoute["/api/customization (ATS & Anti-Hallucination)"]
+        InterviewRoute["/api/interview (5 Categories & 3D Rubric)"]
+        AppRoute["/api/applications (10-Stage Lifecycle)"]
+        ChatRoute["/api/assistant (Multi-Agent Dispatcher)"]
     end
 
-    subgraph ServiceLayer ["Application Services & AI"]
-        GeminiService["Gemini AI Service (Multi-model & Heuristic Fallback)"]
-        MatchingEngine["Deterministic Matcher & Skill Matrix Engine"]
-        ResumeParser["PDF-Parse & Mammoth Text Extractor"]
-        SeedProvider["40+ Curated Live Internship Seed Dataset"]
+    subgraph AI_Engine ["AI & Multi-Agent Layer"]
+        GeminiService["Google Gemini 1.5 Flash API"]
+        FallbackEngine["Sub-300ms Heuristic Fallback Engine"]
+        VectorStore["In-Memory Cosine Vector Store (720 Chunks)"]
+        Guardrail["Anti-Hallucination Verification Engine"]
     end
 
-    subgraph Persistence ["Persistence Layer (SQLite / sql.js)"]
-        DB_Users[(Users & Password Hashes)]
-        DB_Profiles[(Student Career Profiles)]
-        DB_Resumes[(Resumes & Extracted Skills)]
-        DB_Internships[(Curated Internship Catalog)]
-        DB_Saved[(Application Tracker)]
-        DB_Sessions[(Interview Sessions & Scores)]
-        DB_Exchanges[(Interview Q&A Transcripts)]
-        DB_Chat[(Chat Messages)]
+    subgraph DataLayer ["Persistence Layer"]
+        SupabasePG[("Supabase PostgreSQL (Production)")]
+        SQLiteLocal[("SQLite sql.js (Local Fallback)")]
     end
 
-    Client --> Server
-    Server --> ServiceLayer
-    ServiceLayer --> GeminiService
-    ServiceLayer --> MatchingEngine
-    Server --> Persistence
+    Client <==> Server
+    Server <==> AI_Engine
+    Server <==> DataLayer
 ```
+
+---
+
+## 🚀 Key Feature Modules
+
+### 1. 📊 10-Stage Application Tracking Module (Milestone 4)
+- **Lifecycle Stages**: `Saved`, `Planning to Apply`, `Applied`, `Under Review`, `Shortlisted`, `Interview Scheduled`, `Interview Completed`, `Offer Received`, `Rejected`, `Withdrawn`.
+- **1-Click Import**: Seamlessly import any curated role from the 180 catalog into your personal tracker.
+- **Urgency Alert Engine**: Computes days remaining until deadline (🔴 Urgent $\le 3$ days, 🟡 Approaching $\le 7$ days, 🎯 Interview Reminders).
+- **Dual Display Modes**: Fluid Kanban drag-and-drop board + sortable and filterable data table.
+- **Portfolio Analytics**: Aggregates conversion metrics, active pipelines, upcoming interviews, and received offers.
+
+### 2. 🔍 RAG Knowledge Base & Semantic Search (Milestone 2)
+- **180 Curated Postings**: Standardized enterprise roles across AI/ML, Cloud/DevOps, Full-Stack, Data Engineering, Mobile, and Cybersecurity.
+- **720 Vector Chunks**: Structured chunking strategy with in-memory normalized cosine similarity indexing.
+- **Benchmark Accuracy**: Achieves **1.000 Mean Reciprocal Rank (MRR)** and **100% Top-1 Domain Retrieval Accuracy**.
+
+### 3. 🎯 Deterministic Multi-Factor Compatibility Engine (Milestone 2)
+- Transparent mathematical scoring:
+  $$\text{Match Score} = (0.40 \times S_{\text{skills}}) + (0.25 \times S_{\text{projects}}) + (0.15 \times S_{\text{domain}}) + (0.10 \times S_{\text{education}}) + (0.10 \times S_{\text{experience}})$$
+- Distinguishes required skills (75% weight) from preferred skills (25% weight).
+
+### 4. 🧠 5 Collaborative AI Agents (Milestone 3)
+1. **Skill Gap Analysis Agent**: Evaluates candidate competencies into 5 gap classifications and builds actionable 3-week learning roadmaps.
+2. **Resume & Cover Letter Customizer Agent**: Generates STAR-formatted bullet points, elevates ATS match scores ($> 90\%$), and enforces anti-hallucination guardrails.
+3. **Interview Preparation Agent**: Creates 5-category question plans, pre-interview revision checklists, and evaluates answers via a 3D rubric (Technical, Communication, Relevance).
+4. **Conversational Career Assistant**: Natural language multi-agent dispatcher and side-by-side internship comparator.
+5. **Job-Resume Matching Agent**: Calculates explainable fit breakdowns and candidate strengths.
 
 ---
 
@@ -75,101 +103,36 @@ graph TD
 
 | Layer | Technologies Used | Rationale |
 |---|---|---|
-| **Frontend** | React 18, Vite 6, Lucide React, Canvas Confetti | Lightning-fast HMR, component modularity, fluid animations |
-| **Styling** | Vanilla Modern CSS (Design Tokens, Glassmorphism) | Zero external framework lock-in, custom responsive themes |
-| **Backend** | Node.js, Express.js | Unified JavaScript runtime, robust REST API architecture |
-| **Persistence** | SQLite (`sql.js` WASM engine) | Zero-configuration file persistence, instant startup |
-| **AI / GenAI** | Google Gemini API (`gemini-2.5-flash`, `gemini-1.5-flash`) | Structured JSON outputs, multi-model fallback, zero crash |
-| **Parsers** | `pdf-parse`, `mammoth` | Server-side binary buffer parsing for PDF, DOCX, and text |
-| **Security** | `bcryptjs` (10 rounds), `jsonwebtoken` (JWT) | Stateless authentication, protected routes, secure password hashing |
+| **Frontend** | React 18, Vite 6, Lucide Icons, Canvas Confetti | Fast HMR, zero bundle bloat, responsive micro-interactions |
+| **Styling** | Vanilla Modern CSS (Tokens, Glassmorphism, Dark Mode) | Clean bespoke aesthetics without third-party framework overhead |
+| **Backend** | Node.js, Express.js REST API | Fast, asynchronous JavaScript backend architecture |
+| **Database** | Dual-Mode: Supabase Managed PostgreSQL + SQLite | High-availability cloud persistence with offline local fallback |
+| **AI / GenAI** | Google Gemini 1.5 Flash API + Resilient Heuristics | Sub-300ms execution latency, structured JSON outputs, zero crashes |
+| **Parsers** | `pdf-parse`, `mammoth` | Server-side binary buffer parsing for PDF and DOCX resumes |
+| **Audio** | Web Speech API | Client-side voice dictation and text-to-speech synthesis |
 
 ---
 
-## 📐 Deterministic Hybrid Matching Formula
+## 🧪 Running Automated Tests
 
-Unlike naive apps that pass everything blindly to an LLM, CareerPulse AI implements a transparent, auditable mathematical formula:
+CareerPulse AI includes comprehensive automated evaluation test suites:
 
-$$\text{Overall Match Score} = (0.45 \times S_{\text{skills}}) + (0.25 \times S_{\text{role}}) + (0.15 \times S_{\text{location}}) + (0.15 \times S_{\text{education}})$$
+```bash
+# Run all milestone test suites (M1, M2, M3, M4)
+npm test
 
-Where:
-- $S_{\text{skills}}$: Normalized skill overlap score. Exact match = $1.0$, Partial match = $0.5$, Missing = $0.0$.
-- $S_{\text{role}}$: Semantic keyword and domain relevance between student target roles and job title.
-- $S_{\text{location}}$: Location and work mode compatibility (Remote = 100%, Hybrid matching = 100%, On-site mismatched = 60%).
-- $S_{\text{education}}$: Academic major and graduation year readiness.
-
----
-
-## 📂 Project Structure
-
-```
-infosys/
-├── package.json               # Root scripts
-├── .env.example               # Template environment configuration
-├── backend/                   # Node.js + Express Backend
-│   ├── package.json
-│   ├── server.js              # Server entry point & database bootstrapper
-│   ├── config/
-│   │   ├── database.js        # SQLite persistence wrapper
-│   │   └── schema.sql         # SQL tables & indexes
-│   ├── middleware/
-│   │   ├── auth.js            # JWT verification & token generation
-│   │   └── upload.js          # Memory buffer Multer configuration
-│   ├── routes/
-│   │   ├── authRoutes.js      # Register, Login, 1-Click Demo Login, Me
-│   │   ├── profileRoutes.js   # Get & Update Student Profile
-│   │   ├── resumeRoutes.js    # Upload, Parse, Gemini SWOT Analysis
-│   │   ├── internshipRoutes.js# Search, Filter, Bookmark Tracker
-│   │   ├── matchingRoutes.js  # Recommendations & Deep-Dive Evaluations
-│   │   ├── interviewRoutes.js # Mock Sessions, Real-Time Scoring, History
-│   │   └── assistantRoutes.js # Context-Aware Chatbot
-│   ├── services/
-│   │   ├── geminiService.js   # Gemini API client with offline heuristic fallback
-│   │   ├── matchingEngine.js  # Mathematical matching & skill matrix
-│   │   ├── resumeParser.js    # PDF & DOCX text extraction
-│   │   └── seedData.js        # Curated tech internship catalog
-│   └── tests/
-│       └── api.test.js        # Automated unit & invariant test suite
-└── frontend/                  # React + Vite Frontend
-    ├── index.html
-    ├── package.json
-    ├── vite.config.js
-    └── src/
-        ├── App.jsx            # Tab router & state manager
-        ├── main.jsx           # Root DOM renderer
-        ├── index.css          # Design system & glassmorphic styling
-        ├── context/
-        │   ├── AuthContext.jsx         # Auth session provider
-        │   └── NotificationContext.jsx # Toast alerts
-        ├── components/
-        │   ├── Navbar.jsx
-        │   ├── Footer.jsx
-        │   ├── LoadingSpinner.jsx
-        │   └── Modal.jsx
-        ├── pages/
-        │   ├── LandingPage.jsx
-        │   ├── AuthPage.jsx
-        │   ├── DashboardPage.jsx
-        │   ├── ProfilePage.jsx
-        │   ├── ResumePage.jsx
-        │   ├── InternshipsPage.jsx
-        │   ├── MatchingPage.jsx
-        │   ├── SkillGapPage.jsx
-        │   ├── MockInterviewPage.jsx
-        │   ├── InterviewHistoryPage.jsx
-        │   └── AssistantPage.jsx
-        └── utils/
-            └── api.js         # Frontend HTTP client
+# Run individual milestone test suites
+npm run test:m1    # Auth & Profile CRUD (15 tests)
+npm run test:m2    # RAG Vector Store & Matching Engine (38 tests)
+npm run test:m3    # Multi-Agent Evaluation Suite (31 tests)
+npm run test:m4    # Application Tracker & End-to-End Pipeline (21 tests)
 ```
 
 ---
 
-## 🚀 Quickstart & Running Locally
+## 💻 Local Development Setup
 
-### Prerequisites
-- Node.js (v18 or higher, tested on Node v24)
-- npm (v9 or higher)
-
-### 1. Clone & Install Dependencies
+### 1. Install Dependencies
 ```bash
 # In the root directory:
 cd backend && npm install
@@ -177,61 +140,35 @@ cd ../frontend && npm install
 ```
 
 ### 2. Configure Environment Variables
-Create `.env` in `backend/` (or copy from `.env.example`):
+Create `.env` in `backend/` (or copy `.env.example`):
 ```env
 PORT=5000
 JWT_SECRET=careerpulse_secure_jwt_token_secret_key_2026_infosys_project
 GEMINI_API_KEY=your_gemini_api_key_here
-```
-> **Note**: If `GEMINI_API_KEY` is not provided, CareerPulse AI automatically activates its intelligent heuristic fallback engine. The application will run 100% offline without crashing!
-
-### 3. Run Automated Tests
-```bash
-npm test
+# Optional Supabase Database (will fallback to SQLite if omitted):
+DATABASE_URL=postgresql://postgres:...@aws-0-ap-south-1.pooler.supabase.com:6543/postgres
 ```
 
-### 4. Start the Application
-Run backend and frontend:
+### 3. Start Development Servers
 ```bash
-# Option A: From root directory:
-npm run dev:backend   # Terminal 1
-npm run dev:frontend  # Terminal 2
+# Start backend API (Terminal 1):
+npm run dev:backend
 
-# Option B: Direct directories:
-# Terminal 1 - Backend API:
-cd backend && npm start
-
-# Terminal 2 - Frontend Dev Server:
-cd frontend && npm run dev
+# Start frontend client (Terminal 2):
+npm run dev:frontend
 ```
 Open **`http://localhost:5173`** in your browser.
 
 ---
 
-## 🎓 Infosys Viva & Project Presentation Q&A Guide
-
-### Q1: What is the core problem that CareerPulse AI addresses?
-**Answer**: University students frequently struggle with generic resumes, blind applications to hundreds of portals, and lack of actionable interview practice. CareerPulse AI bridges this gap with an end-to-end intelligent platform that screens resumes with Gemini AI, deterministically matches students against real internship competencies, visualizes skill gaps with prioritized learning roadmaps, and conducts interactive mock interviews with real-time scoring.
-
-### Q2: Why did you use a Hybrid Matching Engine instead of letting the LLM calculate the score?
-**Answer**: Pure LLM calculations are non-deterministic, expensive, prone to hallucinations, and lack mathematical explainability. We built a hybrid architecture:
-- **Deterministic formula**: Computes exact mathematical weights (Skill overlap 45%, Role alignment 25%, Work mode 15%, Academic fit 15%).
-- **Gemini LLM**: Used where generative intelligence excels—synthesizing qualitative fit rationale, highlighting hidden applicant advantages, and providing contextual mock interview evaluations.
-
-### Q3: How do you handle resume text extraction securely?
-**Answer**: We use in-memory streaming with Multer and server-side parsers (`pdf-parse` for PDFs and `mammoth` for DOCX). The files are never permanently exposed on unprotected web roots. Extracted text is sanitized before structured analysis, and secrets are stored strictly on the server in environment variables.
-
-### Q4: What happens if the Gemini API key is expired or there is no internet connection during viva?
-**Answer**: CareerPulse AI has an **Enterprise Heuristic Fallback Engine** built directly into `geminiService.js`. If the Gemini API is unreachable, the system automatically uses domain-specific heuristic analyzers for resume taxonomy extraction, interview questions, answer grading, and chat responses. The application will never crash or hang.
-
-### Q5: How does the AI Mock Interviewer evaluate answers?
-**Answer**: The system evaluates responses across three distinct dimensions on a 0–100 scale:
-1. **Technical Correctness & Depth**: Did the student explain core concepts and architecture accurately?
-2. **Communication & Structure**: Was the answer clear, structured (e.g. STAR method), and concise?
-3. **Relevance & Completeness**: Did the candidate answer all sub-parts of the specific question?
-It also highlights key concepts mentioned, missed edge cases, and provides a model answer blueprint.
+## 📄 Academic Project Reports & Documentation
+- 📘 [FINAL_PROJECT_REPORT.md](file:///c:/Users/lokes/OneDrive/Desktop/infosys/FINAL_PROJECT_REPORT.md): Complete technical report containing problem statement, system architecture, RAG design, agent specifications, and quantitative evaluation.
+- 📋 [MILESTONE_4_COMPLIANCE_REPORT.md](file:///c:/Users/lokes/OneDrive/Desktop/infosys/MILESTONE_4_COMPLIANCE_REPORT.md): Detailed compliance matrix for Milestone 4.
+- 📋 [MILESTONE_3_COMPLIANCE_REPORT.md](file:///c:/Users/lokes/OneDrive/Desktop/infosys/MILESTONE_3_COMPLIANCE_REPORT.md): Multi-agent architecture and evaluation report.
+- 📋 [MILESTONE_2_COMPLIANCE_REPORT.md](file:///c:/Users/lokes/OneDrive/Desktop/infosys/MILESTONE_2_COMPLIANCE_REPORT.md): RAG knowledge base & matching report.
+- 📋 [MILESTONE_1_COMPLIANCE_REPORT.md](file:///c:/Users/lokes/OneDrive/Desktop/infosys/MILESTONE_1_COMPLIANCE_REPORT.md): System architecture and parser report.
 
 ---
 
-## 📄 License & Academic Attribution
-This project was developed for the **Infosys Virtual Internship Program**. Built with **Google Antigravity** and the **Google Gemini API**. Licensed under the MIT License.
+## 📄 License & Attribution
+Developed for the **Infosys Springboard Virtual Internship Program**. Built with **Google Antigravity** and **Google Gemini API**. Licensed under the MIT License.

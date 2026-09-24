@@ -181,5 +181,33 @@ export const api = {
   clearChatHistory: async () => {
     clearApiCache('/assistant/history');
     return apiRequest('/assistant/history', { method: 'DELETE' });
+  },
+
+  // M4.1 Application Tracking & Management Module
+  getApplications: (params = {}, opts = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return apiRequest(`/applications${query ? `?${query}` : ''}`, opts);
+  },
+  getApplicationStats: (opts = {}) => apiRequest('/applications/stats', opts),
+  getApplication: (id, opts = {}) => apiRequest(`/applications/${id}`, opts),
+  createApplication: async (payload) => {
+    clearApiCache('/applications');
+    return apiRequest('/applications', { method: 'POST', body: JSON.stringify(payload) });
+  },
+  importInternshipToTracker: async (internshipId, payload = {}) => {
+    clearApiCache('/applications');
+    return apiRequest(`/applications/import-internship/${internshipId}`, { method: 'POST', body: JSON.stringify(payload) });
+  },
+  updateApplicationStatus: async (id, status) => {
+    clearApiCache('/applications');
+    return apiRequest(`/applications/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) });
+  },
+  updateApplication: async (id, payload) => {
+    clearApiCache('/applications');
+    return apiRequest(`/applications/${id}`, { method: 'PUT', body: JSON.stringify(payload) });
+  },
+  deleteTrackerApplication: async (id) => {
+    clearApiCache('/applications');
+    return apiRequest(`/applications/${id}`, { method: 'DELETE' });
   }
 };

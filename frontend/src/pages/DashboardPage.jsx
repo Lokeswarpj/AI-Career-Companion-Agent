@@ -15,7 +15,8 @@ import {
   Award,
   Zap,
   Target,
-  ExternalLink
+  ExternalLink,
+  ClipboardList
 } from 'lucide-react';
 
 export default function DashboardPage({ setActiveTab, setSelectedInternshipId }) {
@@ -105,11 +106,19 @@ export default function DashboardPage({ setActiveTab, setSelectedInternshipId })
 
           <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
             <button 
-              onClick={() => setActiveTab('mock-interview')}
+              onClick={() => setActiveTab('applications')}
               className="btn btn-primary"
               style={{ gap: '0.5rem' }}
             >
-              <Mic size={18} />
+              <ClipboardList size={18} />
+              <span>Application Tracker (M4)</span>
+            </button>
+            <button 
+              onClick={() => setActiveTab('mock-interview')}
+              className="btn btn-secondary"
+              style={{ gap: '0.5rem' }}
+            >
+              <Mic size={18} color="#06b6d4" />
               <span>Start AI Mock Interview</span>
             </button>
             <button 

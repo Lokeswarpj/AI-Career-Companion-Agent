@@ -189,6 +189,29 @@ const PG_TABLE_SCHEMAS = [
       ats_score REAL DEFAULT 0,
       created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+  )`,
+  `CREATE TABLE IF NOT EXISTS applications (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      internship_id TEXT REFERENCES internships(id) ON DELETE SET NULL,
+      company_name TEXT NOT NULL,
+      role_title TEXT NOT NULL,
+      job_description TEXT,
+      location TEXT,
+      stipend TEXT,
+      status TEXT NOT NULL DEFAULT 'Saved',
+      application_date TEXT,
+      deadline TEXT,
+      interview_date TEXT,
+      interview_status TEXT DEFAULT 'None',
+      interview_type TEXT DEFAULT 'Virtual',
+      priority TEXT DEFAULT 'Medium',
+      notes TEXT,
+      tailored_application_id TEXT REFERENCES tailored_applications(id) ON DELETE SET NULL,
+      applied_url TEXT,
+      contact_person TEXT,
+      created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
   )`
 ];
 
@@ -228,7 +251,7 @@ export async function getSqliteDatabase() {
       saveDatabase();
     }
 
-    // Run non-destructive schema migrations (Milestone 2 & 3 support)
+    // Run non-destructive schema migrations (Milestone 2, 3 & 4 support)
     try {
       dbInstance.run(`
         CREATE TABLE IF NOT EXISTS internship_chunks (
@@ -259,6 +282,36 @@ export async function getSqliteDatabase() {
           FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
         );
         CREATE INDEX IF NOT EXISTS idx_tailored_applications_user_id ON tailored_applications(user_id);
+
+        CREATE TABLE IF NOT EXISTS applications (
+          id TEXT PRIMARY KEY,
+          user_id TEXT NOT NULL,
+          internship_id TEXT,
+          company_name TEXT NOT NULL,
+          role_title TEXT NOT NULL,
+          job_description TEXT,
+          location TEXT,
+          stipend TEXT,
+          status TEXT NOT NULL DEFAULT 'Saved',
+          application_date TEXT,
+          deadline TEXT,
+          interview_date TEXT,
+          interview_status TEXT DEFAULT 'None',
+          interview_type TEXT DEFAULT 'Virtual',
+          priority TEXT DEFAULT 'Medium',
+          notes TEXT,
+          tailored_application_id TEXT,
+          applied_url TEXT,
+          contact_person TEXT,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
+          FOREIGN KEY(internship_id) REFERENCES internships(id) ON DELETE SET NULL,
+          FOREIGN KEY(tailored_application_id) REFERENCES tailored_applications(id) ON DELETE SET NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_applications_user_id ON applications(user_id);
+        CREATE INDEX IF NOT EXISTS idx_applications_status ON applications(status);
+        CREATE INDEX IF NOT EXISTS idx_applications_deadline ON applications(deadline);
       `);
 
       const cols = ['responsibilities_json', 'preferred_skills_json', 'experience_requirements', 'education_requirements'];

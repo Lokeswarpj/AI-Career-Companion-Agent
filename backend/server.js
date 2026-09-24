@@ -18,6 +18,7 @@ import interviewRoutes from './routes/interviewRoutes.js';
 import assistantRoutes from './routes/assistantRoutes.js';
 import skillGapRoutes from './routes/skillGapRoutes.js';
 import customizationRoutes from './routes/customizationRoutes.js';
+import applicationRoutes from './routes/applicationRoutes.js';
 
 dotenv.config();
 
@@ -274,7 +275,8 @@ app.get('/api', (req, res) => {
       '/api/skill-gap',
       '/api/customization',
       '/api/interview',
-      '/api/assistant'
+      '/api/assistant',
+      '/api/applications'
     ]
   });
 });
@@ -290,6 +292,7 @@ const routes = [
   { path: '/customization', handler: customizationRoutes },
   { path: '/interview', handler: interviewRoutes },
   { path: '/assistant', handler: assistantRoutes },
+  { path: '/applications', handler: applicationRoutes },
 ];
 
 for (const route of routes) {

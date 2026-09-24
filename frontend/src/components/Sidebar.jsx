@@ -18,7 +18,8 @@ import {
   History,
   ShieldCheck,
   PanelLeftClose,
-  PanelLeftOpen
+  PanelLeftOpen,
+  ClipboardList
 } from 'lucide-react';
 
 export default function Sidebar({ activeTab, setActiveTab, isCollapsed, setIsCollapsed }) {
@@ -34,6 +35,7 @@ export default function Sidebar({ activeTab, setActiveTab, isCollapsed, setIsCol
     { id: 'skill-gap', label: 'Skill Gap', icon: Compass, badge: null },
     { id: 'customizer', label: 'Customizer', icon: FileText, badge: 'ATS' },
     { id: 'mock-interview', label: 'Mock Interview', icon: Mic, badge: '3D' },
+    { id: 'applications', label: 'Application Tracker', icon: ClipboardList, badge: 'M4' },
     { id: 'assistant', label: 'Career Assistant', icon: MessageSquare, badge: 'AI' },
   ];
 

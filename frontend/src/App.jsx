@@ -20,6 +20,7 @@ const SkillGapPage = lazy(() => import('./pages/SkillGapPage'));
 const ApplicationCustomizerPage = lazy(() => import('./pages/ApplicationCustomizerPage'));
 const MockInterviewPage = lazy(() => import('./pages/MockInterviewPage'));
 const InterviewHistoryPage = lazy(() => import('./pages/InterviewHistoryPage'));
+const ApplicationsPage = lazy(() => import('./pages/ApplicationsPage'));
 const AssistantPage = lazy(() => import('./pages/AssistantPage'));
 
 // Fallback loader during initial lazy chunk fetch
@@ -47,6 +48,7 @@ const VALID_AUTH_TABS = [
   'skill-gap',
   'customizer',
   'mock-interview',
+  'applications',
   'history',
   'assistant'
 ];
@@ -61,6 +63,7 @@ function prefetchSecondaryPages() {
     () => import('./pages/SkillGapPage'),
     () => import('./pages/ApplicationCustomizerPage'),
     () => import('./pages/MockInterviewPage'),
+    () => import('./pages/ApplicationsPage'),
     () => import('./pages/InterviewHistoryPage'),
     () => import('./pages/AssistantPage')
   ];
@@ -315,6 +318,15 @@ export default function App() {
                   selectedInternshipId={selectedInternshipId}
                   setSelectedInternshipId={setSelectedInternshipId}
                   setActiveTab={handleNavigate}
+                />
+              </div>
+            )}
+
+            {visitedTabs.has('applications') && (
+              <div style={{ display: currentTab === 'applications' ? 'block' : 'none' }}>
+                <ApplicationsPage 
+                  setActiveTab={handleNavigate} 
+                  setSelectedInternshipId={setSelectedInternshipId} 
                 />
               </div>
             )}

@@ -7,7 +7,11 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch --watch-path=server.js --watch-path=routes --watch-path=services --watch-path=middleware --watch-path=config server.js",
-    "test": "node tests/api.test.js && node tests/m2_evaluation.test.js && node tests/m3_evaluation.test.js"
+    "test": "node tests/api.test.js && node tests/m2_evaluation.test.js && node tests/m3_evaluation.test.js && node tests/m4_evaluation.test.js",
+    "test:m1": "node tests/api.test.js",
+    "test:m2": "node tests/m2_evaluation.test.js",
+    "test:m3": "node tests/m3_evaluation.test.js",
+    "test:m4": "node tests/m4_evaluation.test.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

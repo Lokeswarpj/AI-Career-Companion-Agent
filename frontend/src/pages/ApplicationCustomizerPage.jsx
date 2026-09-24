@@ -728,6 +728,30 @@ export default function ApplicationCustomizerPage({ selectedInternshipId, setSel
                     )}
 
                     <button
+                      onClick={async () => {
+                        try {
+                          await api.createApplication({
+                            company_name: app.company,
+                            role_title: app.role_title,
+                            internship_id: app.internship_id,
+                            tailored_application_id: app.id,
+                            status: 'Applied',
+                            priority: 'High'
+                          });
+                          notify.success(`Added ${app.company} application bundle to Tracker.`);
+                          if (setActiveTab) setActiveTab('applications');
+                        } catch (err) {
+                          notify.error('Failed to add to tracker.');
+                        }
+                      }}
+                      className="btn btn-outline"
+                      style={{ fontSize: '0.78rem', padding: '0.35rem 0.6rem', gap: '0.25rem', borderColor: '#06b6d4', color: '#06b6d4' }}
+                      title="Track this customized application in M4.1 Tracker"
+                    >
+                      <Sparkles size={13} /> Track in M4
+                    </button>
+
+                    <button
                       onClick={() => handleDeleteSavedApp(app.id)}
                       className="btn btn-secondary"
                       style={{ fontSize: '0.78rem', padding: '0.35rem 0.55rem', color: 'var(--accent-rose)' }}

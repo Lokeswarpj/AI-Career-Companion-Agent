@@ -21,7 +21,8 @@ import {
   Database,
   ArrowRight,
   Sliders,
-  Target
+  Target,
+  ClipboardList
 } from 'lucide-react';
 
 export default function InternshipsPage({ setActiveTab, setSelectedInternshipId }) {
@@ -33,6 +34,16 @@ export default function InternshipsPage({ setActiveTab, setSelectedInternshipId 
   const [resumeMatchMap, setResumeMatchMap] = useState({});
   const [selectedItem, setSelectedItem] = useState(null);
   const [stats, setStats] = useState(null);
+
+  const handleTrackInternship = async (item) => {
+    try {
+      const res = await api.importInternshipToTracker(item.id, { status: 'Saved', priority: 'Medium' });
+      notify.success(res.message || `Added ${item.company} to application tracker.`);
+      if (setActiveTab) setActiveTab('applications');
+    } catch (err) {
+      notify.error('Failed to add to application tracker.');
+    }
+  };
 
   // Search & Filter state
   const [search, setSearch] = useState('');
@@ -617,18 +628,34 @@ export default function InternshipsPage({ setActiveTab, setSelectedInternshipId 
               justifyContent: 'space-between',
               paddingTop: '1.25rem',
               borderTop: '1px solid var(--border-subtle)',
-              marginTop: '0.5rem'
+              marginTop: '0.5rem',
+              flexWrap: 'wrap',
+              gap: '0.75rem'
             }}>
-              <a
-                href={selectedItem.apply_url || '#'}
-                target="_blank"
-                rel="noreferrer"
-                className="btn btn-primary btn-sm"
-                style={{ gap: '0.4rem' }}
-              >
-                <span>Direct Application Link</span>
-                <ExternalLink size={14} />
-              </a>
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <a
+                  href={selectedItem.apply_url || '#'}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="btn btn-primary btn-sm"
+                  style={{ gap: '0.4rem' }}
+                >
+                  <span>Direct Application Link</span>
+                  <ExternalLink size={14} />
+                </a>
+
+                <button
+                  onClick={() => {
+                    handleTrackInternship(selectedItem);
+                    setSelectedItem(null);
+                  }}
+                  className="btn btn-outline btn-sm"
+                  style={{ gap: '0.4rem', borderColor: '#06b6d4', color: '#06b6d4' }}
+                >
+                  <ClipboardList size={14} />
+                  <span>Track Application</span>
+                </button>
+              </div>
 
               <button
                 onClick={() => {
