@@ -12,19 +12,21 @@ const dbFilePath = isServerless ? path.join('/tmp', 'career_companion.sqlite') :
 const databaseUrl = process.env.DATABASE_URL || process.env.SUPABASE_DATABASE_URL || process.env.POSTGRES_URL;
 
 let pgPool = null;
+let pgInitialized = false;
 let dbInstance = null;
 let SQL = null;
 
-if (databaseUrl) {
+if (databaseUrl && !databaseUrl.includes('placeholder')) {
   try {
     const isLocal = databaseUrl.includes('localhost') || databaseUrl.includes('127.0.0.1');
     pgPool = new pg.Pool({
       connectionString: databaseUrl,
-      ssl: isLocal ? false : { rejectUnauthorized: false }
+      ssl: isLocal ? false : { rejectUnauthorized: false },
+      connectionTimeoutMillis: 5000
     });
-    console.log('[Database] 🌐 Initialized Supabase / PostgreSQL Cloud Client');
+    console.log('[Database] 🌐 Supabase / PostgreSQL Cloud Pool Configured.');
   } catch (pgErr) {
-    console.warn('[Database] Failed to initialize PostgreSQL pool, falling back to SQLite:', pgErr.message);
+    console.warn('[Database] PostgreSQL pool configuration notice:', pgErr.message);
     pgPool = null;
   }
 }
@@ -64,7 +66,7 @@ async function loadSqlEngine() {
 }
 
 async function initPgTables() {
-  if (!pgPool) return;
+  if (!pgPool || pgInitialized) return;
   try {
     await pgPool.query(`
       CREATE TABLE IF NOT EXISTS users (
@@ -200,9 +202,10 @@ async function initPgTables() {
           updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       );
     `);
+    pgInitialized = true;
     console.log('[Database] ✅ Supabase PostgreSQL schema initialized and verified.');
   } catch (err) {
-    console.error('[Database] PostgreSQL schema initialization error:', err.message);
+    console.warn('[Database] PostgreSQL schema verification notice:', err.message);
   }
 }
 
@@ -314,15 +317,9 @@ function convertSqliteToPg(sql) {
   return sql.replace(/\?/g, () => `$${index++}`);
 }
 
-// Universal Helper wrapper for clean SQL queries across SQLite and Supabase PostgreSQL
-export const db = {
-  async get(sql, params = []) {
-    if (pgPool) {
-      const pgSql = convertSqliteToPg(sql);
-      const res = await pgPool.query(pgSql, params);
-      return res.rows[0] || null;
-    }
-    const database = await getDatabase();
+async function executeSqliteFallback(action, sql, params = []) {
+  const database = await getDatabase();
+  if (action === 'get') {
     const stmt = database.prepare(sql);
     stmt.bind(params);
     if (stmt.step()) {
@@ -332,15 +329,7 @@ export const db = {
     }
     stmt.free();
     return null;
-  },
-
-  async all(sql, params = []) {
-    if (pgPool) {
-      const pgSql = convertSqliteToPg(sql);
-      const res = await pgPool.query(pgSql, params);
-      return res.rows;
-    }
-    const database = await getDatabase();
+  } else if (action === 'all') {
     const stmt = database.prepare(sql);
     stmt.bind(params);
     const results = [];
@@ -349,28 +338,75 @@ export const db = {
     }
     stmt.free();
     return results;
+  } else if (action === 'run') {
+    database.run(sql, params);
+    saveDatabase();
+    return { success: true };
+  } else if (action === 'exec') {
+    database.exec(sql);
+    saveDatabase();
+    return { success: true };
+  }
+}
+
+// Universal Helper wrapper for clean SQL queries across SQLite and Supabase PostgreSQL
+export const db = {
+  async get(sql, params = []) {
+    if (pgPool) {
+      try {
+        if (!pgInitialized) await initPgTables();
+        const pgSql = convertSqliteToPg(sql);
+        const res = await pgPool.query(pgSql, params);
+        return res.rows[0] || null;
+      } catch (err) {
+        console.warn('[Database] PostgreSQL get error, using SQLite fallback:', err.message);
+        return executeSqliteFallback('get', sql, params);
+      }
+    }
+    return executeSqliteFallback('get', sql, params);
+  },
+
+  async all(sql, params = []) {
+    if (pgPool) {
+      try {
+        if (!pgInitialized) await initPgTables();
+        const pgSql = convertSqliteToPg(sql);
+        const res = await pgPool.query(pgSql, params);
+        return res.rows;
+      } catch (err) {
+        console.warn('[Database] PostgreSQL all error, using SQLite fallback:', err.message);
+        return executeSqliteFallback('all', sql, params);
+      }
+    }
+    return executeSqliteFallback('all', sql, params);
   },
 
   async run(sql, params = []) {
     if (pgPool) {
-      const pgSql = convertSqliteToPg(sql);
-      await pgPool.query(pgSql, params);
-      return { success: true };
+      try {
+        if (!pgInitialized) await initPgTables();
+        const pgSql = convertSqliteToPg(sql);
+        await pgPool.query(pgSql, params);
+        return { success: true };
+      } catch (err) {
+        console.warn('[Database] PostgreSQL run error, using SQLite fallback:', err.message);
+        return executeSqliteFallback('run', sql, params);
+      }
     }
-    const database = await getDatabase();
-    database.run(sql, params);
-    saveDatabase();
-    return { success: true };
+    return executeSqliteFallback('run', sql, params);
   },
 
   async exec(sql) {
     if (pgPool) {
-      await pgPool.query(sql);
-      return { success: true };
+      try {
+        if (!pgInitialized) await initPgTables();
+        await pgPool.query(sql);
+        return { success: true };
+      } catch (err) {
+        console.warn('[Database] PostgreSQL exec error, using SQLite fallback:', err.message);
+        return executeSqliteFallback('exec', sql);
+      }
     }
-    const database = await getDatabase();
-    database.exec(sql);
-    saveDatabase();
-    return { success: true };
+    return executeSqliteFallback('exec', sql);
   }
 };
