@@ -15,6 +15,7 @@ let pgPool = null;
 let pgInitialized = false;
 let dbInstance = null;
 let SQL = null;
+let pgInitError = null;
 
 if (databaseUrl && !databaseUrl.includes('placeholder')) {
   try {
@@ -22,13 +23,61 @@ if (databaseUrl && !databaseUrl.includes('placeholder')) {
     pgPool = new pg.Pool({
       connectionString: databaseUrl,
       ssl: isLocal ? false : { rejectUnauthorized: false },
-      connectionTimeoutMillis: 5000
+      connectionTimeoutMillis: 10000,
+      idleTimeoutMillis: 30000,
+      max: 10
     });
+
+    pgPool.on('error', (err) => {
+      console.warn('[Database] Unexpected PostgreSQL client pool error:', err.message);
+    });
+
     console.log('[Database] 🌐 Supabase / PostgreSQL Cloud Pool Configured.');
-    initPgTables().catch(err => console.warn('[Database] Initial PG table bootstrap notice:', err.message));
+    initPgTables().catch(err => {
+      pgInitError = err.message;
+      console.warn('[Database] Initial PG table bootstrap notice:', err.message);
+    });
   } catch (pgErr) {
+    pgInitError = pgErr.message;
     console.warn('[Database] PostgreSQL pool configuration notice:', pgErr.message);
     pgPool = null;
+  }
+}
+
+export async function getDatabaseHealth() {
+  if (pgPool) {
+    try {
+      if (!pgInitialized) await initPgTables();
+      const countRes = await pgPool.query('SELECT COUNT(*) as count FROM users');
+      return {
+        engine: 'PostgreSQL (Supabase Cloud)',
+        status: 'Connected & Fully Synchronized',
+        userCount: parseInt(countRes.rows[0]?.count || '0', 10),
+        pgInitialized: true
+      };
+    } catch (err) {
+      return {
+        engine: 'PostgreSQL (Supabase)',
+        status: 'Connection Issue',
+        error: err.message,
+        fallback: 'Falling back to local SQLite engine',
+        pgInitialized: false
+      };
+    }
+  }
+
+  try {
+    const userRow = await executeSqliteFallback('get', 'SELECT COUNT(*) as count FROM users');
+    return {
+      engine: 'SQLite (Local / Ephemeral)',
+      status: 'Active',
+      userCount: userRow?.count || 0
+    };
+  } catch (err) {
+    return {
+      engine: 'SQLite',
+      status: `Error: ${err.message}`
+    };
   }
 }
 

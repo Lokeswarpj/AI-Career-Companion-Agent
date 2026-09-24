@@ -6,7 +6,7 @@ import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 
-import { getDatabase } from './config/database.js';
+import { getDatabase, getDatabaseHealth } from './config/database.js';
 import { seedInternshipsIfNeeded } from './services/seedData.js';
 
 import authRoutes from './routes/authRoutes.js';
@@ -250,11 +250,13 @@ app.get('/', (req, res) => {
 });
 
 // Health check endpoint
-app.get('/api/health', (req, res) => {
+app.get('/api/health', async (req, res) => {
+  const dbHealth = await getDatabaseHealth();
   res.json({
     status: 'healthy',
     timestamp: new Date().toISOString(),
     service: 'CareerPulse AI Backend API',
+    database: dbHealth,
     version: '1.0.0'
   });
 });
