@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import pg from 'pg';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -8,8 +9,25 @@ const isServerless = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTI
 const localDbPath = path.join(__dirname, '..', 'data', 'career_companion.sqlite');
 const dbFilePath = isServerless ? path.join('/tmp', 'career_companion.sqlite') : localDbPath;
 
+const databaseUrl = process.env.DATABASE_URL || process.env.SUPABASE_DATABASE_URL || process.env.POSTGRES_URL;
+
+let pgPool = null;
 let dbInstance = null;
 let SQL = null;
+
+if (databaseUrl) {
+  try {
+    const isLocal = databaseUrl.includes('localhost') || databaseUrl.includes('127.0.0.1');
+    pgPool = new pg.Pool({
+      connectionString: databaseUrl,
+      ssl: isLocal ? false : { rejectUnauthorized: false }
+    });
+    console.log('[Database] 🌐 Initialized Supabase / PostgreSQL Cloud Client');
+  } catch (pgErr) {
+    console.warn('[Database] Failed to initialize PostgreSQL pool, falling back to SQLite:', pgErr.message);
+    pgPool = null;
+  }
+}
 
 async function loadSqlEngine() {
   if (SQL) return SQL;
@@ -45,7 +63,155 @@ async function loadSqlEngine() {
   }
 }
 
+async function initPgTables() {
+  if (!pgPool) return;
+  try {
+    await pgPool.query(`
+      CREATE TABLE IF NOT EXISTS users (
+          id TEXT PRIMARY KEY,
+          email TEXT UNIQUE NOT NULL,
+          password_hash TEXT NOT NULL,
+          full_name TEXT NOT NULL,
+          avatar_url TEXT,
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS profiles (
+          id TEXT PRIMARY KEY,
+          user_id TEXT UNIQUE NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          phone TEXT,
+          university TEXT,
+          degree TEXT,
+          graduation_year INTEGER,
+          location TEXT,
+          preferred_location TEXT,
+          preferred_roles TEXT,
+          technical_skills TEXT,
+          soft_skills TEXT,
+          experience_json TEXT,
+          projects_json TEXT,
+          certifications_json TEXT,
+          preferred_industries TEXT,
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS resumes (
+          id TEXT PRIMARY KEY,
+          user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          filename TEXT NOT NULL,
+          file_type TEXT NOT NULL,
+          raw_text TEXT NOT NULL,
+          parsed_summary TEXT,
+          detected_skills_json TEXT,
+          strengths_json TEXT,
+          weaknesses_json TEXT,
+          recommended_skills_json TEXT,
+          career_suggestions_json TEXT,
+          uploaded_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS internships (
+          id TEXT PRIMARY KEY,
+          title TEXT NOT NULL,
+          company TEXT NOT NULL,
+          location TEXT NOT NULL,
+          remote_type TEXT NOT NULL,
+          description TEXT NOT NULL,
+          responsibilities_json TEXT,
+          required_skills_json TEXT NOT NULL,
+          preferred_skills_json TEXT,
+          preferred_qualifications TEXT,
+          experience_requirements TEXT,
+          education_requirements TEXT,
+          duration TEXT DEFAULT '3 Months',
+          stipend TEXT DEFAULT '₹25,000/month',
+          apply_url TEXT,
+          source TEXT DEFAULT 'Curated',
+          posted_date TEXT DEFAULT '2026-08-01',
+          deadline TEXT DEFAULT '2026-10-01',
+          industry TEXT DEFAULT 'Technology',
+          is_demo INTEGER DEFAULT 0,
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS saved_internships (
+          id TEXT PRIMARY KEY,
+          user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          internship_id TEXT NOT NULL REFERENCES internships(id) ON DELETE CASCADE,
+          notes TEXT,
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS interview_sessions (
+          id TEXT PRIMARY KEY,
+          user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          internship_id TEXT REFERENCES internships(id) ON DELETE SET NULL,
+          role_title TEXT NOT NULL,
+          company TEXT,
+          overall_score REAL DEFAULT 0,
+          status TEXT DEFAULT 'in_progress',
+          feedback_json TEXT,
+          started_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+          completed_at TIMESTAMP WITH TIME ZONE
+      );
+
+      CREATE TABLE IF NOT EXISTS interview_messages (
+          id TEXT PRIMARY KEY,
+          session_id TEXT NOT NULL REFERENCES interview_sessions(id) ON DELETE CASCADE,
+          sender TEXT NOT NULL,
+          content TEXT NOT NULL,
+          score REAL,
+          feedback TEXT,
+          model_answer TEXT,
+          timestamp TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS assistant_chats (
+          id TEXT PRIMARY KEY,
+          user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          sender TEXT NOT NULL,
+          content TEXT NOT NULL,
+          metadata_json TEXT,
+          timestamp TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS internship_chunks (
+          id TEXT PRIMARY KEY,
+          internship_id TEXT NOT NULL REFERENCES internships(id) ON DELETE CASCADE,
+          chunk_index INTEGER NOT NULL,
+          chunk_type TEXT NOT NULL,
+          chunk_text TEXT NOT NULL,
+          metadata_json TEXT,
+          embedding_json TEXT,
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS tailored_applications (
+          id TEXT PRIMARY KEY,
+          user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          internship_id TEXT,
+          role_title TEXT NOT NULL,
+          company TEXT NOT NULL,
+          tailored_resume_json TEXT,
+          cover_letter TEXT,
+          ats_score REAL DEFAULT 0,
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+    console.log('[Database] ✅ Supabase PostgreSQL schema initialized and verified.');
+  } catch (err) {
+    console.error('[Database] PostgreSQL schema initialization error:', err.message);
+  }
+}
+
 export async function getDatabase() {
+  if (pgPool) {
+    await initPgTables();
+    return pgPool;
+  }
+
   if (dbInstance) return dbInstance;
 
   SQL = await loadSqlEngine();
@@ -68,7 +234,7 @@ export async function getDatabase() {
       saveDatabase();
     }
 
-    // Run non-destructive schema migrations (Milestone 2 support)
+    // Run non-destructive schema migrations (Milestone 2 & 3 support)
     try {
       dbInstance.run(`
         CREATE TABLE IF NOT EXISTS internship_chunks (
@@ -101,14 +267,11 @@ export async function getDatabase() {
         CREATE INDEX IF NOT EXISTS idx_tailored_applications_user_id ON tailored_applications(user_id);
       `);
 
-      // Add columns to internships if missing
       const cols = ['responsibilities_json', 'preferred_skills_json', 'experience_requirements', 'education_requirements'];
       for (const col of cols) {
         try {
           dbInstance.run(`ALTER TABLE internships ADD COLUMN ${col} TEXT;`);
-        } catch (alterErr) {
-          // Column already exists, ignore
-        }
+        } catch (alterErr) {}
       }
     } catch (migErr) {
       console.warn('[Database] Schema migration notice:', migErr.message);
@@ -131,6 +294,7 @@ export async function getDatabase() {
 }
 
 export function saveDatabase() {
+  if (pgPool) return; // Supabase Postgres commits transactions immediately
   if (!dbInstance) return;
   try {
     const data = dbInstance.export();
@@ -145,9 +309,19 @@ export function saveDatabase() {
   }
 }
 
-// Helper wrapper for clean SQL queries
+function convertSqliteToPg(sql) {
+  let index = 1;
+  return sql.replace(/\?/g, () => `$${index++}`);
+}
+
+// Universal Helper wrapper for clean SQL queries across SQLite and Supabase PostgreSQL
 export const db = {
   async get(sql, params = []) {
+    if (pgPool) {
+      const pgSql = convertSqliteToPg(sql);
+      const res = await pgPool.query(pgSql, params);
+      return res.rows[0] || null;
+    }
     const database = await getDatabase();
     const stmt = database.prepare(sql);
     stmt.bind(params);
@@ -161,6 +335,11 @@ export const db = {
   },
 
   async all(sql, params = []) {
+    if (pgPool) {
+      const pgSql = convertSqliteToPg(sql);
+      const res = await pgPool.query(pgSql, params);
+      return res.rows;
+    }
     const database = await getDatabase();
     const stmt = database.prepare(sql);
     stmt.bind(params);
@@ -173,6 +352,11 @@ export const db = {
   },
 
   async run(sql, params = []) {
+    if (pgPool) {
+      const pgSql = convertSqliteToPg(sql);
+      await pgPool.query(pgSql, params);
+      return { success: true };
+    }
     const database = await getDatabase();
     database.run(sql, params);
     saveDatabase();
@@ -180,6 +364,10 @@ export const db = {
   },
 
   async exec(sql) {
+    if (pgPool) {
+      await pgPool.query(sql);
+      return { success: true };
+    }
     const database = await getDatabase();
     database.exec(sql);
     saveDatabase();
