@@ -25,6 +25,7 @@ if (databaseUrl && !databaseUrl.includes('placeholder')) {
       connectionTimeoutMillis: 5000
     });
     console.log('[Database] 🌐 Supabase / PostgreSQL Cloud Pool Configured.');
+    initPgTables().catch(err => console.warn('[Database] Initial PG table bootstrap notice:', err.message));
   } catch (pgErr) {
     console.warn('[Database] PostgreSQL pool configuration notice:', pgErr.message);
     pgPool = null;
@@ -209,12 +210,7 @@ async function initPgTables() {
   }
 }
 
-export async function getDatabase() {
-  if (pgPool) {
-    await initPgTables();
-    return pgPool;
-  }
-
+export async function getSqliteDatabase() {
   if (dbInstance) return dbInstance;
 
   SQL = await loadSqlEngine();
@@ -296,8 +292,14 @@ export async function getDatabase() {
   return dbInstance;
 }
 
+export async function getDatabase() {
+  if (pgPool) {
+    await initPgTables();
+  }
+  return getSqliteDatabase();
+}
+
 export function saveDatabase() {
-  if (pgPool) return; // Supabase Postgres commits transactions immediately
   if (!dbInstance) return;
   try {
     const data = dbInstance.export();
@@ -318,7 +320,7 @@ function convertSqliteToPg(sql) {
 }
 
 async function executeSqliteFallback(action, sql, params = []) {
-  const database = await getDatabase();
+  const database = await getSqliteDatabase();
   if (action === 'get') {
     const stmt = database.prepare(sql);
     stmt.bind(params);
