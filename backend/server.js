@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 
 import { getDatabase } from './config/database.js';
@@ -45,8 +46,23 @@ app.use(async (req, res, next) => {
   next();
 });
 
+// Serve static frontend assets if built
+const distCandidates = [
+  path.resolve(__dirname, '../dist'),
+  path.resolve(__dirname, '../frontend/dist'),
+  path.resolve(__dirname, 'dist')
+];
+const distPath = distCandidates.find(d => fs.existsSync(path.join(d, 'index.html')));
+
+if (distPath) {
+  app.use(express.static(distPath));
+}
+
 // Root endpoint & API status dashboard
 app.get('/', (req, res) => {
+  if (distPath && fs.existsSync(path.join(distPath, 'index.html'))) {
+    return res.sendFile(path.join(distPath, 'index.html'));
+  }
   if (req.accepts('html')) {
     return res.send(`
 <!DOCTYPE html>
@@ -266,6 +282,16 @@ const routes = [
 for (const route of routes) {
   app.use(`/api${route.path}`, route.handler);
   app.use(route.path, route.handler);
+}
+
+// SPA Wildcard Fallback for Single-Page React App
+if (distPath) {
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) {
+      return next();
+    }
+    res.sendFile(path.join(distPath, 'index.html'));
+  });
 }
 
 // Global Error Handler
