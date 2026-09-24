@@ -64,16 +64,29 @@ export default function MockInterviewPage({ selectedInternshipId, setSelectedInt
     setupSpeechRecognition();
   }, []);
 
+  useEffect(() => {
+    if (internshipsList.length > 0) {
+      if (selectedInternshipId) {
+        const found = internshipsList.find(i => i.id === selectedInternshipId);
+        if (found && !roleTitle) setRoleTitle(found.title);
+      } else {
+        setSelectedInternshipId(internshipsList[0].id);
+        if (!roleTitle) setRoleTitle(internshipsList[0].title);
+      }
+    }
+  }, [selectedInternshipId, internshipsList]);
+
   async function loadInternships() {
     try {
       const res = await api.getInternships();
-      setInternshipsList(res.internships || []);
+      const list = res.internships || [];
+      setInternshipsList(list);
       if (selectedInternshipId) {
-        const found = res.internships.find(i => i.id === selectedInternshipId);
+        const found = list.find(i => i.id === selectedInternshipId);
         if (found) setRoleTitle(found.title);
-      } else if (res.internships?.length > 0) {
-        setSelectedInternshipId(res.internships[0].id);
-        setRoleTitle(res.internships[0].title);
+      } else if (list.length > 0) {
+        setSelectedInternshipId(list[0].id);
+        setRoleTitle(list[0].title);
       }
     } catch (err) {}
   }
@@ -157,9 +170,13 @@ export default function MockInterviewPage({ selectedInternshipId, setSelectedInt
   const handleStartInterview = async () => {
     setLoading(true);
     try {
+      const targetInternship = internshipsList.find(i => i.id === selectedInternshipId) || (internshipsList.length > 0 ? internshipsList[0] : null);
+      const targetId = targetInternship?.id || selectedInternshipId || null;
+      const targetRole = roleTitle || targetInternship?.title || 'Full-Stack Software Engineer';
+
       const res = await api.startInterview({
-        internshipId: selectedInternshipId,
-        roleTitle: roleTitle || 'Full-Stack Software Engineer',
+        internshipId: targetId,
+        roleTitle: targetRole,
         difficulty,
         interviewType
       });
@@ -283,18 +300,22 @@ export default function MockInterviewPage({ selectedInternshipId, setSelectedInt
                 <label className="form-label">Select Target Internship</label>
                 <select
                   className="form-select"
-                  value={selectedInternshipId || ''}
+                  value={selectedInternshipId || (internshipsList.length > 0 ? internshipsList[0].id : '')}
                   onChange={(e) => {
                     setSelectedInternshipId(e.target.value);
                     const found = internshipsList.find(i => i.id === e.target.value);
                     if (found) setRoleTitle(found.title);
                   }}
                 >
-                  {internshipsList.map((item) => (
-                    <option key={item.id} value={item.id}>
-                      {item.title} — {item.company}
-                    </option>
-                  ))}
+                  {internshipsList.length === 0 ? (
+                    <option value="">Loading curated internships...</option>
+                  ) : (
+                    internshipsList.map((item) => (
+                      <option key={item.id} value={item.id}>
+                        {item.title} — {item.company}
+                      </option>
+                    ))
+                  )}
                 </select>
               </div>
 

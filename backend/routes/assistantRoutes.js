@@ -24,7 +24,7 @@ router.post('/chat', authenticateToken, async (req, res) => {
       [req.user.id]
     );
     const avgScoreRow = await db.get(
-      'SELECT AVG(overall_score) as avgScore FROM interview_sessions WHERE user_id = ? AND status = "completed"',
+      "SELECT AVG(overall_score) as avgScore FROM interview_sessions WHERE user_id = ? AND status = 'completed'",
       [req.user.id]
     );
 

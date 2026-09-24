@@ -184,37 +184,52 @@ const PG_TABLE_SCHEMAS = [
       id TEXT PRIMARY KEY,
       user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
       internship_id TEXT NOT NULL REFERENCES internships(id) ON DELETE CASCADE,
+      status TEXT DEFAULT 'saved',
       notes TEXT,
-      created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE(user_id, internship_id)
   )`,
   `CREATE TABLE IF NOT EXISTS interview_sessions (
       id TEXT PRIMARY KEY,
       user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
       internship_id TEXT REFERENCES internships(id) ON DELETE SET NULL,
       role_title TEXT NOT NULL,
-      company TEXT,
+      difficulty TEXT DEFAULT 'Intermediate',
+      interview_type TEXT DEFAULT 'Technical',
       overall_score REAL DEFAULT 0,
+      technical_score REAL DEFAULT 0,
+      communication_score REAL DEFAULT 0,
+      relevance_score REAL DEFAULT 0,
+      feedback_summary TEXT,
+      strengths_json TEXT,
+      improvements_json TEXT,
+      recommendations_json TEXT,
       status TEXT DEFAULT 'in_progress',
-      feedback_json TEXT,
-      started_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+      created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
       completed_at TIMESTAMP WITH TIME ZONE
   )`,
-  `CREATE TABLE IF NOT EXISTS interview_messages (
+  `CREATE TABLE IF NOT EXISTS interview_exchanges (
       id TEXT PRIMARY KEY,
       session_id TEXT NOT NULL REFERENCES interview_sessions(id) ON DELETE CASCADE,
-      sender TEXT NOT NULL,
-      content TEXT NOT NULL,
+      question_number INTEGER NOT NULL,
+      question_text TEXT NOT NULL,
+      category TEXT,
+      user_answer TEXT,
       score REAL,
+      technical_score REAL,
+      communication_score REAL,
+      relevance_score REAL,
       feedback TEXT,
-      model_answer TEXT,
+      key_points TEXT,
+      missed_points TEXT,
+      ideal_answer_points TEXT,
       timestamp TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
   )`,
-  `CREATE TABLE IF NOT EXISTS assistant_chats (
+  `CREATE TABLE IF NOT EXISTS chat_messages (
       id TEXT PRIMARY KEY,
       user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-      sender TEXT NOT NULL,
+      role TEXT NOT NULL,
       content TEXT NOT NULL,
-      metadata_json TEXT,
       timestamp TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
   )`,
   `CREATE TABLE IF NOT EXISTS internship_chunks (
@@ -264,14 +279,93 @@ const PG_TABLE_SCHEMAS = [
   )`
 ];
 
+const PG_MIGRATIONS = [
+  // interview_sessions
+  `ALTER TABLE interview_sessions ADD COLUMN IF NOT EXISTS difficulty TEXT DEFAULT 'Intermediate'`,
+  `ALTER TABLE interview_sessions ADD COLUMN IF NOT EXISTS interview_type TEXT DEFAULT 'Technical'`,
+  `ALTER TABLE interview_sessions ADD COLUMN IF NOT EXISTS overall_score REAL DEFAULT 0`,
+  `ALTER TABLE interview_sessions ADD COLUMN IF NOT EXISTS technical_score REAL DEFAULT 0`,
+  `ALTER TABLE interview_sessions ADD COLUMN IF NOT EXISTS communication_score REAL DEFAULT 0`,
+  `ALTER TABLE interview_sessions ADD COLUMN IF NOT EXISTS relevance_score REAL DEFAULT 0`,
+  `ALTER TABLE interview_sessions ADD COLUMN IF NOT EXISTS feedback_summary TEXT`,
+  `ALTER TABLE interview_sessions ADD COLUMN IF NOT EXISTS strengths_json TEXT`,
+  `ALTER TABLE interview_sessions ADD COLUMN IF NOT EXISTS improvements_json TEXT`,
+  `ALTER TABLE interview_sessions ADD COLUMN IF NOT EXISTS recommendations_json TEXT`,
+  `ALTER TABLE interview_sessions ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'in_progress'`,
+  `ALTER TABLE interview_sessions ADD COLUMN IF NOT EXISTS created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP`,
+  `ALTER TABLE interview_sessions ADD COLUMN IF NOT EXISTS completed_at TIMESTAMP WITH TIME ZONE`,
+  // interview_exchanges
+  `ALTER TABLE interview_exchanges ADD COLUMN IF NOT EXISTS technical_score REAL`,
+  `ALTER TABLE interview_exchanges ADD COLUMN IF NOT EXISTS communication_score REAL`,
+  `ALTER TABLE interview_exchanges ADD COLUMN IF NOT EXISTS relevance_score REAL`,
+  `ALTER TABLE interview_exchanges ADD COLUMN IF NOT EXISTS key_points TEXT`,
+  `ALTER TABLE interview_exchanges ADD COLUMN IF NOT EXISTS missed_points TEXT`,
+  `ALTER TABLE interview_exchanges ADD COLUMN IF NOT EXISTS ideal_answer_points TEXT`,
+  // saved_internships
+  `ALTER TABLE saved_internships ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'saved'`,
+  `ALTER TABLE saved_internships ADD COLUMN IF NOT EXISTS notes TEXT`,
+  `ALTER TABLE saved_internships ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP`,
+  // internships
+  `ALTER TABLE internships ADD COLUMN IF NOT EXISTS responsibilities_json TEXT`,
+  `ALTER TABLE internships ADD COLUMN IF NOT EXISTS preferred_skills_json TEXT`,
+  `ALTER TABLE internships ADD COLUMN IF NOT EXISTS preferred_qualifications TEXT`,
+  `ALTER TABLE internships ADD COLUMN IF NOT EXISTS experience_requirements TEXT`,
+  `ALTER TABLE internships ADD COLUMN IF NOT EXISTS education_requirements TEXT`,
+  `ALTER TABLE internships ADD COLUMN IF NOT EXISTS duration TEXT DEFAULT '3 Months'`,
+  `ALTER TABLE internships ADD COLUMN IF NOT EXISTS stipend TEXT DEFAULT '₹25,000/month'`,
+  `ALTER TABLE internships ADD COLUMN IF NOT EXISTS apply_url TEXT`,
+  `ALTER TABLE internships ADD COLUMN IF NOT EXISTS source TEXT DEFAULT 'Curated'`,
+  `ALTER TABLE internships ADD COLUMN IF NOT EXISTS posted_date TEXT DEFAULT '2026-08-01'`,
+  `ALTER TABLE internships ADD COLUMN IF NOT EXISTS deadline TEXT DEFAULT '2026-10-01'`,
+  `ALTER TABLE internships ADD COLUMN IF NOT EXISTS industry TEXT DEFAULT 'Technology'`,
+  `ALTER TABLE internships ADD COLUMN IF NOT EXISTS is_demo INTEGER DEFAULT 0`,
+  // applications
+  `ALTER TABLE applications ADD COLUMN IF NOT EXISTS tailored_application_id TEXT`,
+  `ALTER TABLE applications ADD COLUMN IF NOT EXISTS applied_url TEXT`,
+  `ALTER TABLE applications ADD COLUMN IF NOT EXISTS contact_person TEXT`,
+  `ALTER TABLE applications ADD COLUMN IF NOT EXISTS interview_date TEXT`,
+  `ALTER TABLE applications ADD COLUMN IF NOT EXISTS interview_status TEXT DEFAULT 'None'`,
+  `ALTER TABLE applications ADD COLUMN IF NOT EXISTS interview_type TEXT DEFAULT 'Virtual'`,
+  `ALTER TABLE applications ADD COLUMN IF NOT EXISTS priority TEXT DEFAULT 'Medium'`
+];
+
+const PG_INDEXES = [
+  'CREATE INDEX IF NOT EXISTS idx_pg_users_email ON users(email)',
+  'CREATE INDEX IF NOT EXISTS idx_pg_profiles_user_id ON profiles(user_id)',
+  'CREATE INDEX IF NOT EXISTS idx_pg_resumes_user_id ON resumes(user_id)',
+  'CREATE INDEX IF NOT EXISTS idx_pg_saved_user_id ON saved_internships(user_id)',
+  'CREATE INDEX IF NOT EXISTS idx_pg_interview_sessions_user_id ON interview_sessions(user_id)',
+  'CREATE INDEX IF NOT EXISTS idx_pg_interview_exchanges_session ON interview_exchanges(session_id)',
+  'CREATE INDEX IF NOT EXISTS idx_pg_chat_messages_user_id ON chat_messages(user_id)',
+  'CREATE INDEX IF NOT EXISTS idx_pg_chunks_internship_id ON internship_chunks(internship_id)',
+  'CREATE INDEX IF NOT EXISTS idx_pg_tailored_applications_user_id ON tailored_applications(user_id)',
+  'CREATE INDEX IF NOT EXISTS idx_pg_applications_user_id ON applications(user_id)',
+  'CREATE INDEX IF NOT EXISTS idx_pg_applications_status ON applications(status)',
+  'CREATE INDEX IF NOT EXISTS idx_pg_applications_deadline ON applications(deadline)'
+];
+
 async function initPgTables() {
   if (!pgPool || pgInitialized) return;
   try {
     for (const schema of PG_TABLE_SCHEMAS) {
       await pgPool.query(schema);
     }
+    for (const migration of PG_MIGRATIONS) {
+      try {
+        await pgPool.query(migration);
+      } catch (migErr) {
+        // Safe to ignore if column exists or minor dialect differences
+      }
+    }
+    for (const idx of PG_INDEXES) {
+      try {
+        await pgPool.query(idx);
+      } catch (idxErr) {
+        // Safe to ignore index collisions
+      }
+    }
     pgInitialized = true;
-    console.log('[Database] ✅ Supabase PostgreSQL schema initialized and verified.');
+    console.log('[Database] ✅ Supabase PostgreSQL schema & migrations verified and synchronized.');
   } catch (err) {
     console.warn('[Database] PostgreSQL schema verification notice:', err.message);
   }

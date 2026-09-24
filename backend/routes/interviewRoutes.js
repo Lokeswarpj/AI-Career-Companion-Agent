@@ -321,7 +321,7 @@ router.post('/complete/:sessionId', authenticateToken, async (req, res) => {
 router.get('/history', authenticateToken, async (req, res) => {
   try {
     const sessions = await db.all(
-      'SELECT * FROM interview_sessions WHERE user_id = ? AND status = "completed" ORDER BY created_at DESC',
+      "SELECT * FROM interview_sessions WHERE user_id = ? AND status = 'completed' ORDER BY created_at DESC",
       [req.user.id]
     );
 
