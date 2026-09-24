@@ -29,47 +29,66 @@ export default function SkillGapPage({ selectedInternshipId, setSelectedInternsh
   const [loading, setLoading] = useState(true);
   const [internshipsList, setInternshipsList] = useState([]);
   const [gapData, setGapData] = useState(null);
+  const [error, setError] = useState(null);
   const [activeGapCategory, setActiveGapCategory] = useState('critical'); // 'critical' | 'partial' | 'matching' | 'preferred' | 'experience'
 
   useEffect(() => {
-    loadAllInternships();
+    let isMounted = true;
+    async function initPage() {
+      try {
+        setLoading(true);
+        setError(null);
+        const res = await api.getInternships();
+        if (!isMounted) return;
+        const list = res?.internships || [];
+        setInternshipsList(list);
+
+        const targetId = selectedInternshipId || list[0]?.id;
+        if (targetId) {
+          if (!selectedInternshipId && setSelectedInternshipId) {
+            setSelectedInternshipId(targetId);
+          }
+          const analysis = await api.analyzeSkillGap(targetId);
+          if (isMounted) {
+            setGapData(analysis);
+            setError(null);
+          }
+        }
+      } catch (err) {
+        if (isMounted) {
+          console.error('Skill gap init error:', err);
+          setError(err.message || 'Failed to load skill gap diagnostic.');
+        }
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    }
+
+    initPage();
+    return () => { isMounted = false; };
   }, []);
 
-  useEffect(() => {
-    if (selectedInternshipId) {
-      loadGapAnalysis(selectedInternshipId);
-    } else if (internshipsList.length > 0) {
-      setSelectedInternshipId(internshipsList[0].id);
-    }
-  }, [selectedInternshipId, internshipsList]);
-
-  async function loadAllInternships() {
-    try {
-      const res = await api.getInternships();
-      setInternshipsList(res.internships || []);
-      if (!selectedInternshipId && res.internships?.length > 0) {
-        setSelectedInternshipId(res.internships[0].id);
-      }
-    } catch (err) {
-      console.error('Failed to load list:', err);
-    }
-  }
-
   async function loadGapAnalysis(id) {
+    if (!id) return;
     try {
       setLoading(true);
+      setError(null);
       const res = await api.analyzeSkillGap(id);
       setGapData(res);
+      setError(null);
     } catch (err) {
+      console.error('Skill gap analysis error:', err);
+      setError(err.message || 'Failed to analyze skill gaps for this internship.');
       notify.error('Failed to analyze skill gaps for this internship.');
     } finally {
       setLoading(false);
     }
   }
 
-  if (loading && !gapData) {
-    return <LoadingSpinner message="Skill Gap Analysis Agent is cross-referencing candidate profile against multi-dimensional role requirements..." />;
-  }
+  const handleSelectInternship = (id) => {
+    if (setSelectedInternshipId) setSelectedInternshipId(id);
+    loadGapAnalysis(id);
+  };
 
   const internship = gapData?.internship;
   const metrics = gapData?.metrics;
@@ -102,8 +121,8 @@ export default function SkillGapPage({ selectedInternshipId, setSelectedInternsh
           </label>
           <select
             className="form-select"
-            value={selectedInternshipId || ''}
-            onChange={(e) => setSelectedInternshipId(e.target.value)}
+            value={selectedInternshipId || (internshipsList[0]?.id || '')}
+            onChange={(e) => handleSelectInternship(e.target.value)}
           >
             {internshipsList.map((item) => (
               <option key={item.id} value={item.id}>
@@ -114,9 +133,33 @@ export default function SkillGapPage({ selectedInternshipId, setSelectedInternsh
         </div>
       </div>
 
-      {loading && <LoadingSpinner message="Re-evaluating position requirements..." />}
+      {loading && !gapData && (
+        <LoadingSpinner message="Skill Gap Analysis Agent is cross-referencing candidate profile against multi-dimensional role requirements..." />
+      )}
 
-      {gapData && !loading && (
+      {error && !gapData && !loading && (
+        <div className="glass-panel" style={{ padding: '3rem 2rem', textAlign: 'center', margin: '2rem 0' }}>
+          <AlertTriangle size={48} color="#f59e0b" style={{ margin: '0 auto 1rem auto' }} />
+          <h3 style={{ fontSize: '1.4rem', fontWeight: 800, marginBottom: '0.5rem' }}>Unable to Complete Diagnostic</h3>
+          <p style={{ color: 'var(--text-secondary)', maxWidth: '500px', margin: '0 auto 1.5rem auto' }}>
+            {error || 'An unexpected error occurred while analyzing role requirements.'}
+          </p>
+          <button
+            onClick={() => loadGapAnalysis(selectedInternshipId || internshipsList[0]?.id)}
+            className="btn btn-primary"
+            style={{ margin: '0 auto' }}
+          >
+            <Sparkles size={16} />
+            <span>Retry Skill Gap Analysis</span>
+          </button>
+        </div>
+      )}
+
+      {loading && gapData && (
+        <LoadingSpinner message="Re-evaluating position requirements..." />
+      )}
+
+      {gapData && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
           
           {/* Target Role & Readiness Score Banner */}

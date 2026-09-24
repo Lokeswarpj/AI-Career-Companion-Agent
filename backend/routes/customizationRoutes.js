@@ -6,6 +6,21 @@ import { tailorResumeForRole, generateCustomizedCoverLetter } from '../services/
 
 const router = express.Router();
 
+function safeArray(val, fallback = []) {
+  if (!val) return fallback;
+  if (Array.isArray(val)) return val;
+  if (typeof val === 'object') return Object.values(val);
+  if (typeof val === 'string') {
+    try {
+      const parsed = JSON.parse(val);
+      return Array.isArray(parsed) ? parsed : [parsed];
+    } catch {
+      return val.split(',').map(s => s.trim()).filter(Boolean);
+    }
+  }
+  return fallback;
+}
+
 // Helper to construct enriched student profile
 async function getEnrichedStudentProfile(userId) {
   const user = await db.get('SELECT * FROM users WHERE id = ?', [userId]);
@@ -14,19 +29,23 @@ async function getEnrichedStudentProfile(userId) {
 
   let studentSkills = [];
   if (profile && profile.technical_skills) {
-    try { studentSkills = JSON.parse(profile.technical_skills); } catch {}
+    studentSkills = safeArray(profile.technical_skills);
   }
   if (latestResume && latestResume.detected_skills_json) {
     try {
-      const resumeSkills = JSON.parse(latestResume.detected_skills_json);
-      const combined = [
-        ...(resumeSkills.programming || []),
-        ...(resumeSkills.web || []),
-        ...(resumeSkills.aiData || []),
-        ...(resumeSkills.cloud || []),
-        ...(resumeSkills.tools || [])
-      ];
-      studentSkills = Array.from(new Set([...studentSkills, ...combined]));
+      const resumeSkills = typeof latestResume.detected_skills_json === 'string'
+        ? JSON.parse(latestResume.detected_skills_json)
+        : latestResume.detected_skills_json;
+      if (resumeSkills && typeof resumeSkills === 'object') {
+        const combined = [
+          ...(resumeSkills.programming || []),
+          ...(resumeSkills.web || []),
+          ...(resumeSkills.aiData || []),
+          ...(resumeSkills.cloud || []),
+          ...(resumeSkills.tools || [])
+        ];
+        studentSkills = Array.from(new Set([...studentSkills, ...combined]));
+      }
     } catch {}
   }
 
@@ -41,11 +60,11 @@ async function getEnrichedStudentProfile(userId) {
     location: profile?.location || 'Bengaluru, India',
     skills: studentSkills,
     technical_skills: studentSkills,
-    soft_skills: profile?.soft_skills ? (typeof profile.soft_skills === 'string' ? JSON.parse(profile.soft_skills) : profile.soft_skills) : [],
-    preferred_roles: profile?.preferred_roles ? (typeof profile.preferred_roles === 'string' ? JSON.parse(profile.preferred_roles) : profile.preferred_roles) : [],
-    projects: profile?.projects_json ? (typeof profile.projects_json === 'string' ? JSON.parse(profile.projects_json) : profile.projects_json) : [],
-    experience: profile?.experience_json ? (typeof profile.experience_json === 'string' ? JSON.parse(profile.experience_json) : profile.experience_json) : [],
-    certifications: profile?.certifications_json ? (typeof profile.certifications_json === 'string' ? JSON.parse(profile.certifications_json) : profile.certifications_json) : []
+    soft_skills: safeArray(profile?.soft_skills),
+    preferred_roles: safeArray(profile?.preferred_roles),
+    projects: safeArray(profile?.projects_json),
+    experience: safeArray(profile?.experience_json),
+    certifications: safeArray(profile?.certifications_json)
   };
 }
 

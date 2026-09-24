@@ -38,14 +38,73 @@ function PageLoader() {
   );
 }
 
+const VALID_AUTH_TABS = [
+  'dashboard',
+  'profile',
+  'resume',
+  'internships',
+  'matching',
+  'skill-gap',
+  'customizer',
+  'mock-interview',
+  'history',
+  'assistant'
+];
+
+// Preload secondary chunks in the background during idle time so switching tabs is instant (0ms)
+function prefetchSecondaryPages() {
+  const prefetchList = [
+    () => import('./pages/ProfilePage'),
+    () => import('./pages/ResumePage'),
+    () => import('./pages/InternshipsPage'),
+    () => import('./pages/MatchingPage'),
+    () => import('./pages/SkillGapPage'),
+    () => import('./pages/ApplicationCustomizerPage'),
+    () => import('./pages/MockInterviewPage'),
+    () => import('./pages/InterviewHistoryPage'),
+    () => import('./pages/AssistantPage')
+  ];
+
+  if (typeof window !== 'undefined') {
+    if ('requestIdleCallback' in window) {
+      window.requestIdleCallback(() => {
+        prefetchList.forEach(fn => fn());
+      });
+    } else {
+      setTimeout(() => {
+        prefetchList.forEach(fn => fn());
+      }, 300);
+    }
+  }
+}
+
+function getInitialTab() {
+  if (typeof window === 'undefined') return 'landing';
+  const hash = window.location.hash.replace(/^#\/?/, '').trim();
+  const stored = localStorage.getItem('careerpulse_active_tab');
+  const token = localStorage.getItem('careerpulse_token');
+
+  if (token) {
+    if (hash && VALID_AUTH_TABS.includes(hash)) return hash;
+    if (stored && VALID_AUTH_TABS.includes(stored)) return stored;
+    return 'dashboard';
+  } else {
+    if (hash === 'auth') return 'auth';
+    return 'landing';
+  }
+}
+
 export default function App() {
   const { isAuthenticated } = useAuth();
-  const [activeTab, setActiveTab] = useState('landing');
+  const [activeTab, setActiveTab] = useState(getInitialTab);
   const [selectedInternshipId, setSelectedInternshipId] = useState(null);
   const [authMode, setAuthMode] = useState('login');
   
   // Track visited tabs to enable instantaneous 0ms tab switching
-  const [visitedTabs, setVisitedTabs] = useState(() => new Set(['landing', 'auth', 'dashboard']));
+  const [visitedTabs, setVisitedTabs] = useState(() => {
+    const initial = getInitialTab();
+    return new Set(['landing', 'auth', 'dashboard', initial]);
+  });
   
   // Sidebar minimize/expand state with localStorage persistence
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
@@ -56,29 +115,75 @@ export default function App() {
     localStorage.setItem('careerpulse_sidebar_collapsed', isSidebarCollapsed.toString());
   }, [isSidebarCollapsed]);
 
-  // When user is authenticated, redirect landing/auth to dashboard
+  // Navigate helper to keep state, localStorage, and URL hash in 100% sync
+  const handleNavigate = (tab) => {
+    if (!tab) return;
+    setActiveTab(tab);
+    setVisitedTabs(prev => {
+      const next = new Set(prev);
+      next.add(tab);
+      return next;
+    });
+
+    if (tab !== 'landing' && tab !== 'auth') {
+      localStorage.setItem('careerpulse_active_tab', tab);
+      window.location.hash = `#${tab}`;
+    } else {
+      window.location.hash = `#${tab}`;
+    }
+  };
+
+  // Synchronize browser back/forward buttons (hashchange event)
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace(/^#\/?/, '').trim();
+      if (isAuthenticated) {
+        if (VALID_AUTH_TABS.includes(hash)) {
+          setActiveTab(hash);
+          localStorage.setItem('careerpulse_active_tab', hash);
+          setVisitedTabs(prev => new Set(prev).add(hash));
+        }
+      } else {
+        if (hash === 'auth' || hash === 'landing') {
+          setActiveTab(hash);
+          setVisitedTabs(prev => new Set(prev).add(hash));
+        }
+      }
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, [isAuthenticated]);
+
+  // When auth state changes (login, logout, session restoration)
   useEffect(() => {
     if (isAuthenticated) {
-      if (activeTab === 'landing' || activeTab === 'auth') {
-        setActiveTab('dashboard');
+      // Trigger background prefetching so all tab switches are instant (0ms)
+      prefetchSecondaryPages();
+
+      // If on landing or auth or invalid tab, navigate to dashboard or persisted tab
+      if (activeTab === 'landing' || activeTab === 'auth' || !VALID_AUTH_TABS.includes(activeTab)) {
+        const hash = window.location.hash.replace(/^#\/?/, '').trim();
+        const stored = localStorage.getItem('careerpulse_active_tab');
+        const target = (hash && VALID_AUTH_TABS.includes(hash)) 
+          ? hash 
+          : ((stored && VALID_AUTH_TABS.includes(stored)) ? stored : 'dashboard');
+        
+        handleNavigate(target);
+      } else {
+        window.location.hash = `#${activeTab}`;
+        localStorage.setItem('careerpulse_active_tab', activeTab);
       }
     } else {
-      // Reset visited tabs on logout
+      // Reset unauthenticated state
+      localStorage.removeItem('careerpulse_active_tab');
+      if (activeTab !== 'landing' && activeTab !== 'auth') {
+        setActiveTab('landing');
+        window.location.hash = '#landing';
+      }
       setVisitedTabs(new Set(['landing', 'auth']));
     }
   }, [isAuthenticated]);
-
-  // Record visited tab
-  useEffect(() => {
-    if (activeTab) {
-      setVisitedTabs(prev => {
-        if (prev.has(activeTab)) return prev;
-        const next = new Set(prev);
-        next.add(activeTab);
-        return next;
-      });
-    }
-  }, [activeTab]);
 
   // Safety fallback for unauthenticated users accessing protected tabs
   const currentTab = !isAuthenticated && !['landing', 'auth'].includes(activeTab) 
@@ -87,10 +192,10 @@ export default function App() {
 
   const handleGetStarted = () => {
     if (isAuthenticated) {
-      setActiveTab('dashboard');
+      handleNavigate('dashboard');
     } else {
       setAuthMode('register');
-      setActiveTab('auth');
+      handleNavigate('auth');
     }
   };
 
@@ -107,7 +212,7 @@ export default function App() {
       {showAuthenticatedNav && (
         <Sidebar
           activeTab={currentTab}
-          setActiveTab={setActiveTab}
+          setActiveTab={handleNavigate}
           isCollapsed={isSidebarCollapsed}
           setIsCollapsed={setIsSidebarCollapsed}
         />
@@ -122,7 +227,7 @@ export default function App() {
       >
         <Navbar 
           activeTab={currentTab} 
-          setActiveTab={setActiveTab} 
+          setActiveTab={handleNavigate} 
           isSidebarCollapsed={isSidebarCollapsed}
           setIsSidebarCollapsed={setIsSidebarCollapsed}
           setAuthMode={setAuthMode}
@@ -145,7 +250,7 @@ export default function App() {
 
         {!isAuthenticated && currentTab === 'auth' && (
           <AuthPage 
-            onSuccess={() => setActiveTab('dashboard')} 
+            onSuccess={() => handleNavigate('dashboard')} 
             authMode={authMode}
             setAuthMode={setAuthMode}
           />
@@ -156,7 +261,7 @@ export default function App() {
           <Suspense fallback={<PageLoader />}>
             {visitedTabs.has('dashboard') && (
               <div style={{ display: currentTab === 'dashboard' ? 'block' : 'none' }}>
-                <DashboardPage setActiveTab={setActiveTab} setSelectedInternshipId={setSelectedInternshipId} />
+                <DashboardPage setActiveTab={handleNavigate} setSelectedInternshipId={setSelectedInternshipId} />
               </div>
             )}
 
@@ -168,19 +273,19 @@ export default function App() {
 
             {visitedTabs.has('resume') && (
               <div style={{ display: currentTab === 'resume' ? 'block' : 'none' }}>
-                <ResumePage setActiveTab={setActiveTab} setSelectedInternshipId={setSelectedInternshipId} />
+                <ResumePage setActiveTab={handleNavigate} setSelectedInternshipId={setSelectedInternshipId} />
               </div>
             )}
 
             {visitedTabs.has('internships') && (
               <div style={{ display: currentTab === 'internships' ? 'block' : 'none' }}>
-                <InternshipsPage setActiveTab={setActiveTab} setSelectedInternshipId={setSelectedInternshipId} />
+                <InternshipsPage setActiveTab={handleNavigate} setSelectedInternshipId={setSelectedInternshipId} />
               </div>
             )}
 
             {visitedTabs.has('matching') && (
               <div style={{ display: currentTab === 'matching' ? 'block' : 'none' }}>
-                <MatchingPage setActiveTab={setActiveTab} setSelectedInternshipId={setSelectedInternshipId} />
+                <MatchingPage setActiveTab={handleNavigate} setSelectedInternshipId={setSelectedInternshipId} />
               </div>
             )}
 
@@ -189,7 +294,7 @@ export default function App() {
                 <SkillGapPage
                   selectedInternshipId={selectedInternshipId}
                   setSelectedInternshipId={setSelectedInternshipId}
-                  setActiveTab={setActiveTab}
+                  setActiveTab={handleNavigate}
                 />
               </div>
             )}
@@ -199,7 +304,7 @@ export default function App() {
                 <ApplicationCustomizerPage
                   selectedInternshipId={selectedInternshipId}
                   setSelectedInternshipId={setSelectedInternshipId}
-                  setActiveTab={setActiveTab}
+                  setActiveTab={handleNavigate}
                 />
               </div>
             )}
@@ -209,14 +314,14 @@ export default function App() {
                 <MockInterviewPage
                   selectedInternshipId={selectedInternshipId}
                   setSelectedInternshipId={setSelectedInternshipId}
-                  setActiveTab={setActiveTab}
+                  setActiveTab={handleNavigate}
                 />
               </div>
             )}
 
             {visitedTabs.has('history') && (
               <div style={{ display: currentTab === 'history' ? 'block' : 'none' }}>
-                <InterviewHistoryPage setActiveTab={setActiveTab} />
+                <InterviewHistoryPage setActiveTab={handleNavigate} />
               </div>
             )}
 
