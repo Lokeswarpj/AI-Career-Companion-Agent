@@ -66,143 +66,138 @@ async function loadSqlEngine() {
   }
 }
 
+const PG_TABLE_SCHEMAS = [
+  `CREATE TABLE IF NOT EXISTS users (
+      id TEXT PRIMARY KEY,
+      email TEXT UNIQUE NOT NULL,
+      password_hash TEXT NOT NULL,
+      full_name TEXT NOT NULL,
+      avatar_url TEXT,
+      created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+  )`,
+  `CREATE TABLE IF NOT EXISTS profiles (
+      id TEXT PRIMARY KEY,
+      user_id TEXT UNIQUE NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      phone TEXT,
+      university TEXT,
+      degree TEXT,
+      graduation_year INTEGER,
+      location TEXT,
+      preferred_location TEXT,
+      preferred_roles TEXT,
+      technical_skills TEXT,
+      soft_skills TEXT,
+      experience_json TEXT,
+      projects_json TEXT,
+      certifications_json TEXT,
+      preferred_industries TEXT,
+      created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+  )`,
+  `CREATE TABLE IF NOT EXISTS resumes (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      filename TEXT NOT NULL,
+      file_type TEXT NOT NULL,
+      raw_text TEXT NOT NULL,
+      parsed_summary TEXT,
+      detected_skills_json TEXT,
+      strengths_json TEXT,
+      weaknesses_json TEXT,
+      recommended_skills_json TEXT,
+      career_suggestions_json TEXT,
+      uploaded_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+  )`,
+  `CREATE TABLE IF NOT EXISTS internships (
+      id TEXT PRIMARY KEY,
+      title TEXT NOT NULL,
+      company TEXT NOT NULL,
+      location TEXT NOT NULL,
+      remote_type TEXT NOT NULL,
+      description TEXT NOT NULL,
+      responsibilities_json TEXT,
+      required_skills_json TEXT NOT NULL,
+      preferred_skills_json TEXT,
+      preferred_qualifications TEXT,
+      experience_requirements TEXT,
+      education_requirements TEXT,
+      duration TEXT DEFAULT '3 Months',
+      stipend TEXT DEFAULT '₹25,000/month',
+      apply_url TEXT,
+      source TEXT DEFAULT 'Curated',
+      posted_date TEXT DEFAULT '2026-08-01',
+      deadline TEXT DEFAULT '2026-10-01',
+      industry TEXT DEFAULT 'Technology',
+      is_demo INTEGER DEFAULT 0,
+      created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+  )`,
+  `CREATE TABLE IF NOT EXISTS saved_internships (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      internship_id TEXT NOT NULL REFERENCES internships(id) ON DELETE CASCADE,
+      notes TEXT,
+      created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+  )`,
+  `CREATE TABLE IF NOT EXISTS interview_sessions (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      internship_id TEXT REFERENCES internships(id) ON DELETE SET NULL,
+      role_title TEXT NOT NULL,
+      company TEXT,
+      overall_score REAL DEFAULT 0,
+      status TEXT DEFAULT 'in_progress',
+      feedback_json TEXT,
+      started_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+      completed_at TIMESTAMP WITH TIME ZONE
+  )`,
+  `CREATE TABLE IF NOT EXISTS interview_messages (
+      id TEXT PRIMARY KEY,
+      session_id TEXT NOT NULL REFERENCES interview_sessions(id) ON DELETE CASCADE,
+      sender TEXT NOT NULL,
+      content TEXT NOT NULL,
+      score REAL,
+      feedback TEXT,
+      model_answer TEXT,
+      timestamp TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+  )`,
+  `CREATE TABLE IF NOT EXISTS assistant_chats (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      sender TEXT NOT NULL,
+      content TEXT NOT NULL,
+      metadata_json TEXT,
+      timestamp TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+  )`,
+  `CREATE TABLE IF NOT EXISTS internship_chunks (
+      id TEXT PRIMARY KEY,
+      internship_id TEXT NOT NULL REFERENCES internships(id) ON DELETE CASCADE,
+      chunk_index INTEGER NOT NULL,
+      chunk_type TEXT NOT NULL,
+      chunk_text TEXT NOT NULL,
+      metadata_json TEXT,
+      embedding_json TEXT,
+      created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+  )`,
+  `CREATE TABLE IF NOT EXISTS tailored_applications (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      internship_id TEXT,
+      role_title TEXT NOT NULL,
+      company TEXT NOT NULL,
+      tailored_resume_json TEXT,
+      cover_letter TEXT,
+      ats_score REAL DEFAULT 0,
+      created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+  )`
+];
+
 async function initPgTables() {
   if (!pgPool || pgInitialized) return;
   try {
-    await pgPool.query(`
-      CREATE TABLE IF NOT EXISTS users (
-          id TEXT PRIMARY KEY,
-          email TEXT UNIQUE NOT NULL,
-          password_hash TEXT NOT NULL,
-          full_name TEXT NOT NULL,
-          avatar_url TEXT,
-          created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-      );
-
-      CREATE TABLE IF NOT EXISTS profiles (
-          id TEXT PRIMARY KEY,
-          user_id TEXT UNIQUE NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-          phone TEXT,
-          university TEXT,
-          degree TEXT,
-          graduation_year INTEGER,
-          location TEXT,
-          preferred_location TEXT,
-          preferred_roles TEXT,
-          technical_skills TEXT,
-          soft_skills TEXT,
-          experience_json TEXT,
-          projects_json TEXT,
-          certifications_json TEXT,
-          preferred_industries TEXT,
-          created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-          updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-      );
-
-      CREATE TABLE IF NOT EXISTS resumes (
-          id TEXT PRIMARY KEY,
-          user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-          filename TEXT NOT NULL,
-          file_type TEXT NOT NULL,
-          raw_text TEXT NOT NULL,
-          parsed_summary TEXT,
-          detected_skills_json TEXT,
-          strengths_json TEXT,
-          weaknesses_json TEXT,
-          recommended_skills_json TEXT,
-          career_suggestions_json TEXT,
-          uploaded_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-      );
-
-      CREATE TABLE IF NOT EXISTS internships (
-          id TEXT PRIMARY KEY,
-          title TEXT NOT NULL,
-          company TEXT NOT NULL,
-          location TEXT NOT NULL,
-          remote_type TEXT NOT NULL,
-          description TEXT NOT NULL,
-          responsibilities_json TEXT,
-          required_skills_json TEXT NOT NULL,
-          preferred_skills_json TEXT,
-          preferred_qualifications TEXT,
-          experience_requirements TEXT,
-          education_requirements TEXT,
-          duration TEXT DEFAULT '3 Months',
-          stipend TEXT DEFAULT '₹25,000/month',
-          apply_url TEXT,
-          source TEXT DEFAULT 'Curated',
-          posted_date TEXT DEFAULT '2026-08-01',
-          deadline TEXT DEFAULT '2026-10-01',
-          industry TEXT DEFAULT 'Technology',
-          is_demo INTEGER DEFAULT 0,
-          created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-      );
-
-      CREATE TABLE IF NOT EXISTS saved_internships (
-          id TEXT PRIMARY KEY,
-          user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-          internship_id TEXT NOT NULL REFERENCES internships(id) ON DELETE CASCADE,
-          notes TEXT,
-          created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-      );
-
-      CREATE TABLE IF NOT EXISTS interview_sessions (
-          id TEXT PRIMARY KEY,
-          user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-          internship_id TEXT REFERENCES internships(id) ON DELETE SET NULL,
-          role_title TEXT NOT NULL,
-          company TEXT,
-          overall_score REAL DEFAULT 0,
-          status TEXT DEFAULT 'in_progress',
-          feedback_json TEXT,
-          started_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-          completed_at TIMESTAMP WITH TIME ZONE
-      );
-
-      CREATE TABLE IF NOT EXISTS interview_messages (
-          id TEXT PRIMARY KEY,
-          session_id TEXT NOT NULL REFERENCES interview_sessions(id) ON DELETE CASCADE,
-          sender TEXT NOT NULL,
-          content TEXT NOT NULL,
-          score REAL,
-          feedback TEXT,
-          model_answer TEXT,
-          timestamp TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-      );
-
-      CREATE TABLE IF NOT EXISTS assistant_chats (
-          id TEXT PRIMARY KEY,
-          user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-          sender TEXT NOT NULL,
-          content TEXT NOT NULL,
-          metadata_json TEXT,
-          timestamp TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-      );
-
-      CREATE TABLE IF NOT EXISTS internship_chunks (
-          id TEXT PRIMARY KEY,
-          internship_id TEXT NOT NULL REFERENCES internships(id) ON DELETE CASCADE,
-          chunk_index INTEGER NOT NULL,
-          chunk_type TEXT NOT NULL,
-          chunk_text TEXT NOT NULL,
-          metadata_json TEXT,
-          embedding_json TEXT,
-          created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-      );
-
-      CREATE TABLE IF NOT EXISTS tailored_applications (
-          id TEXT PRIMARY KEY,
-          user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-          internship_id TEXT,
-          role_title TEXT NOT NULL,
-          company TEXT NOT NULL,
-          tailored_resume_json TEXT,
-          cover_letter TEXT,
-          ats_score REAL DEFAULT 0,
-          created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-          updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-      );
-    `);
+    for (const schema of PG_TABLE_SCHEMAS) {
+      await pgPool.query(schema);
+    }
     pgInitialized = true;
     console.log('[Database] ✅ Supabase PostgreSQL schema initialized and verified.');
   } catch (err) {
@@ -300,6 +295,7 @@ export async function getDatabase() {
 }
 
 export function saveDatabase() {
+  if (pgPool) return; // Supabase Postgres commits transactions immediately
   if (!dbInstance) return;
   try {
     const data = dbInstance.export();
@@ -361,7 +357,7 @@ export const db = {
         const res = await pgPool.query(pgSql, params);
         return res.rows[0] || null;
       } catch (err) {
-        console.warn('[Database] PostgreSQL get error, using SQLite fallback:', err.message);
+        console.warn('[Database] PostgreSQL get notice, fallback:', err.message);
         return executeSqliteFallback('get', sql, params);
       }
     }
@@ -376,7 +372,7 @@ export const db = {
         const res = await pgPool.query(pgSql, params);
         return res.rows;
       } catch (err) {
-        console.warn('[Database] PostgreSQL all error, using SQLite fallback:', err.message);
+        console.warn('[Database] PostgreSQL all notice, fallback:', err.message);
         return executeSqliteFallback('all', sql, params);
       }
     }
@@ -391,7 +387,7 @@ export const db = {
         await pgPool.query(pgSql, params);
         return { success: true };
       } catch (err) {
-        console.warn('[Database] PostgreSQL run error, using SQLite fallback:', err.message);
+        console.warn('[Database] PostgreSQL run notice, fallback:', err.message);
         return executeSqliteFallback('run', sql, params);
       }
     }
@@ -405,7 +401,7 @@ export const db = {
         await pgPool.query(sql);
         return { success: true };
       } catch (err) {
-        console.warn('[Database] PostgreSQL exec error, using SQLite fallback:', err.message);
+        console.warn('[Database] PostgreSQL exec notice, fallback:', err.message);
         return executeSqliteFallback('exec', sql);
       }
     }
