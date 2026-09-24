@@ -83,9 +83,13 @@ router.post('/tailor-resume', authenticateToken, async (req, res) => {
     }
 
     const candidateProfile = await getEnrichedStudentProfile(req.user.id);
+    const hasProfileData = (candidateProfile.skills && candidateProfile.skills.length > 0) || (candidateProfile.projects && candidateProfile.projects.length > 0);
     const result = await tailorResumeForRole(candidateProfile, targetInternship);
 
-    return res.json(result);
+    return res.json({
+      ...result,
+      hasProfileData
+    });
   } catch (err) {
     console.error('Tailor resume route error:', err);
     return res.status(500).json({ error: 'Failed to generate tailored resume.' });
@@ -107,9 +111,13 @@ router.post('/cover-letter', authenticateToken, async (req, res) => {
     }
 
     const candidateProfile = await getEnrichedStudentProfile(req.user.id);
+    const hasProfileData = (candidateProfile.skills && candidateProfile.skills.length > 0) || (candidateProfile.projects && candidateProfile.projects.length > 0);
     const result = await generateCustomizedCoverLetter(candidateProfile, targetInternship, tone);
 
-    return res.json(result);
+    return res.json({
+      ...result,
+      hasProfileData
+    });
   } catch (err) {
     console.error('Cover letter route error:', err);
     return res.status(500).json({ error: 'Failed to generate customized cover letter.' });

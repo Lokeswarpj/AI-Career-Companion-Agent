@@ -21,7 +21,8 @@ import {
   Clock,
   ExternalLink,
   ChevronRight,
-  GraduationCap
+  GraduationCap,
+  Compass
 } from 'lucide-react';
 
 export default function SkillGapPage({ selectedInternshipId, setSelectedInternshipId, setActiveTab }) {
@@ -30,6 +31,7 @@ export default function SkillGapPage({ selectedInternshipId, setSelectedInternsh
   const [internshipsList, setInternshipsList] = useState([]);
   const [gapData, setGapData] = useState(null);
   const [error, setError] = useState(null);
+  const [showPreview, setShowPreview] = useState(false);
   const [activeGapCategory, setActiveGapCategory] = useState('critical'); // 'critical' | 'partial' | 'matching' | 'preferred' | 'experience'
 
   useEffect(() => {
@@ -162,53 +164,92 @@ export default function SkillGapPage({ selectedInternshipId, setSelectedInternsh
       {gapData && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
           
-          {/* Empty Profile / No Resume Uploaded Alert Banner */}
-          {gapData.hasProfileSkills === false && (
-            <div style={{
-              background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(234, 88, 12, 0.08) 100%)',
-              border: '1px solid rgba(245, 158, 11, 0.35)',
-              borderRadius: 'var(--radius-md)',
-              padding: '1.25rem 1.5rem',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: '1.25rem',
-              flexWrap: 'wrap'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-                <AlertTriangle size={24} color="#f59e0b" style={{ flexShrink: 0 }} />
-                <div>
-                  <div style={{ fontWeight: 700, color: '#f59e0b', fontSize: '0.98rem' }}>
-                    Fresh Account: No Resume or Profile Skills Detected Yet
-                  </div>
-                  <div style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', marginTop: '0.15rem' }}>
-                    You have not uploaded a resume or added skills to your profile yet. We are displaying baseline role prerequisites below. Upload your resume or add your skills to unlock personalized gap diagnostic and custom learning roadmaps!
-                  </div>
-                </div>
+          {/* Empty Profile / No Resume Uploaded Full State */}
+          {gapData.hasProfileSkills === false && !showPreview ? (
+            <div className="glass-panel" style={{ padding: '3.5rem 2rem', textAlign: 'center', maxWidth: '720px', margin: '1rem auto' }}>
+              <div style={{
+                width: '64px',
+                height: '64px',
+                borderRadius: '50%',
+                background: 'rgba(99, 102, 241, 0.12)',
+                color: '#818cf8',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 1.5rem auto'
+              }}>
+                <Compass size={32} />
               </div>
-              <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
+              <h2 style={{ fontSize: '1.7rem', fontWeight: 800, marginBottom: '0.6rem' }}>
+                No Resume or Profile Skills Detected
+              </h2>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.6, maxWidth: '580px', margin: '0 auto 2rem auto' }}>
+                The Skill Gap Analysis Agent compares your authentic background against role requirements to diagnose missing competencies, detect adjacent proficiencies, and build a custom 3-week learning roadmap. Please upload your resume or add your skills to begin!
+              </p>
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
                 {setActiveTab && (
                   <>
                     <button
                       onClick={() => setActiveTab('resume')}
                       className="btn btn-primary"
-                      style={{ padding: '0.5rem 1.1rem', fontSize: '0.86rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+                      style={{ padding: '0.75rem 1.5rem', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
                     >
-                      <Sparkles size={14} />
-                      <span>Upload Resume</span>
+                      <Sparkles size={16} />
+                      <span>Upload Resume for AI Diagnostic</span>
                     </button>
                     <button
                       onClick={() => setActiveTab('profile')}
                       className="btn btn-outline"
-                      style={{ padding: '0.5rem 1.1rem', fontSize: '0.86rem' }}
+                      style={{ padding: '0.75rem 1.5rem' }}
                     >
-                      Edit Profile
+                      Add Skills to Profile
                     </button>
                   </>
                 )}
               </div>
+              <button
+                onClick={() => setShowPreview(true)}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: 'var(--text-muted)',
+                  fontSize: '0.85rem',
+                  cursor: 'pointer',
+                  textDecoration: 'underline'
+                }}
+              >
+                Or preview general prerequisites for {internship?.title || 'this role'}
+              </button>
             </div>
-          )}
+          ) : (
+            <>
+              {gapData.hasProfileSkills === false && showPreview && (
+                <div style={{
+                  background: 'rgba(99, 102, 241, 0.08)',
+                  border: '1px solid rgba(99, 102, 241, 0.25)',
+                  borderRadius: 'var(--radius-md)',
+                  padding: '1rem 1.25rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '1rem',
+                  flexWrap: 'wrap'
+                }}>
+                  <span style={{ fontSize: '0.88rem', color: 'var(--text-secondary)' }}>
+                    ℹ️ Previewing baseline role prerequisites for <strong>{internship?.title}</strong>. Upload your resume for a personalized gap diagnostic.
+                  </span>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button onClick={() => setShowPreview(false)} className="btn btn-secondary btn-sm">
+                      Back
+                    </button>
+                    {setActiveTab && (
+                      <button onClick={() => setActiveTab('resume')} className="btn btn-primary btn-sm">
+                        Upload Resume
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
 
           {/* Target Role & Readiness Score Banner */}
           <div className="glass-panel" style={{ padding: '2rem', borderLeft: `6px solid ${scoreColor}` }}>
@@ -585,6 +626,9 @@ export default function SkillGapPage({ selectedInternshipId, setSelectedInternsh
               </button>
             </div>
           </div>
+
+            </>
+          )}
 
         </div>
       )}

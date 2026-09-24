@@ -53,18 +53,36 @@ export default function ApplicationCustomizerPage({ selectedInternshipId, setSel
   const [loadingSaved, setLoadingSaved] = useState(false);
   const [savingApp, setSavingApp] = useState(false);
 
+  // Profile readiness check
+  const [hasProfileSkills, setHasProfileSkills] = useState(null);
+  const [previewAnyway, setPreviewAnyway] = useState(false);
+
   useEffect(() => {
-    loadInternships();
-    loadSavedApplications();
+    async function initPage() {
+      await Promise.all([loadInternships(), loadSavedApplications()]);
+      try {
+        const [profileRes, resumeRes] = await Promise.all([
+          api.getProfile().catch(() => null),
+          api.getLatestResume().catch(() => null)
+        ]);
+        const hasSkills = (profileRes?.profile?.technical_skills?.length > 0) || 
+                          (profileRes?.profile?.projects_json?.length > 0) || 
+                          !!resumeRes?.resume;
+        setHasProfileSkills(hasSkills);
+      } catch {
+        setHasProfileSkills(false);
+      }
+    }
+    initPage();
   }, []);
 
   useEffect(() => {
-    if (selectedInternshipId) {
+    if (selectedInternshipId && (hasProfileSkills === true || previewAnyway)) {
       handleGenerateAll(selectedInternshipId);
-    } else if (internshipsList.length > 0) {
+    } else if (internshipsList.length > 0 && !selectedInternshipId) {
       setSelectedInternshipId(internshipsList[0].id);
     }
-  }, [selectedInternshipId, internshipsList]);
+  }, [selectedInternshipId, internshipsList, hasProfileSkills, previewAnyway]);
 
   async function loadInternships() {
     try {
@@ -180,6 +198,81 @@ export default function ApplicationCustomizerPage({ selectedInternshipId, setSel
 
   const currentJob = internshipsList.find(i => i.id === selectedInternshipId);
 
+  if (hasProfileSkills === false && !previewAnyway) {
+    return (
+      <div className="container" style={{ padding: '2.5rem 1.5rem', maxWidth: '1150px' }}>
+        <div style={{ marginBottom: '2rem' }}>
+          <div style={{ display: 'inline-flex', marginBottom: '0.4rem' }}>
+            <span className="badge badge-indigo">Application Customizer Agent</span>
+          </div>
+          <h1 style={{ fontSize: '2rem', fontWeight: 800 }}>Role-Specific Application Customizer</h1>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.92rem' }}>
+            Generate grounded, ATS-optimized tailored resumes and targeted cover letters for selected internships.
+          </p>
+        </div>
+
+        <div className="glass-panel" style={{ padding: '3.5rem 2rem', textAlign: 'center', maxWidth: '720px', margin: '1rem auto' }}>
+          <div style={{
+            width: '64px',
+            height: '64px',
+            borderRadius: '50%',
+            background: 'rgba(99, 102, 241, 0.12)',
+            color: '#818cf8',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: '0 auto 1.5rem auto'
+          }}>
+            <FileText size={32} />
+          </div>
+          <h2 style={{ fontSize: '1.7rem', fontWeight: 800, marginBottom: '0.6rem' }}>
+            No Resume or Profile Found Yet
+          </h2>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.6, maxWidth: '580px', margin: '0 auto 2rem auto' }}>
+            The Application Customizer Agent analyzes your authentic resume, experiences, and technical skills to generate tailored STAR bullet points, improve ATS keyword alignment, and write targeted cover letters. Please upload your resume or add your skills to begin!
+          </p>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
+            {setActiveTab && (
+              <>
+                <button
+                  onClick={() => setActiveTab('resume')}
+                  className="btn btn-primary"
+                  style={{ padding: '0.75rem 1.5rem', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
+                >
+                  <Sparkles size={16} />
+                  <span>Upload Resume Now</span>
+                </button>
+                <button
+                  onClick={() => setActiveTab('profile')}
+                  className="btn btn-outline"
+                  style={{ padding: '0.75rem 1.5rem' }}
+                >
+                  Edit Profile Details
+                </button>
+              </>
+            )}
+          </div>
+          <button
+            onClick={() => {
+              setPreviewAnyway(true);
+              if (selectedInternshipId) handleGenerateAll(selectedInternshipId);
+            }}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              color: 'var(--text-muted)',
+              fontSize: '0.85rem',
+              cursor: 'pointer',
+              textDecoration: 'underline'
+            }}
+          >
+            Or preview sample ATS tailoring for {currentJob?.title || 'this role'}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="container" style={{ padding: '2.5rem 1.5rem', maxWidth: '1150px' }}>
       
@@ -216,6 +309,35 @@ export default function ApplicationCustomizerPage({ selectedInternshipId, setSel
           </select>
         </div>
       </div>
+
+      {hasProfileSkills === false && previewAnyway && (
+        <div style={{
+          background: 'rgba(99, 102, 241, 0.08)',
+          border: '1px solid rgba(99, 102, 241, 0.25)',
+          borderRadius: 'var(--radius-md)',
+          padding: '1rem 1.25rem',
+          marginBottom: '1.5rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '1rem',
+          flexWrap: 'wrap'
+        }}>
+          <span style={{ fontSize: '0.88rem', color: 'var(--text-secondary)' }}>
+            ℹ️ Showing sample tailoring for <strong>{currentJob?.title}</strong>. Upload your resume for personalized STAR bullet points.
+          </span>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button onClick={() => setPreviewAnyway(false)} className="btn btn-secondary btn-sm">
+              Back
+            </button>
+            {setActiveTab && (
+              <button onClick={() => setActiveTab('resume')} className="btn btn-primary btn-sm">
+                Upload Resume
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Navigation Sub-Tabs */}
       <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--border-card)', paddingBottom: '0.75rem', flexWrap: 'wrap' }}>
