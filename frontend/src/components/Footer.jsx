@@ -35,7 +35,7 @@ export default function Footer() {
               <span style={{ fontSize: '1.1rem', fontWeight: 800 }}>CareerPulse AI</span>
             </div>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', lineHeight: 1.6 }}>
-              An AI-powered career companion agent designed for students. Empowering next-generation talent with intelligent resume screening, hybrid internship matching, skill gap discovery, and realistic Gemini mock interview coaching.
+              An AI-powered career companion agent designed for students. Empowering next-generation talent with intelligent resume screening, hybrid internship matching, skill gap discovery, and realistic AI mock interview coaching.
             </p>
           </div>
 
@@ -46,7 +46,7 @@ export default function Footer() {
                 CORE CAPABILITIES
               </div>
               <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                <li>✨ Gemini AI Resume Extraction</li>
+                <li>✨ AI Resume Extraction</li>
                 <li>🎯 Deterministic Hybrid Matching</li>
                 <li>📊 Interactive Skill-Gap Matrix</li>
                 <li>🎙️ Real-time Mock Interviewer</li>
@@ -61,7 +61,7 @@ export default function Footer() {
                 <li>⚡ Vite + React Modern UI</li>
                 <li>🧠 RAG Vector Intelligence Engine</li>
                 <li>🛡️ Serverless REST API Backend</li>
-                <li>🚀 Zero-Config SQLite Persistence</li>
+                <li>🚀 Cloud & SQLite Persistence</li>
               </ul>
             </div>
           </div>
@@ -80,7 +80,7 @@ export default function Footer() {
           color: 'var(--text-muted)'
         }}>
           <div>
-            © 2026 CareerPulse AI. Built with Google Antigravity & Google Gemini API.
+            © 2026 CareerPulse AI. All rights reserved.
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', color: '#10b981' }}>
