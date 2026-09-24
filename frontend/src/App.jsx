@@ -25,6 +25,9 @@ export default function App() {
   const [selectedInternshipId, setSelectedInternshipId] = useState(null);
   const [authMode, setAuthMode] = useState('login');
   
+  // Track visited tabs to enable instantaneous 0ms tab switching
+  const [visitedTabs, setVisitedTabs] = useState(() => new Set(['landing', 'auth', 'dashboard']));
+  
   // Sidebar minimize/expand state with localStorage persistence
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
     return localStorage.getItem('careerpulse_sidebar_collapsed') === 'true';
@@ -36,10 +39,27 @@ export default function App() {
 
   // When user is authenticated, redirect landing/auth to dashboard
   useEffect(() => {
-    if (isAuthenticated && (activeTab === 'landing' || activeTab === 'auth')) {
-      setActiveTab('dashboard');
+    if (isAuthenticated) {
+      if (activeTab === 'landing' || activeTab === 'auth') {
+        setActiveTab('dashboard');
+      }
+    } else {
+      // Reset visited tabs on logout
+      setVisitedTabs(new Set(['landing', 'auth']));
     }
   }, [isAuthenticated]);
+
+  // Record visited tab
+  useEffect(() => {
+    if (activeTab) {
+      setVisitedTabs(prev => {
+        if (prev.has(activeTab)) return prev;
+        const next = new Set(prev);
+        next.add(activeTab);
+        return next;
+      });
+    }
+  }, [activeTab]);
 
   // Safety fallback for unauthenticated users accessing protected tabs
   const currentTab = !isAuthenticated && !['landing', 'auth'].includes(activeTab) 
@@ -90,7 +110,7 @@ export default function App() {
         />
       </div>
 
-      {/* 3. Main Routed Content Area */}
+      {/* 3. Main Routed Content Area with Instant 0ms Tab Switching */}
       <main 
         style={{ 
           flex: 1,
@@ -99,11 +119,12 @@ export default function App() {
           paddingBottom: '2.5rem'
         }}
       >
-        {currentTab === 'landing' && (
+        {/* Unauthenticated Pages */}
+        {!isAuthenticated && currentTab === 'landing' && (
           <LandingPage onGetStarted={handleGetStarted} />
         )}
 
-        {currentTab === 'auth' && (
+        {!isAuthenticated && currentTab === 'auth' && (
           <AuthPage 
             onSuccess={() => setActiveTab('dashboard')} 
             authMode={authMode}
@@ -111,56 +132,81 @@ export default function App() {
           />
         )}
 
-        {currentTab === 'dashboard' && (
-          <DashboardPage setActiveTab={setActiveTab} setSelectedInternshipId={setSelectedInternshipId} />
-        )}
+        {/* Authenticated Pages - Retained in DOM for 0ms Zero-Lag Tab Switching */}
+        {isAuthenticated && (
+          <>
+            {visitedTabs.has('dashboard') && (
+              <div style={{ display: currentTab === 'dashboard' ? 'block' : 'none' }}>
+                <DashboardPage setActiveTab={setActiveTab} setSelectedInternshipId={setSelectedInternshipId} />
+              </div>
+            )}
 
-        {currentTab === 'profile' && (
-          <ProfilePage />
-        )}
+            {visitedTabs.has('profile') && (
+              <div style={{ display: currentTab === 'profile' ? 'block' : 'none' }}>
+                <ProfilePage />
+              </div>
+            )}
 
-        {currentTab === 'resume' && (
-          <ResumePage setActiveTab={setActiveTab} setSelectedInternshipId={setSelectedInternshipId} />
-        )}
+            {visitedTabs.has('resume') && (
+              <div style={{ display: currentTab === 'resume' ? 'block' : 'none' }}>
+                <ResumePage setActiveTab={setActiveTab} setSelectedInternshipId={setSelectedInternshipId} />
+              </div>
+            )}
 
-        {currentTab === 'internships' && (
-          <InternshipsPage setActiveTab={setActiveTab} setSelectedInternshipId={setSelectedInternshipId} />
-        )}
+            {visitedTabs.has('internships') && (
+              <div style={{ display: currentTab === 'internships' ? 'block' : 'none' }}>
+                <InternshipsPage setActiveTab={setActiveTab} setSelectedInternshipId={setSelectedInternshipId} />
+              </div>
+            )}
 
-        {currentTab === 'matching' && (
-          <MatchingPage setActiveTab={setActiveTab} setSelectedInternshipId={setSelectedInternshipId} />
-        )}
+            {visitedTabs.has('matching') && (
+              <div style={{ display: currentTab === 'matching' ? 'block' : 'none' }}>
+                <MatchingPage setActiveTab={setActiveTab} setSelectedInternshipId={setSelectedInternshipId} />
+              </div>
+            )}
 
-        {currentTab === 'skill-gap' && (
-          <SkillGapPage
-            selectedInternshipId={selectedInternshipId}
-            setSelectedInternshipId={setSelectedInternshipId}
-            setActiveTab={setActiveTab}
-          />
-        )}
+            {visitedTabs.has('skill-gap') && (
+              <div style={{ display: currentTab === 'skill-gap' ? 'block' : 'none' }}>
+                <SkillGapPage
+                  selectedInternshipId={selectedInternshipId}
+                  setSelectedInternshipId={setSelectedInternshipId}
+                  setActiveTab={setActiveTab}
+                />
+              </div>
+            )}
 
-        {currentTab === 'customizer' && (
-          <ApplicationCustomizerPage
-            selectedInternshipId={selectedInternshipId}
-            setSelectedInternshipId={setSelectedInternshipId}
-            setActiveTab={setActiveTab}
-          />
-        )}
+            {visitedTabs.has('customizer') && (
+              <div style={{ display: currentTab === 'customizer' ? 'block' : 'none' }}>
+                <ApplicationCustomizerPage
+                  selectedInternshipId={selectedInternshipId}
+                  setSelectedInternshipId={setSelectedInternshipId}
+                  setActiveTab={setActiveTab}
+                />
+              </div>
+            )}
 
-        {currentTab === 'mock-interview' && (
-          <MockInterviewPage
-            selectedInternshipId={selectedInternshipId}
-            setSelectedInternshipId={setSelectedInternshipId}
-            setActiveTab={setActiveTab}
-          />
-        )}
+            {visitedTabs.has('mock-interview') && (
+              <div style={{ display: currentTab === 'mock-interview' ? 'block' : 'none' }}>
+                <MockInterviewPage
+                  selectedInternshipId={selectedInternshipId}
+                  setSelectedInternshipId={setSelectedInternshipId}
+                  setActiveTab={setActiveTab}
+                />
+              </div>
+            )}
 
-        {currentTab === 'history' && (
-          <InterviewHistoryPage setActiveTab={setActiveTab} />
-        )}
+            {visitedTabs.has('history') && (
+              <div style={{ display: currentTab === 'history' ? 'block' : 'none' }}>
+                <InterviewHistoryPage setActiveTab={setActiveTab} />
+              </div>
+            )}
 
-        {currentTab === 'assistant' && (
-          <AssistantPage />
+            {visitedTabs.has('assistant') && (
+              <div style={{ display: currentTab === 'assistant' ? 'block' : 'none' }}>
+                <AssistantPage />
+              </div>
+            )}
+          </>
         )}
       </main>
 

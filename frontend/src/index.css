@@ -105,6 +105,8 @@ button, input, select, textarea {
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--border-card);
   border-radius: var(--radius-lg);
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
 }
 
 .glass-nav {
@@ -112,6 +114,13 @@ button, input, select, textarea {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--border-subtle);
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+
+.glass-sidebar {
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
 }
 
 /* Gradient Texts & Badges */
