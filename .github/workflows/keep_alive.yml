@@ -1,0 +1,22 @@
+name: 24/7 Render Service Keep-Alive Heartbeat
+
+on:
+  schedule:
+    # Runs every 10 minutes to keep the Render free-tier instance active
+    - cron: '*/10 * * * *'
+  workflow_dispatch: # Allows manual trigger from GitHub UI
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping CareerPulse AI API Gateway
+        run: |
+          echo "Sending keep-alive ping to Render service..."
+          STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" https://careerpulse-ai-9q9s.onrender.com/api)
+          echo "Render Service API response status: $STATUS_CODE"
+          if [ "$STATUS_CODE" -eq 200 ]; then
+            echo "✅ Service is WARM and healthy."
+          else
+            echo "⚠️ Warning: Received HTTP $STATUS_CODE"
+          fi

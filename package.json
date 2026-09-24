@@ -17,7 +17,8 @@
     "build:frontend": "node scripts/build.js",
     "build:client": "node scripts/build.js",
     "start": "npm run start --prefix backend",
-    "test": "npm run test --prefix backend"
+    "test": "npm run test --prefix backend",
+    "keep-alive": "node scripts/keep_alive.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
