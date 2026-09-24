@@ -264,7 +264,7 @@ export default function ApplicationsPage({ setActiveTab, setSelectedInternshipId
           <div style={{ display: 'inline-flex', marginBottom: '0.4rem' }}>
             <span className="badge badge-indigo">
               <Sparkles size={13} style={{ marginRight: '0.35rem' }} />
-              M4.1 Application Lifecycle Manager
+              Application Lifecycle Manager
             </span>
           </div>
           <h1 style={{ fontSize: '2.2rem', fontWeight: 900, letterSpacing: '-0.02em' }}>

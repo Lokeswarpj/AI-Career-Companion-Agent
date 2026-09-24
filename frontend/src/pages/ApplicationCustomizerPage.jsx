@@ -187,7 +187,7 @@ export default function ApplicationCustomizerPage({ selectedInternshipId, setSel
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <div style={{ display: 'inline-flex', marginBottom: '0.4rem' }}>
-            <span className="badge badge-indigo">M3.2 Application Customizer Agent</span>
+            <span className="badge badge-indigo">Application Customizer Agent</span>
           </div>
           <h1 style={{ fontSize: '2rem', fontWeight: 800 }}>Role-Specific Application Customizer</h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.92rem' }}>
@@ -746,9 +746,9 @@ export default function ApplicationCustomizerPage({ selectedInternshipId, setSel
                       }}
                       className="btn btn-outline"
                       style={{ fontSize: '0.78rem', padding: '0.35rem 0.6rem', gap: '0.25rem', borderColor: '#06b6d4', color: '#06b6d4' }}
-                      title="Track this customized application in M4.1 Tracker"
+                      title="Track this customized application in Application Tracker"
                     >
-                      <Sparkles size={13} /> Track in M4
+                      <Sparkles size={13} /> Track Application
                     </button>
 
                     <button

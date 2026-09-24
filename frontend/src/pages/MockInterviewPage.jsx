@@ -244,7 +244,7 @@ export default function MockInterviewPage({ selectedInternshipId, setSelectedInt
         <div>
           <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
             <div style={{ display: 'inline-flex', marginBottom: '0.75rem' }}>
-              <span className="badge badge-indigo">M3.3 Interview Preparation Agent</span>
+              <span className="badge badge-indigo">Interview Preparation Agent</span>
             </div>
             <h1 style={{ fontSize: '2.4rem', fontWeight: 800 }}>AI Technical Mock Interview</h1>
             <p style={{ color: 'var(--text-secondary)', maxWidth: '650px', margin: '0.5rem auto 0 auto', fontSize: '0.95rem' }}>

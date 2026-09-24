@@ -106,7 +106,7 @@ export default function SkillGapPage({ selectedInternshipId, setSelectedInternsh
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <div style={{ display: 'inline-flex', marginBottom: '0.4rem' }}>
-            <span className="badge badge-indigo">M3.1 Skill Gap Analysis Agent</span>
+            <span className="badge badge-indigo">Skill Gap Analysis Agent</span>
           </div>
           <h1 style={{ fontSize: '2rem', fontWeight: 800 }}>Skill-Gap Diagnostic & Learning Roadmap</h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.92rem' }}>
@@ -557,7 +557,7 @@ export default function SkillGapPage({ selectedInternshipId, setSelectedInternsh
             <div>
               <div style={{ fontSize: '1.2rem', fontWeight: 800 }}>Ready to close gaps and apply for {internship?.title}?</div>
               <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
-                Use our specialized M3.2 Customization Agent or launch a 5-category mock interview now.
+                Use our specialized Application Customizer or launch a mock interview now.
               </div>
             </div>
 

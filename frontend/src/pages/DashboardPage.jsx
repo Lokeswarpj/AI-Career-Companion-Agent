@@ -111,7 +111,7 @@ export default function DashboardPage({ setActiveTab, setSelectedInternshipId })
               style={{ gap: '0.5rem' }}
             >
               <ClipboardList size={18} />
-              <span>Application Tracker (M4)</span>
+              <span>Application Tracker</span>
             </button>
             <button 
               onClick={() => setActiveTab('mock-interview')}

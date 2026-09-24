@@ -123,7 +123,7 @@ export default function AssistantPage() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span className="badge badge-indigo">M3.4 Conversational Career Assistant</span>
+            <span className="badge badge-indigo">Conversational Career Assistant</span>
           </div>
           <h1 style={{ fontSize: '2rem', fontWeight: 800 }}>AI Career Companion</h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.92rem' }}>

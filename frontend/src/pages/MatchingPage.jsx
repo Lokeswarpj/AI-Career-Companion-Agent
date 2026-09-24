@@ -61,7 +61,7 @@ export default function MatchingPage({ setActiveTab, setSelectedInternshipId }) 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>
         <div>
           <div style={{ display: 'inline-flex', marginBottom: '0.5rem' }}>
-            <span className="badge badge-indigo">Milestone 2 • Job-Resume Matching Agent & RAG</span>
+            <span className="badge badge-indigo">Job-Resume Matching Agent & RAG</span>
           </div>
           <h1 style={{ fontSize: '2rem', fontWeight: 800 }}>Job-Resume Matching & Ranking Board</h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.92rem', maxWidth: '750px' }}>

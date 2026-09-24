@@ -171,7 +171,7 @@ export default function InternshipsPage({ setActiveTab, setSelectedInternshipId 
       {/* Page Header */}
       <div style={{ marginBottom: '2rem' }}>
         <div style={{ display: 'inline-flex', marginBottom: '0.5rem' }}>
-          <span className="badge badge-indigo">Milestone 2 • 180 Curated Postings & Vector Store</span>
+          <span className="badge badge-indigo">180 Curated Postings & Vector Store</span>
         </div>
         <h1 style={{ fontSize: '2rem', fontWeight: 800 }}>Internship Knowledge Base & RAG Engine</h1>
         <p style={{ color: 'var(--text-secondary)', fontSize: '0.92rem', maxWidth: '750px' }}>
