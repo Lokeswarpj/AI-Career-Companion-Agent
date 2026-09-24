@@ -22,6 +22,7 @@
     "test:m2": "npm run test:m2 --prefix backend",
     "test:m3": "npm run test:m3 --prefix backend",
     "test:m4": "npm run test:m4 --prefix backend",
+    "test:fresh": "npm run test:fresh --prefix backend",
     "keep-alive": "node scripts/keep_alive.js"
   },
   "dependencies": {
