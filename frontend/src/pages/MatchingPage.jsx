@@ -19,25 +19,30 @@ import {
   BookOpen,
   ChevronDown,
   ChevronUp,
-  FlaskConical
+  FlaskConical,
+  Compass
 } from 'lucide-react';
 
 export default function MatchingPage({ setActiveTab, setSelectedInternshipId }) {
   const notify = useNotification();
   const [loading, setLoading] = useState(true);
   const [recommendations, setRecommendations] = useState([]);
+  const [hasProfileSkills, setHasProfileSkills] = useState(true);
+  const [previewAnyway, setPreviewAnyway] = useState(false);
   const [topSkillCount, setTopSkillCount] = useState(0);
   const [expandedId, setExpandedId] = useState(null);
   const [isBenchmarkModalOpen, setIsBenchmarkModalOpen] = useState(false);
 
   useEffect(() => {
     loadRecommendations();
-  }, []);
+  }, [previewAnyway]);
 
   async function loadRecommendations() {
     try {
       setLoading(true);
-      const res = await api.getRecommendations();
+      const res = await api.getRecommendations({ preview: previewAnyway });
+      const hasSkills = res.hasProfileSkills !== false && (res.topSkillOverlap > 0 || res.hasProfileSkills === true);
+      setHasProfileSkills(hasSkills);
       setRecommendations(res.recommendations || []);
       setTopSkillCount(res.topSkillOverlap || 0);
       if (res.recommendations && res.recommendations.length > 0) {
@@ -121,298 +126,351 @@ export default function MatchingPage({ setActiveTab, setSelectedInternshipId }) 
         </div>
       </div>
 
-      {/* Fresh Account Notification Banner */}
-      {topSkillCount === 0 && (
-        <div style={{
-          background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(6, 182, 212, 0.08) 100%)',
-          border: '1px solid rgba(99, 102, 241, 0.3)',
-          borderRadius: 'var(--radius-md)',
-          padding: '1.25rem 1.5rem',
-          marginBottom: '1.5rem',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '1rem',
-          flexWrap: 'wrap'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-            <Sparkles size={22} color="#818cf8" style={{ flexShrink: 0 }} />
-            <div>
-              <div style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.95rem' }}>
-                No Verified Resume or Skills Added Yet
-              </div>
-              <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
-                Showing baseline general internship matches. Upload your resume or tag your skills in your Profile to generate personalized AI compatibility scores.
-              </div>
-            </div>
+      {/* Fresh Account Zero-State Screen */}
+      {!hasProfileSkills && !previewAnyway ? (
+        <div className="glass-panel" style={{ padding: '3.5rem 2rem', textAlign: 'center', maxWidth: '720px', margin: '1rem auto' }}>
+          <div style={{
+            width: '64px',
+            height: '64px',
+            borderRadius: '50%',
+            background: 'rgba(99, 102, 241, 0.12)',
+            color: '#818cf8',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: '0 auto 1.5rem auto'
+          }}>
+            <Target size={32} />
           </div>
-          {setActiveTab && (
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <button onClick={() => setActiveTab('resume')} className="btn btn-primary btn-sm">
-                Upload Resume
-              </button>
-              <button onClick={() => setActiveTab('profile')} className="btn btn-outline btn-sm">
-                Edit Profile
-              </button>
+          <h2 style={{ fontSize: '1.7rem', fontWeight: 800, marginBottom: '0.6rem' }}>
+            No Resume or Profile Skills Detected
+          </h2>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.6, maxWidth: '580px', margin: '0 auto 2rem auto' }}>
+            The Job-Resume Matching Agent compares your verified technical skills, practical projects, and academic background against required competencies across the knowledge base to generate multi-factor compatibility scores. Please upload your resume or tag your skills in your Profile to begin!
+          </p>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
+            {setActiveTab && (
+              <>
+                <button
+                  onClick={() => setActiveTab('resume')}
+                  className="btn btn-primary"
+                  style={{ padding: '0.75rem 1.5rem', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
+                >
+                  <Sparkles size={16} />
+                  <span>Upload Resume for AI Matching</span>
+                </button>
+                <button
+                  onClick={() => setActiveTab('profile')}
+                  className="btn btn-outline"
+                  style={{ padding: '0.75rem 1.5rem' }}
+                >
+                  Add Skills to Profile
+                </button>
+              </>
+            )}
+          </div>
+          <button
+            onClick={() => setPreviewAnyway(true)}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              color: 'var(--text-muted)',
+              fontSize: '0.85rem',
+              cursor: 'pointer',
+              textDecoration: 'underline'
+            }}
+          >
+            Or preview baseline general catalog rankings
+          </button>
+        </div>
+      ) : (
+        <>
+          {/* Optional preview banner if user chose to preview */}
+          {!hasProfileSkills && previewAnyway && (
+            <div style={{
+              background: 'rgba(99, 102, 241, 0.08)',
+              border: '1px solid rgba(99, 102, 241, 0.25)',
+              borderRadius: 'var(--radius-md)',
+              padding: '1rem 1.25rem',
+              marginBottom: '1.5rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '1rem',
+              flexWrap: 'wrap'
+            }}>
+              <span style={{ fontSize: '0.88rem', color: 'var(--text-secondary)' }}>
+                ℹ️ Previewing baseline general catalog rankings. Upload your resume or add skills for personalized AI compatibility scores.
+              </span>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button onClick={() => setPreviewAnyway(false)} className="btn btn-secondary btn-sm">
+                  Back to Zero State
+                </button>
+                {setActiveTab && (
+                  <button onClick={() => setActiveTab('resume')} className="btn btn-primary btn-sm">
+                    Upload Resume
+                  </button>
+                )}
+              </div>
             </div>
           )}
-        </div>
-      )}
 
-      {/* Ranked Listings */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-        {recommendations.map((rec, index) => {
-          const item = rec.internship;
-          const score = rec.matchScore;
-          const matrix = rec.skillMatrix || { matchingSkills: [], moderateSkills: [], missingSkills: [], haveCount: 0, totalRequired: 0 };
-          const breakdown = rec.breakdown || {};
-          const explanation = rec.explanation || {};
-          const isExpanded = expandedId === item.id;
-          const scoreColor = score >= 80 ? '#10b981' : score >= 65 ? '#6366f1' : '#f59e0b';
+          {/* Ranked Listings */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            {recommendations.map((rec, index) => {
+              const item = rec.internship;
+              const score = rec.matchScore;
+              const matrix = rec.skillMatrix || { matchingSkills: [], moderateSkills: [], missingSkills: [], haveCount: 0, totalRequired: 0 };
+              const breakdown = rec.breakdown || {};
+              const explanation = rec.explanation || {};
+              const isExpanded = expandedId === item.id;
+              const scoreColor = score >= 80 ? '#10b981' : score >= 65 ? '#6366f1' : '#f59e0b';
 
-          return (
-            <div 
-              key={item.id}
-              className="glass-panel"
-              style={{
-                padding: '2rem',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '1.25rem',
-                borderLeft: `6px solid ${scoreColor}`
-              }}
-            >
-              {/* Header with Rank & Score */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
-                  <div style={{
-                    width: '38px',
-                    height: '38px',
-                    borderRadius: '50%',
-                    background: index === 0 ? 'linear-gradient(135deg, #f59e0b, #d97706)' : 'var(--bg-tertiary)',
-                    color: index === 0 ? '#000000' : 'var(--text-primary)',
-                    fontWeight: 800,
-                    fontSize: '1rem',
+              return (
+                <div 
+                  key={item.id}
+                  className="glass-panel"
+                  style={{
+                    padding: '2rem',
                     display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0
-                  }}>
-                    #{index + 1}
-                  </div>
-
-                  <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.2rem', flexWrap: 'wrap' }}>
-                      <span className="badge badge-indigo" style={{ fontSize: '0.7rem' }}>{item.source}</span>
-                      <span className="badge badge-cyan" style={{ fontSize: '0.7rem' }}>{item.remote_type}</span>
-                      {rec.isRagRetrieved && (
-                        <span className="badge badge-emerald" style={{ fontSize: '0.7rem' }}>
-                          ⚡ RAG Vector Retrieved
-                        </span>
-                      )}
-                    </div>
-                    <h3 style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--text-primary)' }}>
-                      {item.title}
-                    </h3>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '0.25rem' }}>
-                      <span><Building size={14} style={{ display: 'inline', marginRight: '3px' }} />{item.company}</span>
-                      <span>•</span>
-                      <span><MapPin size={14} style={{ display: 'inline', marginRight: '3px' }} />{item.location}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Match Score Meter */}
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '1rem',
-                  padding: '0.75rem 1.25rem',
-                  background: 'var(--bg-secondary)',
-                  borderRadius: 'var(--radius-md)',
-                  border: '1px solid var(--border-card)'
-                }}>
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: '1.5rem', fontWeight: 900, color: scoreColor }}>
-                      {score}%
-                    </div>
-                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>
-                      Compatibility Fit
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Skills matched vs missing bar */}
-              <div style={{
-                background: 'var(--bg-secondary)',
-                padding: '1rem',
-                borderRadius: 'var(--radius-md)',
-                display: 'flex',
-                flexWrap: 'wrap',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: '1rem'
-              }}>
-                <div>
-                  <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.4rem' }}>
-                    SKILL COVERAGE ({matrix.haveCount || 0} of {matrix.totalRequired || 0} Requirements Met)
-                  </div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
-                    {(matrix.matchingSkills || []).map((m, i) => (
-                      <span key={i} className="badge badge-emerald" style={{ fontSize: '0.72rem' }}>
-                        ✓ {m.skill}
-                      </span>
-                    ))}
-                    {(matrix.moderateSkills || []).map((m, i) => (
-                      <span key={i} className="badge badge-amber" style={{ fontSize: '0.72rem' }}>
-                        ~ {m.skill}
-                      </span>
-                    ))}
-                    {(matrix.missingSkills || []).map((m, i) => (
-                      <span key={i} className="badge badge-rose" style={{ fontSize: '0.72rem' }}>
-                        ✕ {m.skill}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--accent-emerald)' }}>
-                    {item.stipend || 'Stipend available'}
-                  </div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                    Duration: {item.duration || '3 Months'}
-                  </div>
-                </div>
-              </div>
-
-              {/* Multi-Factor Sub-Scores Progress Breakdown */}
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
-                gap: '0.75rem',
-                fontSize: '0.75rem',
-                padding: '0.75rem 1rem',
-                background: 'rgba(99, 102, 241, 0.04)',
-                borderRadius: 'var(--radius-sm)'
-              }}>
-                <div>
-                  <div style={{ color: 'var(--text-muted)', marginBottom: '0.2rem' }}>Skills (40%): <strong>{breakdown.skillScore || 0}%</strong></div>
-                  <div style={{ height: '4px', background: 'var(--bg-tertiary)', borderRadius: '2px', overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${breakdown.skillScore || 0}%`, background: '#818cf8' }} />
-                  </div>
-                </div>
-                <div>
-                  <div style={{ color: 'var(--text-muted)', marginBottom: '0.2rem' }}>Projects (25%): <strong>{breakdown.experienceAndProjectsScore || 80}%</strong></div>
-                  <div style={{ height: '4px', background: 'var(--bg-tertiary)', borderRadius: '2px', overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${breakdown.experienceAndProjectsScore || 80}%`, background: '#22d3ee' }} />
-                  </div>
-                </div>
-                <div>
-                  <div style={{ color: 'var(--text-muted)', marginBottom: '0.2rem' }}>Role Fit (15%): <strong>{breakdown.roleScore || 100}%</strong></div>
-                  <div style={{ height: '4px', background: 'var(--bg-tertiary)', borderRadius: '2px', overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${breakdown.roleScore || 100}%`, background: '#34d399' }} />
-                  </div>
-                </div>
-                <div>
-                  <div style={{ color: 'var(--text-muted)', marginBottom: '0.2rem' }}>Academic (10%): <strong>{breakdown.educationScore || 90}%</strong></div>
-                  <div style={{ height: '4px', background: 'var(--bg-tertiary)', borderRadius: '2px', overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${breakdown.educationScore || 90}%`, background: '#fbbf24' }} />
-                  </div>
-                </div>
-                <div>
-                  <div style={{ color: 'var(--text-muted)', marginBottom: '0.2rem' }}>Location (10%): <strong>{breakdown.locationScore || 100}%</strong></div>
-                  <div style={{ height: '4px', background: 'var(--bg-tertiary)', borderRadius: '2px', overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${breakdown.locationScore || 100}%`, background: '#f43f5e' }} />
-                  </div>
-                </div>
-              </div>
-
-              {/* AI Reasoning Section (Collapsible) */}
-              {isExpanded && explanation && (
-                <div style={{
-                  padding: '1.25rem',
-                  background: 'var(--bg-secondary)',
-                  borderRadius: 'var(--radius-md)',
-                  border: '1px solid var(--border-card)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '0.75rem',
-                  fontSize: '0.85rem'
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--accent-primary)', fontWeight: 700 }}>
-                    <Sparkles size={16} />
-                    <span>AI Qualitative Fit Assessment & Reasoning</span>
-                  </div>
-
-                  <div>
-                    <span style={{ fontWeight: 700, color: 'var(--accent-emerald)' }}>Why It Matches: </span>
-                    <span style={{ color: 'var(--text-secondary)' }}>{explanation.whyItMatches}</span>
-                  </div>
-
-                  <div>
-                    <span style={{ fontWeight: 700, color: 'var(--accent-amber)' }}>Potential Gaps / Concerns: </span>
-                    <span style={{ color: 'var(--text-secondary)' }}>{explanation.potentialConcerns}</span>
-                  </div>
-
-                  <div>
-                    <span style={{ fontWeight: 700, color: '#22d3ee' }}>Recommended Action Roadmap: </span>
-                    <span style={{ color: 'var(--text-secondary)' }}>{explanation.recommendedPreparation}</span>
-                  </div>
-                </div>
-              )}
-
-              {/* Action Buttons */}
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                paddingTop: '0.5rem',
-                borderTop: '1px solid var(--border-subtle)',
-                flexWrap: 'wrap',
-                gap: '0.5rem'
-              }}>
-                <button
-                  onClick={() => setExpandedId(isExpanded ? null : item.id)}
-                  className="btn btn-outline btn-sm"
-                  style={{ gap: '0.3rem', fontSize: '0.78rem' }}
+                    flexDirection: 'column',
+                    gap: '1.25rem',
+                    borderLeft: `6px solid ${scoreColor}`
+                  }}
                 >
-                  {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                  <span>{isExpanded ? 'Hide AI Reasoning' : 'View AI Reasoning & Roadmap'}</span>
-                </button>
+                  {/* Header with Rank & Score */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
+                      <div style={{
+                        width: '38px',
+                        height: '38px',
+                        borderRadius: '50%',
+                        background: index === 0 ? 'linear-gradient(135deg, #f59e0b, #d97706)' : 'var(--bg-tertiary)',
+                        color: index === 0 ? '#000000' : 'var(--text-primary)',
+                        fontWeight: 800,
+                        fontSize: '1rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0
+                      }}>
+                        #{index + 1}
+                      </div>
 
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  <button
-                    onClick={() => {
-                      setSelectedInternshipId(item.id);
-                      setActiveTab('skill-gap');
-                    }}
-                    className="btn btn-secondary btn-sm"
-                    style={{ gap: '0.4rem' }}
-                  >
-                    <Sparkles size={14} color="#818cf8" />
-                    <span>Deep Diagnostics</span>
-                  </button>
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.2rem', flexWrap: 'wrap' }}>
+                          <span className="badge badge-indigo" style={{ fontSize: '0.7rem' }}>{item.source}</span>
+                          <span className="badge badge-cyan" style={{ fontSize: '0.7rem' }}>{item.remote_type}</span>
+                          {rec.isRagRetrieved && (
+                            <span className="badge badge-emerald" style={{ fontSize: '0.7rem' }}>
+                              ⚡ RAG Vector Retrieved
+                            </span>
+                          )}
+                        </div>
+                        <h3 style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+                          {item.title}
+                        </h3>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '0.25rem' }}>
+                          <span><Building size={14} style={{ display: 'inline', marginRight: '3px' }} />{item.company}</span>
+                          <span>•</span>
+                          <span><MapPin size={14} style={{ display: 'inline', marginRight: '3px' }} />{item.location}</span>
+                        </div>
+                      </div>
+                    </div>
 
-                  <button
-                    onClick={() => {
-                      setSelectedInternshipId(item.id);
-                      setActiveTab('mock-interview');
-                    }}
-                    className="btn btn-primary btn-sm"
-                    style={{ gap: '0.4rem' }}
-                  >
-                    <Mic size={14} />
-                    <span>Mock Interview</span>
-                  </button>
+                    {/* Match Score Meter */}
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '1rem',
+                      padding: '0.75rem 1.25rem',
+                      background: 'var(--bg-secondary)',
+                      borderRadius: 'var(--radius-md)',
+                      border: '1px solid var(--border-card)'
+                    }}>
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{ fontSize: '1.5rem', fontWeight: 900, color: scoreColor }}>
+                          {score}%
+                        </div>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>
+                          Compatibility Fit
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Skills matched vs missing bar */}
+                  <div style={{
+                    background: 'var(--bg-secondary)',
+                    padding: '1rem',
+                    borderRadius: 'var(--radius-md)',
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '1rem'
+                  }}>
+                    <div>
+                      <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.4rem' }}>
+                        SKILL COVERAGE ({matrix.haveCount || 0} of {matrix.totalRequired || 0} Requirements Met)
+                      </div>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
+                        {(matrix.matchingSkills || []).map((m, i) => (
+                          <span key={i} className="badge badge-emerald" style={{ fontSize: '0.72rem' }}>
+                            ✓ {m.skill}
+                          </span>
+                        ))}
+                        {(matrix.moderateSkills || []).map((m, i) => (
+                          <span key={i} className="badge badge-amber" style={{ fontSize: '0.72rem' }}>
+                            ~ {m.skill}
+                          </span>
+                        ))}
+                        {(matrix.missingSkills || []).map((m, i) => (
+                          <span key={i} className="badge badge-rose" style={{ fontSize: '0.72rem' }}>
+                            ✕ {m.skill}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--accent-emerald)' }}>
+                        {item.stipend || 'Stipend available'}
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                        Duration: {item.duration || '3 Months'}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Multi-Factor Sub-Scores Progress Breakdown */}
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
+                    gap: '0.75rem',
+                    fontSize: '0.75rem',
+                    padding: '0.75rem 1rem',
+                    background: 'rgba(99, 102, 241, 0.04)',
+                    borderRadius: 'var(--radius-sm)'
+                  }}>
+                    <div>
+                      <div style={{ color: 'var(--text-muted)', marginBottom: '0.2rem' }}>Skills (40%): <strong>{breakdown.skillScore || 0}%</strong></div>
+                      <div style={{ height: '4px', background: 'var(--bg-tertiary)', borderRadius: '2px', overflow: 'hidden' }}>
+                        <div style={{ height: '100%', width: `${breakdown.skillScore || 0}%`, background: '#818cf8' }} />
+                      </div>
+                    </div>
+                    <div>
+                      <div style={{ color: 'var(--text-muted)', marginBottom: '0.2rem' }}>Projects (25%): <strong>{breakdown.experienceAndProjectsScore || 80}%</strong></div>
+                      <div style={{ height: '4px', background: 'var(--bg-tertiary)', borderRadius: '2px', overflow: 'hidden' }}>
+                        <div style={{ height: '100%', width: `${breakdown.experienceAndProjectsScore || 80}%`, background: '#22d3ee' }} />
+                      </div>
+                    </div>
+                    <div>
+                      <div style={{ color: 'var(--text-muted)', marginBottom: '0.2rem' }}>Role Fit (15%): <strong>{breakdown.roleScore || 100}%</strong></div>
+                      <div style={{ height: '4px', background: 'var(--bg-tertiary)', borderRadius: '2px', overflow: 'hidden' }}>
+                        <div style={{ height: '100%', width: `${breakdown.roleScore || 100}%`, background: '#34d399' }} />
+                      </div>
+                    </div>
+                    <div>
+                      <div style={{ color: 'var(--text-muted)', marginBottom: '0.2rem' }}>Academic (10%): <strong>{breakdown.educationScore || 90}%</strong></div>
+                      <div style={{ height: '4px', background: 'var(--bg-tertiary)', borderRadius: '2px', overflow: 'hidden' }}>
+                        <div style={{ height: '100%', width: `${breakdown.educationScore || 90}%`, background: '#fbbf24' }} />
+                      </div>
+                    </div>
+                    <div>
+                      <div style={{ color: 'var(--text-muted)', marginBottom: '0.2rem' }}>Location (10%): <strong>{breakdown.locationScore || 100}%</strong></div>
+                      <div style={{ height: '4px', background: 'var(--bg-tertiary)', borderRadius: '2px', overflow: 'hidden' }}>
+                        <div style={{ height: '100%', width: `${breakdown.locationScore || 100}%`, background: '#f43f5e' }} />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* AI Reasoning Section (Collapsible) */}
+                  {isExpanded && explanation && (
+                    <div style={{
+                      padding: '1.25rem',
+                      background: 'var(--bg-secondary)',
+                      borderRadius: 'var(--radius-md)',
+                      border: '1px solid var(--border-card)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.75rem',
+                      fontSize: '0.85rem'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--accent-primary)', fontWeight: 700 }}>
+                        <Sparkles size={16} />
+                        <span>AI Qualitative Fit Assessment & Reasoning</span>
+                      </div>
+
+                      <div>
+                        <span style={{ fontWeight: 700, color: 'var(--accent-emerald)' }}>Why It Matches: </span>
+                        <span style={{ color: 'var(--text-secondary)' }}>{explanation.whyItMatches}</span>
+                      </div>
+
+                      <div>
+                        <span style={{ fontWeight: 700, color: 'var(--accent-amber)' }}>Potential Gaps / Concerns: </span>
+                        <span style={{ color: 'var(--text-secondary)' }}>{explanation.potentialConcerns}</span>
+                      </div>
+
+                      <div>
+                        <span style={{ fontWeight: 700, color: '#22d3ee' }}>Recommended Action Roadmap: </span>
+                        <span style={{ color: 'var(--text-secondary)' }}>{explanation.recommendedPreparation}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Action Buttons */}
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    paddingTop: '0.5rem',
+                    borderTop: '1px solid var(--border-subtle)',
+                    flexWrap: 'wrap',
+                    gap: '0.5rem'
+                  }}>
+                    <button
+                      onClick={() => setExpandedId(isExpanded ? null : item.id)}
+                      className="btn btn-outline btn-sm"
+                      style={{ gap: '0.3rem', fontSize: '0.78rem' }}
+                    >
+                      {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                      <span>{isExpanded ? 'Hide AI Reasoning' : 'View AI Reasoning & Roadmap'}</span>
+                    </button>
+
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <button
+                        onClick={() => {
+                          setSelectedInternshipId(item.id);
+                          setActiveTab('skill-gap');
+                        }}
+                        className="btn btn-secondary btn-sm"
+                        style={{ gap: '0.4rem' }}
+                      >
+                        <Sparkles size={14} color="#818cf8" />
+                        <span>Deep Diagnostics</span>
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setSelectedInternshipId(item.id);
+                          setActiveTab('mock-interview');
+                        }}
+                        className="btn btn-primary btn-sm"
+                        style={{ gap: '0.4rem' }}
+                      >
+                        <Mic size={14} />
+                        <span>Mock Interview</span>
+                      </button>
+                    </div>
+                  </div>
+
                 </div>
-              </div>
-
-            </div>
-          );
-        })}
-      </div>
+              );
+            })}
+          </div>
+        </>
+      )}
 
       {/* Benchmark Suite Interactive Modal */}
       <EvaluationBenchmarkModal

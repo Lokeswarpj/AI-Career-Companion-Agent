@@ -138,7 +138,10 @@ export const api = {
   },
 
   // Matching & Recommendations
-  getRecommendations: (opts) => apiRequest('/matching/recommendations', opts),
+  getRecommendations: (params = {}, opts = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return apiRequest(`/matching/recommendations${query ? `?${query}` : ''}`, opts);
+  },
   evaluateMatch: (internshipId, opts) => apiRequest(`/matching/evaluate/${internshipId}`, opts),
   evaluateProfile: (profile, limit = 20) => apiRequest('/matching/evaluate-profile', { method: 'POST', body: JSON.stringify({ profile, limit }) }),
 

@@ -245,101 +245,133 @@ export default function DashboardPage({ setActiveTab, setSelectedInternshipId })
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            {recommendations.slice(0, 3).map((rec) => (
-              <div 
-                key={rec.internship.id}
-                className="glass-panel"
-                style={{
-                  padding: '1.5rem',
+            {recommendations.length === 0 ? (
+              <div className="glass-panel" style={{ padding: '2.5rem 1.5rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
+                <div style={{
+                  width: '48px',
+                  height: '48px',
+                  borderRadius: '50%',
+                  background: 'rgba(99, 102, 241, 0.1)',
+                  color: '#818cf8',
                   display: 'flex',
-                  flexDirection: 'column',
-                  gap: '0.85rem',
-                  borderLeft: `4px solid ${rec.matchScore >= 80 ? '#10b981' : rec.matchScore >= 60 ? '#6366f1' : '#f59e0b'}`
-                }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <div>
-                    <h4 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                      {rec.internship.title}
-                    </h4>
-                    <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
-                      {rec.internship.company} • {rec.internship.location} ({rec.internship.remote_type})
-                    </div>
-                  </div>
-                  
-                  {/* Score badge */}
-                  <div style={{
-                    padding: '0.45rem 0.85rem',
-                    borderRadius: 'var(--radius-md)',
-                    background: rec.matchScore >= 80 ? 'rgba(16, 185, 129, 0.15)' : 'rgba(99, 102, 241, 0.15)',
-                    border: `1px solid ${rec.matchScore >= 80 ? 'rgba(16, 185, 129, 0.3)' : 'rgba(99, 102, 241, 0.3)'}`,
-                    textAlign: 'right'
-                  }}>
-                    <div style={{
-                      color: rec.matchScore >= 80 ? '#34d399' : '#818cf8',
-                      fontWeight: 900,
-                      fontSize: '1.05rem',
-                      lineHeight: 1
-                    }}>
-                      {rec.matchScore}% Match
-                    </div>
-                    <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>
-                      Resume Match
-                    </div>
-                  </div>
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto 1rem auto'
+                }}>
+                  <Target size={24} />
                 </div>
-
-                {/* Skills tags */}
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
-                  {rec.skillMatrix?.matchingSkills?.slice(0, 3).map((m, i) => (
-                    <span key={`m-${i}`} className="badge badge-emerald" style={{ fontSize: '0.72rem' }}>
-                      ✓ {m.skill}
-                    </span>
-                  ))}
-                  {rec.internship.required_skills_json.slice(0, 3).map((skill, i) => {
-                    const isAlreadyShown = rec.skillMatrix?.matchingSkills?.some(m => m.skill.toLowerCase() === skill.toLowerCase());
-                    if (isAlreadyShown) return null;
-                    return (
-                      <span key={`r-${i}`} className="badge badge-indigo" style={{ fontSize: '0.72rem' }}>
-                        {skill}
-                      </span>
-                    );
-                  })}
-                  {rec.internship.required_skills_json.length > 4 && (
-                    <span className="badge badge-cyan" style={{ fontSize: '0.72rem' }}>
-                      +{rec.internship.required_skills_json.length - 3} more
-                    </span>
-                  )}
-                </div>
-
-                {/* Action CTA */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.5rem', borderTop: '1px solid var(--border-subtle)' }}>
-                  <span style={{ fontSize: '0.82rem', color: 'var(--accent-emerald)', fontWeight: 600 }}>
-                    {rec.internship.stipend || 'Stipend available'}
-                  </span>
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button
-                      onClick={() => {
-                        setSelectedInternshipId(rec.internship.id);
-                        setActiveTab('skill-gap');
-                      }}
-                      className="btn btn-outline btn-sm"
-                    >
-                      Skill Gap Matrix
-                    </button>
-                    <button
-                      onClick={() => {
-                        setSelectedInternshipId(rec.internship.id);
-                        setActiveTab('mock-interview');
-                      }}
-                      className="btn btn-primary btn-sm"
-                    >
-                      Mock Prep
-                    </button>
-                  </div>
+                <h4 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.4rem', color: 'var(--text-primary)' }}>
+                  No Recommendations Yet
+                </h4>
+                <p style={{ fontSize: '0.85rem', marginBottom: '1.25rem', maxWidth: '360px', margin: '0 auto 1.25rem auto', lineHeight: 1.5 }}>
+                  Upload your resume or add technical skills in your Profile to unlock personalized AI compatibility scores.
+                </p>
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem' }}>
+                  <button onClick={() => setActiveTab('resume')} className="btn btn-primary btn-sm">
+                    Upload Resume
+                  </button>
+                  <button onClick={() => setActiveTab('internships')} className="btn btn-outline btn-sm">
+                    Explore Directory
+                  </button>
                 </div>
               </div>
-            ))}
+            ) : (
+              recommendations.slice(0, 3).map((rec) => (
+                <div 
+                  key={rec.internship.id}
+                  className="glass-panel"
+                  style={{
+                    padding: '1.5rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.85rem',
+                    borderLeft: `4px solid ${rec.matchScore >= 80 ? '#10b981' : rec.matchScore >= 60 ? '#6366f1' : '#f59e0b'}`
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div>
+                      <h4 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                        {rec.internship.title}
+                      </h4>
+                      <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
+                        {rec.internship.company} • {rec.internship.location} ({rec.internship.remote_type})
+                      </div>
+                    </div>
+                    
+                    {/* Score badge */}
+                    <div style={{
+                      padding: '0.45rem 0.85rem',
+                      borderRadius: 'var(--radius-md)',
+                      background: rec.matchScore >= 80 ? 'rgba(16, 185, 129, 0.15)' : 'rgba(99, 102, 241, 0.15)',
+                      border: `1px solid ${rec.matchScore >= 80 ? 'rgba(16, 185, 129, 0.3)' : 'rgba(99, 102, 241, 0.3)'}`,
+                      textAlign: 'right'
+                    }}>
+                      <div style={{
+                        color: rec.matchScore >= 80 ? '#34d399' : '#818cf8',
+                        fontWeight: 900,
+                        fontSize: '1.05rem',
+                        lineHeight: 1
+                      }}>
+                        {rec.matchScore}% Match
+                      </div>
+                      <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>
+                        Resume Match
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Skills tags */}
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
+                    {rec.skillMatrix?.matchingSkills?.slice(0, 3).map((m, i) => (
+                      <span key={`m-${i}`} className="badge badge-emerald" style={{ fontSize: '0.72rem' }}>
+                        ✓ {m.skill}
+                      </span>
+                    ))}
+                    {rec.internship.required_skills_json.slice(0, 3).map((skill, i) => {
+                      const isAlreadyShown = rec.skillMatrix?.matchingSkills?.some(m => m.skill.toLowerCase() === skill.toLowerCase());
+                      if (isAlreadyShown) return null;
+                      return (
+                        <span key={`r-${i}`} className="badge badge-indigo" style={{ fontSize: '0.72rem' }}>
+                          {skill}
+                        </span>
+                      );
+                    })}
+                    {rec.internship.required_skills_json.length > 4 && (
+                      <span className="badge badge-cyan" style={{ fontSize: '0.72rem' }}>
+                        +{rec.internship.required_skills_json.length - 3} more
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Action CTA */}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.5rem', borderTop: '1px solid var(--border-subtle)' }}>
+                    <span style={{ fontSize: '0.82rem', color: 'var(--accent-emerald)', fontWeight: 600 }}>
+                      {rec.internship.stipend || 'Stipend available'}
+                    </span>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <button
+                        onClick={() => {
+                          setSelectedInternshipId(rec.internship.id);
+                          setActiveTab('skill-gap');
+                        }}
+                        className="btn btn-outline btn-sm"
+                      >
+                        Skill Gap Matrix
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSelectedInternshipId(rec.internship.id);
+                          setActiveTab('mock-interview');
+                        }}
+                        className="btn btn-primary btn-sm"
+                      >
+                        Mock Prep
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
 

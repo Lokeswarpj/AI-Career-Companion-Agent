@@ -29,22 +29,39 @@ router.get('/recommendations', authenticateToken, async (req, res) => {
       } catch {}
     }
 
+    const projects = profile?.projects_json ? (typeof profile.projects_json === 'string' ? JSON.parse(profile.projects_json) : profile.projects_json) : [];
+    const experience = profile?.experience_json ? (typeof profile.experience_json === 'string' ? JSON.parse(profile.experience_json) : profile.experience_json) : [];
+    const hasProfileSkills = studentSkills.length > 0 || projects.length > 0 || experience.length > 0 || !!latestResume?.parsed_summary;
+
+    const isPreview = req.query.preview === 'true';
+
+    if (!hasProfileSkills && !isPreview) {
+      return res.json({
+        hasProfileSkills: false,
+        recommendations: [],
+        totalEvaluated: 0,
+        topMatchScore: 0,
+        topSkillOverlap: 0
+      });
+    }
+
     const candidateProfile = {
       skills: studentSkills,
-      preferred_roles: profile?.preferred_roles ? (typeof profile.preferred_roles === 'string' ? JSON.parse(profile.preferred_roles) : profile.preferred_roles) : ['Software Engineering Intern'],
+      preferred_roles: profile?.preferred_roles ? (typeof profile.preferred_roles === 'string' ? JSON.parse(profile.preferred_roles) : profile.preferred_roles) : (isPreview ? ['Software Engineering Intern'] : []),
       location: profile?.location || '',
       preferred_location: profile?.preferred_location || '',
-      degree: profile?.degree || 'Computer Science and Engineering',
-      university: profile?.university || 'University',
+      degree: profile?.degree || (isPreview ? 'Computer Science and Engineering' : ''),
+      university: profile?.university || (isPreview ? 'University' : ''),
       graduation_year: profile?.graduation_year || 2026,
-      projects: profile?.projects_json ? (typeof profile.projects_json === 'string' ? JSON.parse(profile.projects_json) : profile.projects_json) : [],
-      experience: profile?.experience_json ? (typeof profile.experience_json === 'string' ? JSON.parse(profile.experience_json) : profile.experience_json) : [],
+      projects,
+      experience,
       parsed_summary: latestResume?.parsed_summary || ''
     };
 
     const evaluated = await runJobResumeMatchingAgent(candidateProfile, 50);
 
     return res.json({
+      hasProfileSkills,
       recommendations: evaluated,
       totalEvaluated: evaluated.length,
       topMatchScore: evaluated[0]?.matchScore || 0,
