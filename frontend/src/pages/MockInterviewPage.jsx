@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import confetti from 'canvas-confetti';
 import { api } from '../utils/api';
 import { useNotification } from '../context/NotificationContext';
@@ -52,6 +52,12 @@ export default function MockInterviewPage({ selectedInternshipId, setSelectedInt
   // Speech Recognition state
   const [isRecording, setIsRecording] = useState(false);
   const [recognitionInstance, setRecognitionInstance] = useState(null);
+  const baseTextRef = useRef('');
+  const userAnswerRef = useRef(userAnswer);
+
+  useEffect(() => {
+    userAnswerRef.current = userAnswer;
+  }, [userAnswer]);
 
   useEffect(() => {
     loadInternships();
@@ -95,11 +101,22 @@ export default function MockInterviewPage({ selectedInternshipId, setSelectedInt
       rec.lang = 'en-US';
 
       rec.onresult = (event) => {
-        let transcript = '';
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          transcript += event.results[i][0].transcript;
+        let finalTranscripts = '';
+        let interimTranscripts = '';
+
+        for (let i = 0; i < event.results.length; i++) {
+          const result = event.results[i];
+          if (result.isFinal) {
+            finalTranscripts += result[0].transcript + ' ';
+          } else {
+            interimTranscripts += result[0].transcript;
+          }
         }
-        setUserAnswer(prev => prev ? `${prev} ${transcript}` : transcript);
+
+        const fullSpoken = (finalTranscripts + interimTranscripts).trim();
+        const base = baseTextRef.current ? baseTextRef.current.trim() : '';
+        const combined = base ? `${base} ${fullSpoken}` : fullSpoken;
+        setUserAnswer(combined);
       };
 
       rec.onerror = (event) => {
@@ -123,9 +140,11 @@ export default function MockInterviewPage({ selectedInternshipId, setSelectedInt
     if (isRecording) {
       recognitionInstance.stop();
       setIsRecording(false);
+      baseTextRef.current = userAnswerRef.current;
       notify.info('Voice recording paused.');
     } else {
       try {
+        baseTextRef.current = userAnswerRef.current;
         recognitionInstance.start();
         setIsRecording(true);
         notify.success('Microphone listening! Speak clearly...');
@@ -148,6 +167,7 @@ export default function MockInterviewPage({ selectedInternshipId, setSelectedInt
       setSessionId(res.sessionId);
       setCurrentQuestion(res.firstQuestion);
       setUserAnswer('');
+      baseTextRef.current = '';
       setCurrentEvaluation(null);
       setIsFinalQuestion(res.totalQuestions <= 1);
       setShowPrepGuide(false);
@@ -198,6 +218,7 @@ export default function MockInterviewPage({ selectedInternshipId, setSelectedInt
       handleCompleteSession();
     } else {
       setUserAnswer('');
+      baseTextRef.current = '';
       setCurrentEvaluation(null);
       setShowHint(false);
       setStage('question');
@@ -229,9 +250,9 @@ export default function MockInterviewPage({ selectedInternshipId, setSelectedInt
   };
 
   const handleQuickAnswer = () => {
-    setUserAnswer(
-      "In our recent campus project, we structured the application using a React single-page frontend connected to an Express REST API with SQLite database persistence. We applied asynchronous async/await patterns for API calls and implemented JWT token authentication with bcrypt password hashing. For performance optimization, we indexed high-frequency database queries and modularized state management."
-    );
+    const demo = "In our recent campus project, we structured the application using a React single-page frontend connected to an Express REST API with SQLite database persistence. We applied asynchronous async/await patterns for API calls and implemented JWT token authentication with bcrypt password hashing. For performance optimization, we indexed high-frequency database queries and modularized state management.";
+    setUserAnswer(demo);
+    baseTextRef.current = demo;
   };
 
   return (
