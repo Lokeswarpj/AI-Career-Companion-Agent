@@ -150,7 +150,45 @@ router.post('/cover-letter', authenticateToken, async (req, res) => {
 router.delete('/:id', authenticateToken, async (req, res) => {
   try {
     await db.run('DELETE FROM resumes WHERE id = ? AND user_id = ?', [req.params.id, req.user.id]);
-    return res.json({ message: 'Resume deleted successfully.' });
+
+    // Check if user has any remaining resumes
+    const remainingResume = await db.get(
+      'SELECT * FROM resumes WHERE user_id = ? ORDER BY uploaded_at DESC LIMIT 1',
+      [req.user.id]
+    );
+
+    if (remainingResume) {
+      // Sync profile with the remaining latest resume
+      let remainingSkills = [];
+      try {
+        const parsed = JSON.parse(remainingResume.detected_skills_json || '{}');
+        remainingSkills = [
+          ...(parsed.programming || []),
+          ...(parsed.web || []),
+          ...(parsed.aiData || []),
+          ...(parsed.cloud || []),
+          ...(parsed.tools || [])
+        ];
+      } catch {}
+      await db.run(
+        'UPDATE profiles SET technical_skills = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?',
+        [JSON.stringify(remainingSkills), req.user.id]
+      );
+    } else {
+      // No resumes left -> completely clear out auto-extracted skills & projects from profile
+      await db.run(
+        `UPDATE profiles SET 
+          technical_skills = '[]', 
+          soft_skills = '[]',
+          projects_json = '[]',
+          experience_json = '[]',
+          updated_at = CURRENT_TIMESTAMP 
+         WHERE user_id = ?`,
+        [req.user.id]
+      );
+    }
+
+    return res.json({ message: 'Resume deleted and profile skills synchronized across all agents.' });
   } catch (err) {
     console.error('Delete resume error:', err);
     return res.status(500).json({ error: 'Failed to delete resume.' });

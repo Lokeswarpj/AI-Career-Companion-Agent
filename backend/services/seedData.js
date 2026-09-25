@@ -76,36 +76,21 @@ export async function seedDefaultAccountsIfNeeded() {
     if (Array.isArray(nonDemoUsers)) {
       for (const u of nonDemoUsers) {
         const resumeRow = await db.get("SELECT COUNT(*) as count FROM resumes WHERE user_id = ?", [u.id]);
-        const resumeCount = resumeRow ? resumeRow.count : 0;
+        const resumeCount = resumeRow ? parseInt(resumeRow.count, 10) || 0 : 0;
         if (resumeCount === 0) {
           const prof = await db.get("SELECT * FROM profiles WHERE user_id = ?", [u.id]);
           if (prof) {
-            let tech = [];
-            try { tech = JSON.parse(prof.technical_skills || '[]'); } catch {}
-            // If the profile matches the old mock internship or default 4 skills array
-            const isOldMockProfile = prof.university === 'Infosys Springboard Virtual Internship' ||
-              prof.degree === 'B.Tech in Computer Science & Engineering' ||
-              (tech.length === 4 && tech.includes('JavaScript') && tech.includes('React') && tech.includes('Python') && tech.includes('Git'));
-            
-            if (isOldMockProfile) {
-              await db.run(
-                `UPDATE profiles SET
-                  degree = NULL,
-                  university = NULL,
-                  graduation_year = NULL,
-                  preferred_roles = '[]',
-                  technical_skills = '[]',
-                  soft_skills = '[]',
-                  experience_json = '[]',
-                  projects_json = '[]',
-                  certifications_json = '[]',
-                  preferred_industries = '[]',
-                  updated_at = CURRENT_TIMESTAMP
-                 WHERE user_id = ?`,
-                [u.id]
-              );
-              console.log(`[SeedData] 🧹 Reset fresh clean profile for real user: ${u.email}`);
-            }
+            await db.run(
+              `UPDATE profiles SET
+                technical_skills = '[]',
+                soft_skills = '[]',
+                projects_json = '[]',
+                experience_json = '[]',
+                updated_at = CURRENT_TIMESTAMP
+               WHERE user_id = ?`,
+              [u.id]
+            );
+            console.log(`[SeedData] 🧹 Cleared orphaned profile skills for user without resume: ${u.email}`);
           }
         }
       }
