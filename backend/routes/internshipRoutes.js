@@ -54,7 +54,11 @@ router.get('/stats', async (req, res) => {
     const industryRows = await db.all('SELECT industry, COUNT(*) as count FROM internships GROUP BY industry ORDER BY count DESC');
     const sourceRows = await db.all('SELECT source, COUNT(*) as count FROM internships GROUP BY source');
 
-    const chunkCount = vectorStore.getChunkCount();
+    let chunkCount = vectorStore.getChunkCount();
+    if (chunkCount === 0) {
+      await vectorStore.initialize();
+      chunkCount = vectorStore.getChunkCount();
+    }
 
     return res.json({
       totalInternships: totalRow?.total || 0,

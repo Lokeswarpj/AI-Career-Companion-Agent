@@ -157,7 +157,7 @@ class VectorStore {
   }
 
   /**
-   * Initializes the vector store by loading existing chunks from SQLite database.
+   * Initializes the vector store by loading existing chunks from database or auto-building them.
    */
   async initialize() {
     try {
@@ -169,14 +169,57 @@ class VectorStore {
           chunkIndex: r.chunk_index,
           chunkType: r.chunk_type,
           text: r.chunk_text,
-          metadata: r.metadata_json ? JSON.parse(r.metadata_json) : {},
-          embedding: r.embedding_json ? JSON.parse(r.embedding_json) : []
+          metadata: r.metadata_json ? (typeof r.metadata_json === 'string' ? JSON.parse(r.metadata_json) : r.metadata_json) : {},
+          embedding: r.embedding_json ? (typeof r.embedding_json === 'string' ? JSON.parse(r.embedding_json) : r.embedding_json) : []
         }));
         this.isInitialized = true;
         console.log(`[VectorStore] Loaded ${this.chunks.length} chunks from database into memory index.`);
       } else {
-        this.chunks = [];
-        this.isInitialized = true;
+        // Auto-build from internships table if chunks table is empty
+        const allJobs = await db.all('SELECT * FROM internships');
+        if (allJobs && allJobs.length > 0) {
+          console.log(`[VectorStore] Chunks empty, auto-building from ${allJobs.length} database internships...`);
+          const allChunks = [];
+          for (const job of allJobs) {
+            const reqSkills = Array.isArray(job.required_skills) ? job.required_skills : (typeof job.required_skills_json === 'string' ? JSON.parse(job.required_skills_json || '[]') : (job.required_skills_json || []));
+            const prefSkills = Array.isArray(job.preferred_skills) ? job.preferred_skills : (typeof job.preferred_skills_json === 'string' ? JSON.parse(job.preferred_skills_json || '[]') : (job.preferred_skills_json || []));
+            const resp = Array.isArray(job.responsibilities) ? job.responsibilities : (typeof job.responsibilities_json === 'string' ? JSON.parse(job.responsibilities_json || '[]') : (job.responsibilities_json || []));
+
+            const meta = {
+              internship_id: job.id,
+              title: job.title,
+              company: job.company,
+              location: job.location,
+              remote_type: job.remote_type,
+              industry: job.industry || 'Technology',
+              stipend: job.stipend || '',
+              duration: job.duration || ''
+            };
+
+            const chunkTexts = [
+              { type: 'overview', text: `Job Title: ${job.title}\nCompany: ${job.company}\nIndustry: ${job.industry || 'Technology'}\nLocation: ${job.location} (${job.remote_type})\nDescription: ${job.description || ''}` },
+              { type: 'responsibilities', text: `Role: ${job.title} at ${job.company}\nCore Responsibilities:\n` + resp.map(r => `• ${r}`).join('\n') },
+              { type: 'requirements_skills', text: `Role: ${job.title} at ${job.company}\nRequired Technical Skills: ${reqSkills.join(', ')}\nPreferred Skills: ${prefSkills.join(', ')}\nQualifications: ${job.qualifications || job.preferred_qualifications || ''}` },
+              { type: 'qualifications', text: `Role: ${job.title} at ${job.company}\nEducation: ${job.education_requirements || 'B.Tech/B.E. in Computer Science'}\nExperience: ${job.experience_requirements || 'Relevant experience'}\nDuration: ${job.duration || '3-6 Months'}\nStipend: ${job.stipend || 'Competitive'}` }
+            ];
+
+            chunkTexts.forEach((ct, idx) => {
+              allChunks.push({
+                id: `${job.id}-chunk-${ct.type}`,
+                internshipId: job.id,
+                chunkIndex: idx,
+                chunkType: ct.type,
+                text: ct.text,
+                metadata: meta,
+                embedding: generateLocalSemanticEmbedding(ct.text)
+              });
+            });
+          }
+          await this.indexChunks(allChunks);
+        } else {
+          this.chunks = [];
+          this.isInitialized = true;
+        }
       }
     } catch (err) {
       console.warn('[VectorStore] Error initializing from database:', err.message);
@@ -221,7 +264,7 @@ class VectorStore {
    * Returns top-K nearest matching items aggregated at the internship level.
    */
   async search(queryText, topK = 10, filters = {}) {
-    if (!this.isInitialized) {
+    if (!this.isInitialized || this.chunks.length === 0) {
       await this.initialize();
     }
 
