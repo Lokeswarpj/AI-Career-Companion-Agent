@@ -20,6 +20,101 @@ import {
   TrendingUp
 } from 'lucide-react';
 
+// Formats inline markdown tokens like **bold**, *italic*, `code`, and removes raw/stray asterisks
+function formatInlineText(text) {
+  if (!text) return null;
+
+  // Split by code backticks first, then bold/italic
+  const tokens = text.split(/(`[^`]+`|\*\*[^*]+\*\*|\*[^*]+\*)/g);
+
+  return tokens.map((tok, i) => {
+    if (!tok) return null;
+    if (tok.startsWith('`') && tok.endsWith('`') && tok.length >= 2) {
+      return (
+        <code key={i} style={{ 
+          background: 'rgba(255,255,255,0.08)', 
+          padding: '0.15rem 0.35rem', 
+          borderRadius: '4px', 
+          fontFamily: 'monospace',
+          fontSize: '0.88em'
+        }}>
+          {tok.slice(1, -1)}
+        </code>
+      );
+    }
+    if (tok.startsWith('**') && tok.endsWith('**') && tok.length >= 4) {
+      return <strong key={i} style={{ fontWeight: 700, color: 'inherit' }}>{tok.slice(2, -2)}</strong>;
+    }
+    if (tok.startsWith('*') && tok.endsWith('*') && tok.length >= 2 && !tok.startsWith('**')) {
+      return <em key={i}>{tok.slice(1, -1)}</em>;
+    }
+    // Clean any stray asterisks that were not closed
+    const cleaned = tok.replace(/\*/g, '');
+    return <React.Fragment key={i}>{cleaned}</React.Fragment>;
+  });
+}
+
+function FormattedChatMessage({ content }) {
+  if (!content) return null;
+
+  const blocks = content.split(/\n\n+/);
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+      {blocks.map((block, bIdx) => {
+        const lines = block.split(/\n/);
+        return (
+          <div key={bIdx} style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+            {lines.map((line, lIdx) => {
+              const trimmed = line.trim();
+              if (!trimmed) return null;
+
+              // Check for headers (e.g. ### Header)
+              if (/^#{1,4}\s+/.test(trimmed)) {
+                const headerText = trimmed.replace(/^#{1,4}\s+/, '');
+                return (
+                  <div key={lIdx} style={{ fontWeight: 700, fontSize: '1.02rem', marginTop: '0.25rem', color: 'var(--text-primary)' }}>
+                    {formatInlineText(headerText)}
+                  </div>
+                );
+              }
+
+              // Check for bullet lists (*, -, •)
+              if (/^\s*([*\-•])\s+/.test(trimmed)) {
+                const bulletText = trimmed.replace(/^\s*([*\-•])\s+/, '');
+                return (
+                  <div key={lIdx} style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start', paddingLeft: '0.25rem' }}>
+                    <span style={{ color: 'var(--accent-primary)', fontWeight: 'bold' }}>•</span>
+                    <span style={{ flex: 1 }}>{formatInlineText(bulletText)}</span>
+                  </div>
+                );
+              }
+
+              // Check for numbered lists (1., 2., etc.)
+              const numMatch = trimmed.match(/^(\d+)\.\s+(.*)$/);
+              if (numMatch) {
+                return (
+                  <div key={lIdx} style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start', paddingLeft: '0.25rem' }}>
+                    <span style={{ color: 'var(--accent-primary)', fontWeight: 600, minWidth: '1.2rem' }}>{numMatch[1]}.</span>
+                    <span style={{ flex: 1 }}>{formatInlineText(numMatch[2])}</span>
+                  </div>
+                );
+              }
+
+              // Normal text line
+              return (
+                <div key={lIdx} style={{ lineHeight: 1.65 }}>
+                  {formatInlineText(line)}
+                </div>
+              );
+            })}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function AssistantPage() {
   const { user } = useAuth();
   const notify = useNotification();
@@ -196,10 +291,9 @@ export default function AssistantPage() {
                 fontSize: '0.92rem',
                 lineHeight: 1.65,
                 boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                border: msg.role === 'user' ? 'none' : '1px solid var(--border-card)',
-                whiteSpace: 'pre-wrap'
+                border: msg.role === 'user' ? 'none' : '1px solid var(--border-card)'
               }}>
-                {msg.content}
+                <FormattedChatMessage content={msg.content} />
               </div>
             </div>
           ))}
