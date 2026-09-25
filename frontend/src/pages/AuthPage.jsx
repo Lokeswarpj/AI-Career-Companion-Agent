@@ -94,9 +94,9 @@ export default function AuthPage({ onSuccess, authMode = 'login', setAuthMode })
       return;
     }
 
-    // Otherwise, open the sleek in-app Google Account Chooser modal
-    setGoogleEmailInput(email || 'kalyankumar@gmail.com');
-    setGoogleNameInput(fullName || 'Kalyan Kumar');
+    // Otherwise, open the Google Account setup modal
+    setGoogleEmailInput(email || '');
+    setGoogleNameInput(fullName || '');
     setShowGoogleModal(true);
   };
 
@@ -489,141 +489,100 @@ export default function AuthPage({ onSuccess, authMode = 'login', setAuthMode })
             </div>
 
             <div style={{ padding: '1.5rem' }}>
-              {/* One-Click Quick Selection Account Card */}
-              <div style={{ marginBottom: '1.25rem' }}>
-                <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                  Select Account
-                </span>
-                
-                <div 
-                  onClick={handleModalGoogleSubmit}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '1rem',
-                    padding: '0.9rem 1rem',
-                    marginTop: '0.5rem',
-                    background: 'rgba(66, 133, 244, 0.08)',
-                    border: '1px solid rgba(66, 133, 244, 0.25)',
-                    borderRadius: '12px',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'rgba(66, 133, 244, 0.16)';
-                    e.currentTarget.style.borderColor = '#4285F4';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'rgba(66, 133, 244, 0.08)';
-                    e.currentTarget.style.borderColor = 'rgba(66, 133, 244, 0.25)';
-                  }}
-                >
-                  <img 
-                    src={`https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(googleNameInput || 'Kalyan Kumar')}`} 
-                    alt="Avatar" 
-                    style={{ width: '42px', height: '42px', borderRadius: '50%', border: '2px solid #4285F4' }}
-                  />
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 600, fontSize: '0.95rem', color: '#ffffff' }}>
-                      {googleNameInput || 'Kalyan Kumar'}
-                    </div>
-                    <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {googleEmailInput || 'kalyankumar@gmail.com'}
-                    </div>
+              <div style={{
+                background: 'rgba(66, 133, 244, 0.1)',
+                border: '1px solid rgba(66, 133, 244, 0.3)',
+                borderRadius: '12px',
+                padding: '1rem',
+                marginBottom: '1.25rem'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.6rem' }}>
+                  <Key size={18} color="#4285F4" style={{ marginTop: '0.15rem', flexShrink: 0 }} />
+                  <div>
+                    <h4 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 600, color: '#ffffff' }}>
+                      Connect Google OAuth Client ID
+                    </h4>
+                    <p style={{ margin: '0.35rem 0 0 0', fontSize: '0.78rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
+                      Google requires a free <strong>OAuth Web Client ID</strong> from Google Cloud Console to securely read your browser's logged-in accounts and display the official Google account picker popup.
+                    </p>
                   </div>
-                  <CheckCircle size={20} color="#34A853" />
                 </div>
+
+                <form onSubmit={handleSaveClientIdAndLaunch} style={{ marginTop: '0.9rem' }}>
+                  <input
+                    type="text"
+                    className="form-input"
+                    value={customClientId}
+                    onChange={(e) => setCustomClientId(e.target.value)}
+                    placeholder="e.g. 123456789-xyz.apps.googleusercontent.com"
+                    style={{ fontSize: '0.82rem', padding: '0.6rem 0.8rem', marginBottom: '0.6rem' }}
+                    required
+                  />
+                  <button
+                    type="submit"
+                    className="btn btn-primary"
+                    style={{ width: '100%', fontSize: '0.85rem', padding: '0.65rem', background: '#4285F4', borderColor: '#4285F4' }}
+                  >
+                    Save & Open Google Browser Popup
+                  </button>
+                </form>
               </div>
 
-              {/* Custom / Another Google Account Form */}
-              <form onSubmit={handleModalGoogleSubmit} style={{ marginTop: '1rem' }}>
-                <div className="form-group" style={{ marginBottom: '0.9rem' }}>
-                  <label className="form-label" style={{ fontSize: '0.8rem' }}>Google Email Address</label>
+              {/* Divider */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                textAlign: 'center',
+                margin: '1.25rem 0',
+                color: 'var(--text-muted)',
+                fontSize: '0.75rem'
+              }}>
+                <div style={{ flex: 1, height: '1px', background: 'rgba(255, 255, 255, 0.1)' }}></div>
+                <span style={{ padding: '0 0.5rem', textTransform: 'uppercase' }}>or sign in directly with email</span>
+                <div style={{ flex: 1, height: '1px', background: 'rgba(255, 255, 255, 0.1)' }}></div>
+              </div>
+
+              {/* Custom Google Account Form */}
+              <form onSubmit={handleModalGoogleSubmit}>
+                <div className="form-group" style={{ marginBottom: '0.85rem' }}>
+                  <label className="form-label" style={{ fontSize: '0.8rem' }}>Your Google / Gmail Address</label>
                   <input
                     type="email"
                     className="form-input"
                     value={googleEmailInput}
                     onChange={(e) => setGoogleEmailInput(e.target.value)}
-                    placeholder="e.g. kalyankumar@gmail.com"
+                    placeholder="yourname@gmail.com"
                     required
-                    style={{ fontSize: '0.88rem', padding: '0.65rem 0.9rem' }}
+                    style={{ fontSize: '0.85rem', padding: '0.65rem 0.8rem' }}
                   />
                 </div>
 
                 <div className="form-group" style={{ marginBottom: '1.25rem' }}>
-                  <label className="form-label" style={{ fontSize: '0.8rem' }}>Display Name</label>
+                  <label className="form-label" style={{ fontSize: '0.8rem' }}>Your Full Name</label>
                   <input
                     type="text"
                     className="form-input"
                     value={googleNameInput}
                     onChange={(e) => setGoogleNameInput(e.target.value)}
-                    placeholder="e.g. Kalyan Kumar"
-                    style={{ fontSize: '0.88rem', padding: '0.65rem 0.9rem' }}
+                    placeholder="Your Name"
+                    style={{ fontSize: '0.85rem', padding: '0.65rem 0.8rem' }}
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={googleLoading}
-                  className="btn btn-primary"
+                  className="btn btn-secondary"
                   style={{
                     width: '100%',
-                    padding: '0.75rem',
-                    background: '#4285F4',
-                    borderColor: '#4285F4',
-                    fontSize: '0.9rem',
+                    padding: '0.7rem',
+                    fontSize: '0.85rem',
                     fontWeight: 600
                   }}
                 >
-                  {googleLoading ? 'Connecting...' : `Sign in with ${googleEmailInput || 'Google'}`}
+                  {googleLoading ? 'Signing In...' : 'Continue to Dashboard'}
                 </button>
               </form>
-
-              {/* Native Google Cloud OAuth Config Expander */}
-              <div style={{ marginTop: '1.5rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)', paddingTop: '1rem' }}>
-                <button
-                  type="button"
-                  onClick={() => setShowConfigClientId(!showConfigClientId)}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: 'var(--accent-cyan)',
-                    fontSize: '0.8rem',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.4rem',
-                    padding: 0
-                  }}
-                >
-                  <Key size={14} />
-                  <span>{showConfigClientId ? 'Hide Google Cloud OAuth Setup' : '⚡ Connect Google Cloud Client ID (For Native Browser Popup)'}</span>
-                </button>
-
-                {showConfigClientId && (
-                  <form onSubmit={handleSaveClientIdAndLaunch} style={{ marginTop: '0.75rem', background: 'rgba(0,0,0,0.25)', padding: '0.9rem', borderRadius: '10px' }}>
-                    <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.6rem', lineHeight: '1.4' }}>
-                      To trigger Google's native account chooser window, enter your Web OAuth Client ID from Google Cloud Console:
-                    </p>
-                    <input
-                      type="text"
-                      className="form-input"
-                      value={customClientId}
-                      onChange={(e) => setCustomClientId(e.target.value)}
-                      placeholder="e.g. 123456789-xyz.apps.googleusercontent.com"
-                      style={{ fontSize: '0.78rem', padding: '0.5rem 0.75rem', marginBottom: '0.6rem' }}
-                    />
-                    <button
-                      type="submit"
-                      className="btn btn-secondary"
-                      style={{ width: '100%', fontSize: '0.8rem', padding: '0.5rem' }}
-                    >
-                      Save & Launch Google Popup Window
-                    </button>
-                  </form>
-                )}
-              </div>
-
             </div>
           </div>
         </div>
