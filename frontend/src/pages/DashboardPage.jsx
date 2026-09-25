@@ -264,12 +264,16 @@ export default function DashboardPage({ setActiveTab, setSelectedInternshipId })
                   No Recommendations Yet
                 </h4>
                 <p style={{ fontSize: '0.85rem', marginBottom: '1.25rem', maxWidth: '360px', margin: '0 auto 1.25rem auto', lineHeight: 1.5 }}>
-                  Upload your resume or add technical skills in your Profile to unlock personalized AI compatibility scores.
+                  {resume || (profile?.technical_skills && profile.technical_skills.length > 0)
+                    ? 'No matching internship postings found currently in the catalog. Explore the directory or check back as new postings are synchronized.'
+                    : 'Upload your resume or add technical skills in your Profile to unlock personalized AI compatibility scores.'}
                 </p>
                 <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem' }}>
-                  <button onClick={() => setActiveTab('resume')} className="btn btn-primary btn-sm">
-                    Upload Resume
-                  </button>
+                  {!resume && (
+                    <button onClick={() => setActiveTab('resume')} className="btn btn-primary btn-sm">
+                      Upload Resume
+                    </button>
+                  )}
                   <button onClick={() => setActiveTab('internships')} className="btn btn-outline btn-sm">
                     Explore Directory
                   </button>

@@ -130,9 +130,9 @@ export async function seedInternshipsIfNeeded(force = false) {
     }
 
     const countRow = await db.get("SELECT COUNT(*) as count FROM internships");
-    const count = countRow ? countRow.count : 0;
+    const count = countRow ? parseInt(countRow.count, 10) || 0 : 0;
 
-    const isForcedOrNeeded = force || (process.env.AUTO_SEED === 'true' && count < 150) || count === 0;
+    const isForcedOrNeeded = force || (process.env.AUTO_SEED === 'true' && count < 150) || count < 50;
 
     // If forced or database needs initial population, seed the full curated knowledge base
     if (isForcedOrNeeded && curatedList.length > 0) {
@@ -179,7 +179,8 @@ export async function seedInternshipsIfNeeded(force = false) {
     } else {
       // Initialize vector store in-memory index from existing SQLite database chunks
       const chunkCountRow = await db.get("SELECT COUNT(*) as count FROM internship_chunks");
-      if (!chunkCountRow || chunkCountRow.count === 0) {
+      const chunkCount = chunkCountRow ? parseInt(chunkCountRow.count, 10) || 0 : 0;
+      if (chunkCount === 0) {
         console.log('[SeedData] Building vector chunks for existing internship database...');
         const allJobs = await db.all("SELECT * FROM internships");
         await buildKnowledgeBase(allJobs);

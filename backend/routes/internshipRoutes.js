@@ -4,6 +4,7 @@ import { db } from '../config/database.js';
 import { authenticateToken } from '../middleware/auth.js';
 import { searchInternshipsSemantic } from '../services/ragService.js';
 import { vectorStore } from '../services/vectorStore.js';
+import { seedInternshipsIfNeeded } from '../services/seedData.js';
 
 const router = express.Router();
 
@@ -65,6 +66,31 @@ router.get('/stats', async (req, res) => {
   } catch (err) {
     console.error('Internship stats error:', err);
     return res.status(500).json({ error: 'Failed to retrieve dataset statistics.' });
+  }
+});
+
+// Seed / Reseed knowledge base endpoint
+router.post('/seed', async (req, res) => {
+  try {
+    await seedInternshipsIfNeeded(true);
+    const totalRow = await db.get('SELECT COUNT(*) as total FROM internships');
+    const count = totalRow ? parseInt(totalRow.total, 10) || 0 : 0;
+    return res.json({ message: `Successfully seeded knowledge base with ${count} curated tech internships!`, total: count });
+  } catch (err) {
+    console.error('Reseed error:', err);
+    return res.status(500).json({ error: 'Failed to seed knowledge base: ' + err.message });
+  }
+});
+
+router.get('/seed', async (req, res) => {
+  try {
+    await seedInternshipsIfNeeded(true);
+    const totalRow = await db.get('SELECT COUNT(*) as total FROM internships');
+    const count = totalRow ? parseInt(totalRow.total, 10) || 0 : 0;
+    return res.json({ message: `Successfully seeded knowledge base with ${count} curated tech internships!`, total: count });
+  } catch (err) {
+    console.error('Reseed error:', err);
+    return res.status(500).json({ error: 'Failed to seed knowledge base: ' + err.message });
   }
 });
 
