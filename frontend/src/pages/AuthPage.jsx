@@ -3,6 +3,8 @@ import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
 import { Sparkles, Lock, Mail, User, ArrowRight, ShieldCheck, Eye, EyeOff, X, Key, CheckCircle, ExternalLink } from 'lucide-react';
 
+const GOOGLE_OAUTH_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '887000506417-t38na8vq0j0qg13vih6dvutohrhh8ivi.apps.googleusercontent.com';
+
 export default function AuthPage({ onSuccess, authMode = 'login', setAuthMode }) {
   const { login, register, googleLogin } = useAuth();
   const notify = useNotification();
@@ -15,20 +17,49 @@ export default function AuthPage({ onSuccess, authMode = 'login', setAuthMode })
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
 
-  // Google Modal State (used when client ID is not configured or for quick selection)
+  // Google Modal State (used for fallback if popup is blocked)
   const [showGoogleModal, setShowGoogleModal] = useState(false);
   const [googleEmailInput, setGoogleEmailInput] = useState('');
   const [googleNameInput, setGoogleNameInput] = useState('');
-  const [customClientId, setCustomClientId] = useState(() => localStorage.getItem('cp_google_client_id') || '');
-  const [showConfigClientId, setShowConfigClientId] = useState(false);
+  const [customClientId, setCustomClientId] = useState(() => localStorage.getItem('cp_google_client_id') || GOOGLE_OAUTH_CLIENT_ID);
 
   useEffect(() => {
     setIsRegister(authMode === 'register');
   }, [authMode]);
 
-  // Attempt Google OAuth native popup flow with select_account prompt
+  // Initialize Google Identity Services One Tap
+  useEffect(() => {
+    const activeClientId = customClientId || GOOGLE_OAUTH_CLIENT_ID;
+    if (activeClientId && window.google?.accounts?.id) {
+      try {
+        window.google.accounts.id.initialize({
+          client_id: activeClientId.trim(),
+          callback: handleGoogleCredentialResponse,
+          auto_select: false
+        });
+      } catch (err) {
+        console.warn('Google Identity Services One-Tap init notice:', err);
+      }
+    }
+  }, [customClientId]);
+
+  const handleGoogleCredentialResponse = async (response) => {
+    if (!response?.credential) return;
+    setGoogleLoading(true);
+    try {
+      await googleLogin({ credential: response.credential });
+      notify.success('Signed in with Google successfully!');
+      if (onSuccess) onSuccess();
+    } catch (err) {
+      notify.error(err.message || 'Google Sign-In failed.');
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
+
+  // Trigger Google OAuth native popup window with select_account prompt
   const triggerNativeGoogleOAuth = (clientIdToUse) => {
-    const activeClientId = clientIdToUse || customClientId || import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    const activeClientId = clientIdToUse || customClientId || GOOGLE_OAUTH_CLIENT_ID;
 
     if (activeClientId && window.google?.accounts?.oauth2) {
       try {
@@ -40,12 +71,15 @@ export default function AuthPage({ onSuccess, authMode = 'login', setAuthMode })
           callback: async (tokenResponse) => {
             if (tokenResponse.error) {
               setGoogleLoading(false);
-              notify.error(`Google Sign-In notice: ${tokenResponse.error_description || tokenResponse.error}`);
+              console.warn('Google Sign-In response:', tokenResponse);
+              if (tokenResponse.error !== 'popup_closed_by_user') {
+                notify.error(`Google notice: ${tokenResponse.error_description || tokenResponse.error}`);
+              }
               return;
             }
 
             try {
-              // Fetch user profile from official Google userinfo endpoint
+              // Fetch user profile directly from Google userinfo endpoint
               const profileRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
                 headers: { Authorization: `Bearer ${tokenResponse.access_token}` }
               });
@@ -63,11 +97,11 @@ export default function AuthPage({ onSuccess, authMode = 'login', setAuthMode })
                 }
               });
 
-              notify.success(`Signed in as ${profile.name || profile.email} with Google!`);
+              notify.success(`Welcome ${profile.name || profile.email}! Signed in with Google.`);
               setShowGoogleModal(false);
               if (onSuccess) onSuccess();
             } catch (err) {
-              console.error('Google profile error:', err);
+              console.error('Google profile processing error:', err);
               notify.error(err.message || 'Google authentication failed.');
             } finally {
               setGoogleLoading(false);
@@ -75,11 +109,11 @@ export default function AuthPage({ onSuccess, authMode = 'login', setAuthMode })
           }
         });
 
-        // Open native Google popup window with account selector
+        // Open native Google popup window with account selector (accounts.google.com/v3/signin/accountchooser)
         tokenClient.requestAccessToken({ prompt: 'select_account' });
         return true;
       } catch (err) {
-        console.warn('Native Google OAuth error:', err);
+        console.warn('Native Google OAuth popup error:', err);
         setGoogleLoading(false);
       }
     }
@@ -87,17 +121,15 @@ export default function AuthPage({ onSuccess, authMode = 'login', setAuthMode })
   };
 
   const handleGoogleClick = () => {
-    const activeClientId = customClientId || import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    const activeClientId = customClientId || GOOGLE_OAUTH_CLIENT_ID;
     
-    // If a Google Client ID exists, directly trigger Google's native account chooser popup
-    if (activeClientId && triggerNativeGoogleOAuth(activeClientId)) {
-      return;
+    // Trigger Google's native account chooser popup window
+    const triggered = triggerNativeGoogleOAuth(activeClientId);
+    if (!triggered) {
+      setGoogleEmailInput(email || '');
+      setGoogleNameInput(fullName || '');
+      setShowGoogleModal(true);
     }
-
-    // Otherwise, open the Google Account setup modal
-    setGoogleEmailInput(email || '');
-    setGoogleNameInput(fullName || '');
-    setShowGoogleModal(true);
   };
 
   const handleSaveClientIdAndLaunch = (e) => {
