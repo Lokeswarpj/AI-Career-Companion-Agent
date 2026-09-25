@@ -85,6 +85,10 @@ export const api = {
     clearApiCache();
     return apiRequest('/auth/login', { method: 'POST', body: JSON.stringify(payload) });
   },
+  googleLogin: async (payload) => {
+    clearApiCache();
+    return apiRequest('/auth/google', { method: 'POST', body: JSON.stringify(payload) });
+  },
   demoLogin: async () => {
     clearApiCache();
     return apiRequest('/auth/demo-login', { method: 'POST' });

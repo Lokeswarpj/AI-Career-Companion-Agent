@@ -39,6 +39,13 @@ export function AuthProvider({ children }) {
     return data;
   };
 
+  const googleLogin = async (payload) => {
+    const data = await api.googleLogin(payload);
+    localStorage.setItem('careerpulse_token', data.token);
+    setUser(data.user);
+    return data;
+  };
+
   const demoLogin = async () => {
     const data = await api.demoLogin();
     localStorage.setItem('careerpulse_token', data.token);
@@ -57,6 +64,7 @@ export function AuthProvider({ children }) {
       loading, 
       login, 
       register, 
+      googleLogin,
       demoLogin, 
       logout, 
       isAuthenticated: !!user 

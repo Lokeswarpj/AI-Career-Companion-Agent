@@ -104,6 +104,99 @@ router.post('/login', async (req, res) => {
 });
 
 /**
+ * Google OAuth2 Login & Sign-Up
+ * POST /api/auth/google
+ */
+router.post('/google', async (req, res) => {
+  try {
+    const { credential, userInfo } = req.body;
+
+    let email = '';
+    let fullName = '';
+    let avatarUrl = '';
+
+    // 1. Verify Google ID token credential if provided
+    if (credential) {
+      try {
+        const verifyRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${credential}`);
+        if (verifyRes.ok) {
+          const payload = await verifyRes.json();
+          email = payload.email?.toLowerCase()?.trim();
+          fullName = payload.name || payload.given_name || 'Student';
+          avatarUrl = payload.picture || '';
+        }
+      } catch (verifyErr) {
+        console.warn('[Google Auth] Google TokenInfo verification notice:', verifyErr.message);
+      }
+    }
+
+    // 2. Fallback to userInfo if provided
+    if (!email && userInfo?.email) {
+      email = userInfo.email.toLowerCase().trim();
+      fullName = userInfo.name || userInfo.full_name || 'Student';
+      avatarUrl = userInfo.picture || userInfo.avatar_url || '';
+    }
+
+    if (!email) {
+      return res.status(400).json({ error: 'Could not verify Google authentication. Please try again.' });
+    }
+
+    // 3. Check if user already exists
+    let user = await db.get('SELECT * FROM users WHERE email = ?', [email]);
+
+    if (!user) {
+      // Auto-register new student via Google Sign-In
+      const userId = uuidv4();
+      const profileId = uuidv4();
+      const randomSecret = uuidv4();
+      const salt = await bcrypt.genSalt(10);
+      const password_hash = await bcrypt.hash(`google_oauth_${randomSecret}`, salt);
+
+      await db.run(
+        'INSERT INTO users (id, email, password_hash, full_name, avatar_url) VALUES (?, ?, ?, ?, ?)',
+        [userId, email, password_hash, fullName, avatarUrl]
+      );
+
+      // Initialize clean empty profile for the new student
+      await db.run(
+        `INSERT INTO profiles 
+         (id, user_id, preferred_roles, technical_skills, soft_skills, experience_json, projects_json, certifications_json, preferred_industries) 
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          profileId,
+          userId,
+          JSON.stringify([]),
+          JSON.stringify([]),
+          JSON.stringify([]),
+          JSON.stringify([]),
+          JSON.stringify([]),
+          JSON.stringify([]),
+          JSON.stringify([])
+        ]
+      );
+
+      user = { id: userId, email, full_name: fullName, avatar_url: avatarUrl };
+    } else {
+      if (avatarUrl && !user.avatar_url) {
+        await db.run('UPDATE users SET avatar_url = ? WHERE id = ?', [avatarUrl, user.id]);
+      }
+    }
+
+    const userData = { id: user.id, email: user.email, full_name: user.full_name, avatar_url: user.avatar_url || avatarUrl };
+    const token = generateToken(userData);
+
+    return res.json({
+      message: 'Google authentication successful!',
+      token,
+      user: userData
+    });
+  } catch (err) {
+    console.error('Google login error:', err);
+    return res.status(500).json({ error: err.message || 'Internal server error during Google login.' });
+  }
+});
+
+/**
  * Instant Demo Login (Creates/Resets a rich demo student profile for instant demonstration)
  * POST /api/auth/demo-login
  */
