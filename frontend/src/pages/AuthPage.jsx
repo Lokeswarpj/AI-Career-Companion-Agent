@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
-import { Sparkles, Lock, Mail, User, ArrowRight, ShieldCheck, Eye, EyeOff } from 'lucide-react';
+import { Sparkles, Lock, Mail, User, ArrowRight, ShieldCheck, Eye, EyeOff, X, Key, CheckCircle, ExternalLink } from 'lucide-react';
 
 export default function AuthPage({ onSuccess, authMode = 'login', setAuthMode }) {
   const { login, register, googleLogin } = useAuth();
@@ -15,79 +15,127 @@ export default function AuthPage({ onSuccess, authMode = 'login', setAuthMode })
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
 
-  React.useEffect(() => {
+  // Google Modal State (used when client ID is not configured or for quick selection)
+  const [showGoogleModal, setShowGoogleModal] = useState(false);
+  const [googleEmailInput, setGoogleEmailInput] = useState('');
+  const [googleNameInput, setGoogleNameInput] = useState('');
+  const [customClientId, setCustomClientId] = useState(() => localStorage.getItem('cp_google_client_id') || '');
+  const [showConfigClientId, setShowConfigClientId] = useState(false);
+
+  useEffect(() => {
     setIsRegister(authMode === 'register');
   }, [authMode]);
 
-  // Initialize Google Identity Services if client ID is configured
-  React.useEffect(() => {
-    const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-    if (googleClientId && window.google?.accounts?.id) {
-      try {
-        window.google.accounts.id.initialize({
-          client_id: googleClientId,
-          callback: handleGoogleCredentialResponse,
-          auto_select: false
-        });
-      } catch (err) {
-        console.warn('Google Identity Services initialization notice:', err);
-      }
-    }
-  }, []);
+  // Attempt Google OAuth native popup flow with select_account prompt
+  const triggerNativeGoogleOAuth = (clientIdToUse) => {
+    const activeClientId = clientIdToUse || customClientId || import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
-  const handleGoogleCredentialResponse = async (response) => {
-    if (!response?.credential) return;
-    setGoogleLoading(true);
-    try {
-      await googleLogin({ credential: response.credential });
-      notify.success('Signed in with Google successfully!');
-      if (onSuccess) onSuccess();
-    } catch (err) {
-      notify.error(err.message || 'Google Sign-In failed.');
-    } finally {
-      setGoogleLoading(false);
-    }
-  };
-
-  const handleGoogleClick = async () => {
-    const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-    if (googleClientId && window.google?.accounts?.id) {
+    if (activeClientId && window.google?.accounts?.oauth2) {
       try {
-        window.google.accounts.id.prompt((notification) => {
-          if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-            // Prompt fallback or standard modal
-            triggerGooglePopupPrompt();
+        setGoogleLoading(true);
+        const tokenClient = window.google.accounts.oauth2.initTokenClient({
+          client_id: activeClientId.trim(),
+          scope: 'https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile openid',
+          prompt: 'select_account',
+          callback: async (tokenResponse) => {
+            if (tokenResponse.error) {
+              setGoogleLoading(false);
+              notify.error(`Google Sign-In notice: ${tokenResponse.error_description || tokenResponse.error}`);
+              return;
+            }
+
+            try {
+              // Fetch user profile from official Google userinfo endpoint
+              const profileRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                headers: { Authorization: `Bearer ${tokenResponse.access_token}` }
+              });
+              const profile = await profileRes.json();
+
+              if (!profile.email) {
+                throw new Error('Could not retrieve email from selected Google account.');
+              }
+
+              await googleLogin({
+                userInfo: {
+                  email: profile.email,
+                  name: profile.name || profile.given_name || profile.email.split('@')[0],
+                  picture: profile.picture || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(profile.name || profile.email)}`
+                }
+              });
+
+              notify.success(`Signed in as ${profile.name || profile.email} with Google!`);
+              setShowGoogleModal(false);
+              if (onSuccess) onSuccess();
+            } catch (err) {
+              console.error('Google profile error:', err);
+              notify.error(err.message || 'Google authentication failed.');
+            } finally {
+              setGoogleLoading(false);
+            }
           }
         });
-        return;
+
+        // Open native Google popup window with account selector
+        tokenClient.requestAccessToken({ prompt: 'select_account' });
+        return true;
       } catch (err) {
-        console.warn('Google One Tap notice:', err);
+        console.warn('Native Google OAuth error:', err);
+        setGoogleLoading(false);
       }
     }
-
-    triggerGooglePopupPrompt();
+    return false;
   };
 
-  const triggerGooglePopupPrompt = async () => {
-    // Quick interactive prompt for Google Account sign-in
-    const userEmail = prompt('Enter your Google / Gmail address to sign in or create an account:', email || '');
-    if (!userEmail || !userEmail.trim()) return;
+  const handleGoogleClick = () => {
+    const activeClientId = customClientId || import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    
+    // If a Google Client ID exists, directly trigger Google's native account chooser popup
+    if (activeClientId && triggerNativeGoogleOAuth(activeClientId)) {
+      return;
+    }
 
-    const googleName = prompt('Enter your Name:', fullName || userEmail.split('@')[0]) || 'Student';
+    // Otherwise, open the sleek in-app Google Account Chooser modal
+    setGoogleEmailInput(email || 'kalyankumar@gmail.com');
+    setGoogleNameInput(fullName || 'Kalyan Kumar');
+    setShowGoogleModal(true);
+  };
+
+  const handleSaveClientIdAndLaunch = (e) => {
+    e.preventDefault();
+    if (!customClientId.trim()) {
+      notify.error('Please enter a valid Google OAuth Client ID.');
+      return;
+    }
+    localStorage.setItem('cp_google_client_id', customClientId.trim());
+    notify.success('Google Client ID saved! Launching Google Account Chooser...');
+    triggerNativeGoogleOAuth(customClientId.trim());
+  };
+
+  const handleModalGoogleSubmit = async (e) => {
+    e.preventDefault();
+    if (!googleEmailInput || !googleEmailInput.trim()) {
+      notify.error('Please enter your Google / Gmail address.');
+      return;
+    }
 
     setGoogleLoading(true);
     try {
+      const emailVal = googleEmailInput.trim().toLowerCase();
+      const nameVal = googleNameInput.trim() || emailVal.split('@')[0];
+
       await googleLogin({
         userInfo: {
-          email: userEmail.trim(),
-          name: googleName.trim(),
-          picture: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(googleName)}`
+          email: emailVal,
+          name: nameVal,
+          picture: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(nameVal)}`
         }
       });
-      notify.success('Signed in with Google successfully! Welcome to CareerPulse AI.');
+
+      notify.success(`Signed in with Google as ${emailVal}!`);
+      setShowGoogleModal(false);
       if (onSuccess) onSuccess();
     } catch (err) {
-      notify.error(err.message || 'Google authentication failed.');
+      notify.error(err.message || 'Google login failed.');
     } finally {
       setGoogleLoading(false);
     }
@@ -374,6 +422,213 @@ export default function AuthPage({ onSuccess, authMode = 'login', setAuthMode })
         </div>
 
       </div>
+
+      {/* Modern Google Account Selector Modal */}
+      {showGoogleModal && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(0, 0, 0, 0.75)',
+          backdropFilter: 'blur(8px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: '1.5rem'
+        }}>
+          <div 
+            className="glass-panel"
+            style={{
+              width: '100%',
+              maxWidth: '460px',
+              background: '#131827',
+              borderRadius: '20px',
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 30px rgba(66, 133, 244, 0.15)',
+              overflow: 'hidden',
+              animation: 'fadeIn 0.2s ease-out'
+            }}
+          >
+            {/* Modal Header */}
+            <div style={{
+              padding: '1.5rem 1.5rem 1rem 1.5rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              borderBottom: '1px solid rgba(255, 255, 255, 0.08)'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <svg width="24" height="24" viewBox="0 0 24 24">
+                  <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
+                  <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.34 24 12 24z"/>
+                  <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+                  <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+                </svg>
+                <div>
+                  <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0, color: '#ffffff' }}>Choose a Google Account</h3>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: 0 }}>to continue to CareerPulse AI</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowGoogleModal(false)}
+                style={{
+                  background: 'rgba(255, 255, 255, 0.06)',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '32px',
+                  height: '32px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'var(--text-muted)',
+                  cursor: 'pointer'
+                }}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div style={{ padding: '1.5rem' }}>
+              {/* One-Click Quick Selection Account Card */}
+              <div style={{ marginBottom: '1.25rem' }}>
+                <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  Select Account
+                </span>
+                
+                <div 
+                  onClick={handleModalGoogleSubmit}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '1rem',
+                    padding: '0.9rem 1rem',
+                    marginTop: '0.5rem',
+                    background: 'rgba(66, 133, 244, 0.08)',
+                    border: '1px solid rgba(66, 133, 244, 0.25)',
+                    borderRadius: '12px',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'rgba(66, 133, 244, 0.16)';
+                    e.currentTarget.style.borderColor = '#4285F4';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'rgba(66, 133, 244, 0.08)';
+                    e.currentTarget.style.borderColor = 'rgba(66, 133, 244, 0.25)';
+                  }}
+                >
+                  <img 
+                    src={`https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(googleNameInput || 'Kalyan Kumar')}`} 
+                    alt="Avatar" 
+                    style={{ width: '42px', height: '42px', borderRadius: '50%', border: '2px solid #4285F4' }}
+                  />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 600, fontSize: '0.95rem', color: '#ffffff' }}>
+                      {googleNameInput || 'Kalyan Kumar'}
+                    </div>
+                    <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {googleEmailInput || 'kalyankumar@gmail.com'}
+                    </div>
+                  </div>
+                  <CheckCircle size={20} color="#34A853" />
+                </div>
+              </div>
+
+              {/* Custom / Another Google Account Form */}
+              <form onSubmit={handleModalGoogleSubmit} style={{ marginTop: '1rem' }}>
+                <div className="form-group" style={{ marginBottom: '0.9rem' }}>
+                  <label className="form-label" style={{ fontSize: '0.8rem' }}>Google Email Address</label>
+                  <input
+                    type="email"
+                    className="form-input"
+                    value={googleEmailInput}
+                    onChange={(e) => setGoogleEmailInput(e.target.value)}
+                    placeholder="e.g. kalyankumar@gmail.com"
+                    required
+                    style={{ fontSize: '0.88rem', padding: '0.65rem 0.9rem' }}
+                  />
+                </div>
+
+                <div className="form-group" style={{ marginBottom: '1.25rem' }}>
+                  <label className="form-label" style={{ fontSize: '0.8rem' }}>Display Name</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    value={googleNameInput}
+                    onChange={(e) => setGoogleNameInput(e.target.value)}
+                    placeholder="e.g. Kalyan Kumar"
+                    style={{ fontSize: '0.88rem', padding: '0.65rem 0.9rem' }}
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={googleLoading}
+                  className="btn btn-primary"
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    background: '#4285F4',
+                    borderColor: '#4285F4',
+                    fontSize: '0.9rem',
+                    fontWeight: 600
+                  }}
+                >
+                  {googleLoading ? 'Connecting...' : `Sign in with ${googleEmailInput || 'Google'}`}
+                </button>
+              </form>
+
+              {/* Native Google Cloud OAuth Config Expander */}
+              <div style={{ marginTop: '1.5rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)', paddingTop: '1rem' }}>
+                <button
+                  type="button"
+                  onClick={() => setShowConfigClientId(!showConfigClientId)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: 'var(--accent-cyan)',
+                    fontSize: '0.8rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.4rem',
+                    padding: 0
+                  }}
+                >
+                  <Key size={14} />
+                  <span>{showConfigClientId ? 'Hide Google Cloud OAuth Setup' : '⚡ Connect Google Cloud Client ID (For Native Browser Popup)'}</span>
+                </button>
+
+                {showConfigClientId && (
+                  <form onSubmit={handleSaveClientIdAndLaunch} style={{ marginTop: '0.75rem', background: 'rgba(0,0,0,0.25)', padding: '0.9rem', borderRadius: '10px' }}>
+                    <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.6rem', lineHeight: '1.4' }}>
+                      To trigger Google's native account chooser window, enter your Web OAuth Client ID from Google Cloud Console:
+                    </p>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={customClientId}
+                      onChange={(e) => setCustomClientId(e.target.value)}
+                      placeholder="e.g. 123456789-xyz.apps.googleusercontent.com"
+                      style={{ fontSize: '0.78rem', padding: '0.5rem 0.75rem', marginBottom: '0.6rem' }}
+                    />
+                    <button
+                      type="submit"
+                      className="btn btn-secondary"
+                      style={{ width: '100%', fontSize: '0.8rem', padding: '0.5rem' }}
+                    >
+                      Save & Launch Google Popup Window
+                    </button>
+                  </form>
+                )}
+              </div>
+
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
