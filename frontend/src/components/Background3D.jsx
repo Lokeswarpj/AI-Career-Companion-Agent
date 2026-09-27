@@ -1,14 +1,12 @@
 import React, { useEffect, useRef } from 'react';
-import { useTheme } from '../context/ThemeContext';
 
 /**
  * High-Performance 3D Ambient Background Engine for CareerPulse AI.
  * Ultra-lightweight rendering with precomputed color lookup, optimized node counts,
- * and dynamic multi-theme color synchronization.
+ * and zero DOM jank on page navigation.
  */
 export default function Background3D() {
   const canvasRef = useRef(null);
-  const { theme } = useTheme();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -48,40 +46,13 @@ export default function Background3D() {
     window.addEventListener('resize', handleResize, { passive: true });
     document.addEventListener('visibilitychange', handleVisibility);
 
-    // Dynamic Multi-Theme Color Palettes
-    let PALETTES = [
+    // Optimized Color Palette Precomputations
+    const PALETTES = [
       { core: '#06b6d4', r: 6, g: 182, b: 212 },   // Cyan
       { core: '#818cf8', r: 129, g: 140, b: 248 }, // Indigo
       { core: '#a855f7', r: 168, g: 85, b: 247 },  // Purple
       { core: '#10b981', r: 16, g: 185, b: 129 }   // Emerald
     ];
-    let gridStrokeR = 99, gridStrokeG = 102, gridStrokeB = 241;
-
-    if (theme === 'emerald-slate') {
-      PALETTES = [
-        { core: '#10b981', r: 16, g: 185, b: 129 },
-        { core: '#34d399', r: 52, g: 211, b: 153 },
-        { core: '#06b6d4', r: 6, g: 182, b: 212 },
-        { core: '#84cc16', r: 132, g: 204, b: 22 }
-      ];
-      gridStrokeR = 16; gridStrokeG = 185; gridStrokeB = 129;
-    } else if (theme === 'sunset-rose') {
-      PALETTES = [
-        { core: '#f43f5e', r: 244, g: 63, b: 94 },
-        { core: '#fb7185', r: 251, g: 113, b: 133 },
-        { core: '#a855f7', r: 168, g: 85, b: 247 },
-        { core: '#f59e0b', r: 245, g: 158, b: 11 }
-      ];
-      gridStrokeR = 244; gridStrokeG = 63; gridStrokeB = 94;
-    } else if (theme === 'modern-light' || theme === 'light') {
-      PALETTES = [
-        { core: '#4f46e5', r: 79, g: 70, b: 229 },
-        { core: '#0284c7', r: 2, g: 132, b: 199 },
-        { core: '#059669', r: 5, g: 150, b: 105 },
-        { core: '#d97706', r: 217, g: 119, b: 6 }
-      ];
-      gridStrokeR = 79; gridStrokeG = 70; gridStrokeB = 229;
-    }
 
     // High-performance 28-node neural vector constellation
     const NODE_COUNT = 26;
@@ -175,7 +146,7 @@ export default function Background3D() {
           const p2y = centerY + (y2_proj * focalLength) / z2_;
 
           const alpha = Math.max(0, Math.min(0.08, (1 - z1_ / 900) * 0.12));
-          ctx.strokeStyle = `rgba(${gridStrokeR}, ${gridStrokeG}, ${gridStrokeB}, ${alpha})`;
+          ctx.strokeStyle = `rgba(99, 102, 241, ${alpha})`;
           ctx.beginPath();
           ctx.moveTo(p1x, p1y);
           ctx.lineTo(p2x, p2y);
@@ -224,7 +195,7 @@ export default function Background3D() {
           if (distSq < 10000) { // dist < 100px
             const dist = Math.sqrt(distSq);
             const lineAlpha = (1 - dist / 100) * Math.min(p1.alpha, p2.alpha) * 0.28;
-            ctx.strokeStyle = `rgba(${gridStrokeR}, ${gridStrokeG}, ${gridStrokeB}, ${lineAlpha})`;
+            ctx.strokeStyle = `rgba(99, 102, 241, ${lineAlpha})`;
             ctx.lineWidth = 0.75;
             ctx.beginPath();
             ctx.moveTo(p1.px, p1.py);
@@ -256,9 +227,7 @@ export default function Background3D() {
         // Label for primary nodes
         if (p.node.hasLabel && p.scale > 0.7 && p.alpha > 0.4) {
           ctx.font = `600 ${Math.max(9, Math.round(11 * p.scale))}px sans-serif`;
-          ctx.fillStyle = (theme === 'modern-light' || theme === 'light')
-            ? `rgba(15, 23, 42, ${p.alpha * 0.75})`
-            : `rgba(241, 245, 249, ${p.alpha * 0.7})`;
+          ctx.fillStyle = `rgba(241, 245, 249, ${p.alpha * 0.7})`;
           ctx.textAlign = 'center';
           ctx.fillText(p.node.label, p.px, p.py - p.radius - 4);
         }
@@ -273,7 +242,7 @@ export default function Background3D() {
       window.removeEventListener('resize', handleResize);
       document.removeEventListener('visibilitychange', handleVisibility);
     };
-  }, [theme]);
+  }, []);
 
   return (
     <canvas

@@ -2,26 +2,26 @@
    CareerPulse AI - Modern Design System & Global Styles
    ========================================================================== */
 
-:root, [data-theme="cyber-dark"] {
+:root {
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
   --font-heading: 'Outfit', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
-  /* Color Palette - Cyberpunk Midnight (Default) */
-  --bg-primary: #07090e;
-  --bg-secondary: #0f1422;
-  --bg-tertiary: #192136;
-  --bg-card: rgba(15, 20, 34, 0.78);
-  --bg-card-hover: rgba(25, 33, 54, 0.88);
-  --bg-glass: rgba(11, 15, 26, 0.75);
+  /* Color Palette - Vibrant Dark-First Tech Theme */
+  --bg-primary: #0b0f19;
+  --bg-secondary: #111827;
+  --bg-tertiary: #1f2937;
+  --bg-card: rgba(17, 24, 39, 0.75);
+  --bg-card-hover: rgba(31, 41, 55, 0.85);
+  --bg-glass: rgba(15, 23, 42, 0.65);
 
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
+  --text-primary: #f9fafb;
+  --text-secondary: #9ca3af;
+  --text-muted: #6b7280;
 
-  --accent-primary: #6366f1; /* Electric Indigo */
+  --accent-primary: #6366f1; /* Indigo */
   --accent-primary-hover: #4f46e5;
-  --accent-secondary: #a855f7; /* Violet */
+  --accent-secondary: #8b5cf6; /* Violet */
   --accent-cyan: #06b6d4;
   --accent-emerald: #10b981;
   --accent-amber: #f59e0b;
@@ -34,9 +34,8 @@
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.4);
-  --shadow-glow: 0 0 28px rgba(99, 102, 241, 0.3);
-  --shadow-cyan-glow: 0 0 28px rgba(6, 182, 212, 0.3);
-  --gradient-brand: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #06b6d4 100%);
+  --shadow-glow: 0 0 25px rgba(99, 102, 241, 0.25);
+  --shadow-cyan-glow: 0 0 25px rgba(6, 182, 212, 0.25);
 
   --radius-sm: 6px;
   --radius-md: 10px;
@@ -47,97 +46,22 @@
   --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Theme 2: Emerald Matrix & Deep Space Slate */
-[data-theme="emerald-slate"] {
-  --bg-primary: #050d0b;
-  --bg-secondary: #0a1b17;
-  --bg-tertiary: #102a24;
-  --bg-card: rgba(10, 27, 23, 0.8);
-  --bg-card-hover: rgba(16, 42, 36, 0.9);
-  --bg-glass: rgba(8, 20, 17, 0.78);
-
-  --text-primary: #f0fdf4;
-  --text-secondary: #a7f3d0;
-  --text-muted: #6ee7b7;
-
-  --accent-primary: #10b981; /* Emerald */
-  --accent-primary-hover: #059669;
-  --accent-secondary: #06b6d4; /* Cyan */
-  --accent-cyan: #22d3ee;
-  --accent-emerald: #10b981;
-  --accent-amber: #fbbf24;
-  --accent-rose: #f43f5e;
-
-  --border-subtle: rgba(16, 185, 129, 0.12);
-  --border-focus: rgba(16, 185, 129, 0.55);
-  --border-card: rgba(16, 185, 129, 0.18);
-
-  --shadow-glow: 0 0 28px rgba(16, 185, 129, 0.32);
-  --shadow-cyan-glow: 0 0 28px rgba(34, 211, 238, 0.32);
-  --gradient-brand: linear-gradient(135deg, #10b981 0%, #06b6d4 50%, #3b82f6 100%);
-}
-
-/* Theme 3: Velvet Royale & Sunset Rose */
-[data-theme="sunset-rose"] {
-  --bg-primary: #0d0614;
-  --bg-secondary: #1a0c28;
-  --bg-tertiary: #28123d;
-  --bg-card: rgba(26, 12, 40, 0.8);
-  --bg-card-hover: rgba(40, 18, 61, 0.9);
-  --bg-glass: rgba(19, 9, 30, 0.78);
-
-  --text-primary: #fff1f2;
-  --text-secondary: #fbcfe8;
-  --text-muted: #f472b6;
-
-  --accent-primary: #f43f5e; /* Rose */
-  --accent-primary-hover: #e11d48;
-  --accent-secondary: #a855f7; /* Violet */
-  --accent-cyan: #fb7185;
-  --accent-emerald: #10b981;
-  --accent-amber: #f59e0b;
-  --accent-rose: #f43f5e;
-
-  --border-subtle: rgba(244, 63, 94, 0.14);
-  --border-focus: rgba(244, 63, 94, 0.55);
-  --border-card: rgba(244, 63, 94, 0.18);
-
-  --shadow-glow: 0 0 28px rgba(244, 63, 94, 0.32);
-  --shadow-cyan-glow: 0 0 28px rgba(168, 85, 247, 0.32);
-  --gradient-brand: linear-gradient(135deg, #f43f5e 0%, #a855f7 50%, #f59e0b 100%);
-}
-
-/* Theme 4: Crisp Neo-Light */
-[data-theme="modern-light"], [data-theme="light"] {
-  --bg-primary: #f4f6fa;
+/* Light Theme Variables */
+[data-theme="light"] {
+  --bg-primary: #f8fafc;
   --bg-secondary: #ffffff;
-  --bg-tertiary: #e9eef5;
-  --bg-card: rgba(255, 255, 255, 0.92);
-  --bg-card-hover: rgba(245, 248, 252, 0.98);
-  --bg-glass: rgba(255, 255, 255, 0.85);
+  --bg-tertiary: #f1f5f9;
+  --bg-card: rgba(255, 255, 255, 0.85);
+  --bg-card-hover: rgba(248, 250, 252, 0.95);
+  --bg-glass: rgba(255, 255, 255, 0.75);
 
   --text-primary: #0f172a;
-  --text-secondary: #334155;
-  --text-muted: #64748b;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
 
-  --accent-primary: #4f46e5;
-  --accent-primary-hover: #4338ca;
-  --accent-secondary: #7c3aed;
-  --accent-cyan: #0284c7;
-  --accent-emerald: #059669;
-  --accent-amber: #d97706;
-  --accent-rose: #e11d48;
-
-  --border-subtle: rgba(15, 23, 42, 0.08);
-  --border-focus: rgba(79, 70, 229, 0.5);
-  --border-card: rgba(15, 23, 42, 0.1);
-
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(15, 23, 42, 0.04);
-  --shadow-lg: 0 12px 28px rgba(15, 23, 42, 0.12), 0 4px 8px rgba(15, 23, 42, 0.06);
-  --shadow-glow: 0 0 28px rgba(79, 70, 229, 0.18);
-  --shadow-cyan-glow: 0 0 28px rgba(2, 132, 199, 0.18);
-  --gradient-brand: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #0284c7 100%);
+  --border-subtle: rgba(0, 0, 0, 0.08);
+  --border-card: rgba(0, 0, 0, 0.08);
+  --shadow-glow: 0 0 25px rgba(99, 102, 241, 0.15);
 }
 
 /* Base Styles */
@@ -311,7 +235,7 @@ button, input, select, textarea {
   background: var(--bg-secondary);
   border: 1px solid var(--border-card);
   border-radius: var(--radius-md);
-  color: var(--text-primary) !important;
+  color: #f9fafb !important;
   font-family: var(--font-sans);
   outline: none;
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
@@ -319,8 +243,8 @@ button, input, select, textarea {
 
 .form-input:focus, .form-select:focus, .form-textarea:focus, .form-control:focus, textarea:focus, input:focus, select:focus {
   border-color: var(--accent-primary);
-  box-shadow: 0 0 0 3px var(--border-focus);
-  color: var(--text-primary) !important;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+  color: #ffffff !important;
 }
 
 .form-textarea, textarea {

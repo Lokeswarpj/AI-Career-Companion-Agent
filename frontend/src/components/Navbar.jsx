@@ -1,6 +1,5 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
-import ThemeSelector from './ThemeSelector';
 import { 
   Sparkles, 
   LogIn, 
@@ -31,7 +30,7 @@ export default function Navbar({ activeTab, setActiveTab, isSidebarCollapsed, se
         top: 0, 
         zIndex: 900, 
         height: '4.25rem',
-        borderBottom: '1px solid var(--border-subtle)'
+        borderBottom: '1px solid rgba(255, 255, 255, 0.08)'
       }}
     >
       <div 
@@ -59,8 +58,8 @@ export default function Navbar({ activeTab, setActiveTab, isSidebarCollapsed, se
                   height: '2.4rem',
                   borderRadius: '10px',
                   objectFit: 'cover',
-                  boxShadow: 'var(--shadow-glow)',
-                  border: '1px solid var(--border-card)'
+                  boxShadow: '0 0 14px rgba(99, 102, 241, 0.45)',
+                  border: '1px solid rgba(255, 255, 255, 0.15)'
                 }}
               />
               <div>
@@ -75,10 +74,6 @@ export default function Navbar({ activeTab, setActiveTab, isSidebarCollapsed, se
 
         {/* Right Side: Header actions based on page context */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          
-          {/* Theme Selector - Always available */}
-          <ThemeSelector />
-
           {isLanding ? (
             isAuthenticated ? (
               <button 
@@ -89,7 +84,7 @@ export default function Navbar({ activeTab, setActiveTab, isSidebarCollapsed, se
                   alignItems: 'center', 
                   gap: '0.45rem',
                   fontWeight: 700,
-                  boxShadow: 'var(--shadow-glow)'
+                  boxShadow: '0 2px 10px rgba(99, 102, 241, 0.35)'
                 }}
               >
                 <Sparkles size={15} />
@@ -106,7 +101,7 @@ export default function Navbar({ activeTab, setActiveTab, isSidebarCollapsed, se
                     alignItems: 'center', 
                     gap: '0.45rem',
                     fontWeight: 700,
-                    boxShadow: 'var(--shadow-glow)'
+                    boxShadow: '0 2px 10px rgba(99, 102, 241, 0.35)'
                   }}
                 >
                   <UserPlus size={15} />
@@ -121,11 +116,11 @@ export default function Navbar({ activeTab, setActiveTab, isSidebarCollapsed, se
                     display: 'flex', 
                     alignItems: 'center', 
                     gap: '0.45rem',
-                    borderColor: 'var(--border-card)',
+                    borderColor: 'rgba(255, 255, 255, 0.2)',
                     fontWeight: 600
                   }}
                 >
-                  <LogIn size={15} color="var(--accent-primary)" />
+                  <LogIn size={15} color="#818cf8" />
                   <span>Log In</span>
                 </button>
               </>
@@ -156,7 +151,7 @@ export default function Navbar({ activeTab, setActiveTab, isSidebarCollapsed, se
                 title="Log in with another account"
                 style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', padding: '0.4rem 0.7rem' }}
               >
-                <LogIn size={14} color="var(--accent-primary)" />
+                <LogIn size={14} color="#818cf8" />
                 <span>Switch Account</span>
               </button>
             </>
