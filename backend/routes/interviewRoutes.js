@@ -64,10 +64,17 @@ router.get('/prep-guide/:internshipId', authenticateToken, async (req, res) => {
   }
 });
 
-// 2. Start a new mock interview session with 5 categorized questions
+// 2. Start a new mock interview session with customizable categorized questions
 router.post('/start', authenticateToken, async (req, res) => {
   try {
-    const { internshipId, roleTitle, difficulty = 'Intermediate', interviewType = 'Technical' } = req.body;
+    const { 
+      internshipId, 
+      roleTitle, 
+      difficulty = 'Intermediate', 
+      interviewType = 'Technical',
+      questionCount = 5,
+      focusMode = 'Balanced'
+    } = req.body;
 
     let internship = null;
     if (internshipId) {
@@ -82,12 +89,15 @@ router.post('/start', authenticateToken, async (req, res) => {
     };
 
     const studentProfile = await getStudentProfile(req.user.id);
+    const parsedCount = Math.min(10, Math.max(1, parseInt(questionCount, 10) || 5));
 
-    // Generate 5 categorized questions (Technical, Resume-based, Project-based, Scenario, HR)
+    // Generate user-specified count of role-tailored categorized questions
     const generatedQuestions = await generateCategorizedInterviewQuestions(
       dummyInternship,
       studentProfile,
-      difficulty
+      difficulty,
+      parsedCount,
+      focusMode
     );
 
     const sessionId = uuidv4();
@@ -123,6 +133,7 @@ router.post('/start', authenticateToken, async (req, res) => {
       roleTitle: effectiveRole,
       difficulty,
       interviewType,
+      focusMode,
       totalQuestions: generatedQuestions.length,
       firstQuestion: generatedQuestions[0],
       allQuestions: generatedQuestions

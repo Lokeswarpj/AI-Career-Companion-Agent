@@ -87,88 +87,366 @@ export async function generatePreInterviewPrepGuide(internship, candidateProfile
 }
 
 /**
- * M3.3: Generates 5 distinct, role-specific question categories.
+ * Domain detection helper for internship roles.
  */
-export async function generateCategorizedInterviewQuestions(internship, candidateProfile, difficulty = 'Intermediate') {
+function detectRoleDomain(roleTitle = '', requiredSkills = []) {
+  const combined = (roleTitle + ' ' + (Array.isArray(requiredSkills) ? requiredSkills.join(' ') : '')).toLowerCase();
+  
+  if (/ai|machine learning|ml|data science|nlp|computer vision|deep learning|llm|neural|genai|prompt/.test(combined)) {
+    return 'AI_ML';
+  }
+  if (/frontend|react|vue|angular|ui|ux|web developer|next\.?js|css|html|tailwind|svelte/.test(combined)) {
+    return 'FRONTEND';
+  }
+  if (/backend|node|express|django|flask|fastapi|spring|golang|go |java |postgres|sql|nosql|redis|database|rest api|microservice/.test(combined)) {
+    return 'BACKEND';
+  }
+  if (/devops|cloud|aws|azure|gcp|kubernetes|docker|sre|infrastructure|ci\/cd|terraform|ansible|linux/.test(combined)) {
+    return 'DEVOPS_CLOUD';
+  }
+  if (/mobile|android|ios|react native|flutter|swift|kotlin/.test(combined)) {
+    return 'MOBILE';
+  }
+  if (/security|cyber|infosec|penetration|soc|cryptography|vulnerability|owasp/.test(combined)) {
+    return 'CYBERSECURITY';
+  }
+  if (/data engineer|etl|spark|hadoop|pipeline|warehouse|snowflake|dbt|bigquery|kafka/.test(combined)) {
+    return 'DATA_ENGINEERING';
+  }
+  if (/qa|test|automation|quality|sdet|selenium|cypress|playwright|jest/.test(combined)) {
+    return 'QA_SDET';
+  }
+  return 'FULLSTACK';
+}
+
+/**
+ * M3.3: Generates distinct, role-specific question categories for customizable question count.
+ */
+export async function generateCategorizedInterviewQuestions(
+  internship, 
+  candidateProfile, 
+  difficulty = 'Intermediate', 
+  questionCount = 5,
+  focusMode = 'Balanced'
+) {
+  const count = Math.min(10, Math.max(1, parseInt(questionCount, 10) || 5));
   const role = internship.title || 'Software Engineering Intern';
   const company = internship.company || 'Tech Company';
-  const requiredSkills = internship.required_skills_json ? (typeof internship.required_skills_json === 'string' ? JSON.parse(internship.required_skills_json) : internship.required_skills_json) : ['JavaScript', 'Python', 'React', 'SQL'];
+  const requiredSkills = internship.required_skills_json 
+    ? (typeof internship.required_skills_json === 'string' ? JSON.parse(internship.required_skills_json) : internship.required_skills_json) 
+    : ['JavaScript', 'Python', 'React', 'SQL'];
   
   const studentProjects = candidateProfile.projects || (candidateProfile.projects_json ? (typeof candidateProfile.projects_json === 'string' ? JSON.parse(candidateProfile.projects_json) : candidateProfile.projects_json) : []);
   const studentSkills = candidateProfile.skills || candidateProfile.technical_skills || ['Python', 'JavaScript'];
+  const roleDomain = detectRoleDomain(role, requiredSkills);
 
-  const prompt = `You are a Principal Technical Interviewer and Hiring Bar Raiser at a top tier tech enterprise.
-Generate a realistic 5-question mock interview questionnaire for:
+  // Define category distribution based on count and focus mode
+  const categoryPlan = [];
+  for (let i = 1; i <= count; i++) {
+    if (focusMode === 'Technical Deep-Dive') {
+      if (i % 3 === 1) categoryPlan.push('Technical Internals');
+      else if (i % 3 === 2) categoryPlan.push('System Architecture & Code Optimization');
+      else categoryPlan.push('Algorithm & Concurrency');
+    } else if (focusMode === 'System Architecture & Scenarios') {
+      if (i % 2 === 1) categoryPlan.push('Role-Specific Production Scenario');
+      else categoryPlan.push('System Design & Bottlenecks');
+    } else if (focusMode === 'Behavioral & STAR Leadership') {
+      if (i % 2 === 1) categoryPlan.push('HR / Behavioral (STAR)');
+      else categoryPlan.push('Engineering Leadership & Collaboration');
+    } else {
+      // Balanced Full-Loop
+      const defaultSequence = [
+        'Core Technical',
+        'Resume & Practical Skills',
+        'Project Architecture Deep-Dive',
+        'Role-Specific Production Scenario',
+        'HR / Behavioral (STAR)',
+        'System Optimization & Scaling',
+        'Security & Edge Cases',
+        'Cross-Functional Collaboration',
+        'Code Refactoring & Testing',
+        'Strategic Tech Trade-offs'
+      ];
+      categoryPlan.push(defaultSequence[i - 1] || 'Technical');
+    }
+  }
+
+  const prompt = `You are a Principal Engineering Bar Raiser and Hiring Manager at ${company}.
+Conduct a realistic, highly personalized mock interview for:
 Role: ${role} at ${company}
+Target Domain: ${roleDomain}
 Difficulty: ${difficulty}
-Candidate Verified Skills: ${JSON.stringify(studentSkills)}
-Candidate Projects: ${JSON.stringify(studentProjects.slice(0, 2))}
-Job Required Skills: ${JSON.stringify(requiredSkills)}
+Focus Mode: ${focusMode}
+Candidate Verified Skills: ${JSON.stringify(studentSkills.slice(0, 8))}
+Candidate Projects: ${JSON.stringify(studentProjects.slice(0, 3))}
+Job Required Skills: ${JSON.stringify(requiredSkills.slice(0, 8))}
+Session Randomization Salt: ${Date.now()}-${Math.random().toString(36).substring(7)}
 
-You MUST generate exactly 5 questions spanning these 5 distinct categories:
-1. "Technical": Deep-dive into language internals, data structures, or framework APIs.
-2. "Resume-Based": Probing candidate's specific claimed skills, tools, or coursework.
-3. "Project-Based": Architectural trade-offs, bottlenecks, and engineering decisions in candidate's past projects.
-4. "Role-Specific Scenario": Practical real-world problem solving directly reflecting ${role} day-to-day duties at ${company}.
-5. "HR / Behavioral": Behavioral question evaluating teamwork, conflict, or learning under deadlines using STAR format.
+GENERATE EXACTLY ${count} UNIQUE, SHARP, ROLE-SPECIFIC QUESTIONS.
+Do NOT generate generic, cliché questions like "what is OOP" or basic textbook definitions. 
+Every question MUST directly test real-world engineering thinking, toolchains, trade-offs, and practical challenges specific to ${role} in ${roleDomain}.
 
-Return valid JSON:
+Question Plan (Total ${count} questions):
+${categoryPlan.map((cat, idx) => `${idx + 1}. Category: "${cat}"`).join('\n')}
+
+Return strictly valid JSON with this exact schema:
 {
   "questions": [
-    {
-      "questionNumber": 1,
-      "category": "Technical",
-      "questionText": "...",
-      "expectedKeyPoints": ["Point 1", "Point 2", "Point 3"],
-      "commonPitfallsToAvoid": "Common mistake candidates make",
-      "hint": "Short guiding hint if candidate gets stuck"
-    },
-    {
-      "questionNumber": 2,
-      "category": "Resume-Based",
-      "questionText": "...",
-      "expectedKeyPoints": ["Point 1", "Point 2"],
-      "commonPitfallsToAvoid": "...",
-      "hint": "..."
-    },
-    {
-      "questionNumber": 3,
-      "category": "Project-Based",
-      "questionText": "...",
-      "expectedKeyPoints": ["Point 1", "Point 2"],
-      "commonPitfallsToAvoid": "...",
-      "hint": "..."
-    },
-    {
-      "questionNumber": 4,
-      "category": "Role-Specific Scenario",
-      "questionText": "...",
-      "expectedKeyPoints": ["Point 1", "Point 2"],
-      "commonPitfallsToAvoid": "...",
-      "hint": "..."
-    },
-    {
-      "questionNumber": 5,
-      "category": "HR / Behavioral",
-      "questionText": "...",
-      "expectedKeyPoints": ["Point 1", "Point 2"],
-      "commonPitfallsToAvoid": "...",
-      "hint": "..."
-    }
+    ${categoryPlan.map((cat, idx) => `{
+      "questionNumber": ${idx + 1},
+      "category": "${cat}",
+      "questionText": "Detailed question directly tailored to ${role} at ${company}...",
+      "expectedKeyPoints": ["Specific technical concept 1", "Trade-off or implementation detail 2", "Best practice 3"],
+      "commonPitfallsToAvoid": "Common blunder or surface-level mistake candidates make",
+      "hint": "Insightful 1-sentence hint guiding the candidate"
+    }`).join(',\n    ')}
   ]
 }`;
 
-  const systemPrompt = "You are a Staff Software Engineer and Hiring Committee Chair. Produce sharp, insightful, categorized interview questions in JSON.";
+  const systemPrompt = `You are an elite Staff Engineer and Technical Interviewer at ${company}. Generate non-repetitive, high-fidelity, role-authentic interview questions tailored specifically to the ${roleDomain} domain and difficulty ${difficulty}. Always output strict JSON.`;
 
   let aiResult = await callGemini(prompt, systemPrompt, true);
 
-  if (!aiResult || !aiResult.questions || aiResult.questions.length < 5) {
+  if (!aiResult || !aiResult.questions || !Array.isArray(aiResult.questions) || aiResult.questions.length < count) {
     aiResult = {
-      questions: generateHeuristicCategorizedQuestions(internship, candidateProfile, difficulty)
+      questions: generateHeuristicCategorizedQuestions(internship, candidateProfile, difficulty, count, focusMode)
     };
   }
 
-  return aiResult.questions;
+  // Ensure 1-indexed numbering and clean formats
+  const finalQuestions = (aiResult.questions || []).slice(0, count).map((q, idx) => ({
+    questionNumber: idx + 1,
+    category: q.category || categoryPlan[idx] || 'Technical',
+    questionText: q.questionText || `Explain key architectural considerations for ${role}.`,
+    expectedKeyPoints: Array.isArray(q.expectedKeyPoints) && q.expectedKeyPoints.length > 0 
+      ? q.expectedKeyPoints 
+      : ['Clear explanation of principles', 'Concrete real-world example', 'Awareness of performance trade-offs'],
+    commonPitfallsToAvoid: q.commonPitfallsToAvoid || 'Giving vague definitions without concrete technical depth.',
+    hint: q.hint || 'Structure your answer around core mechanisms, trade-offs, and verification.'
+  }));
+
+  return finalQuestions;
+}
+
+/**
+ * Rich, randomized domain-specific heuristic fallback engine.
+ */
+function generateHeuristicCategorizedQuestions(internship, profile, difficulty, count = 5, focusMode = 'Balanced') {
+  const role = internship.title || 'Software Engineering Intern';
+  const company = internship.company || 'Tech Enterprise';
+  const reqSkills = internship.required_skills_json 
+    ? (typeof internship.required_skills_json === 'string' ? JSON.parse(internship.required_skills_json) : internship.required_skills_json) 
+    : ['JavaScript', 'Python', 'React', 'SQL'];
+  
+  const skill1 = reqSkills[0] || profile.skills?.[0] || 'Modern Programming';
+  const skill2 = reqSkills[1] || profile.skills?.[1] || 'System Architecture';
+  const skill3 = reqSkills[2] || profile.skills?.[2] || 'Data Pipelines';
+  
+  const proj = profile.projects?.[0] || { title: 'Full-Stack Portfolio Project' };
+  const projTitle = typeof proj === 'string' ? proj : (proj.title || 'Recent Engineering Project');
+  const domain = detectRoleDomain(role, reqSkills);
+
+  // Domain-specific bank of realistic questions
+  const domainQuestionBanks = {
+    AI_ML: [
+      {
+        category: 'Technical (Core AI/ML)',
+        questionText: `In machine learning pipelines utilizing ${skill1}, how do you detect and mitigate data leakage and target drift between training and production feature distributions?`,
+        expectedKeyPoints: ['Temporal data splitting vs random splitting', 'Feature scaling fit strictly on train folds', 'Monitoring Kolmogorov-Smirnov or PSI metrics in inference'],
+        commonPitfallsToAvoid: 'Applying transformations or imputations across the full dataset prior to train/test split.',
+        hint: 'Think about how feature transformers fit during cross-validation.'
+      },
+      {
+        category: 'Technical (LLM & RAG Architecture)',
+        questionText: `Suppose you are designing a Retrieval-Augmented Generation (RAG) system for ${company}. How would you optimize chunking strategies, embedding vector retrieval, and re-ranking to minimize hallucination?`,
+        expectedKeyPoints: ['Semantic chunking with contextual overlap', 'Hybrid search (Dense vector + BM25 keyword)', 'Cross-encoder re-ranking and prompt grounding'],
+        commonPitfallsToAvoid: 'Relying solely on cosine similarity of large arbitrary chunks without reranking or metadata filtering.',
+        hint: 'Walk through the query processing, retrieval, reranking, and prompt synthesis stages.'
+      },
+      {
+        category: 'Technical (Model Optimization & Inference)',
+        questionText: `When deploying deep learning or transformer models to low-latency production endpoints, what quantization and model distillation techniques do you consider?`,
+        expectedKeyPoints: ['INT8/FP16 quantization (PTQ vs QAT)', 'Knowledge distillation student-teacher paradigms', 'TensorRT, ONNX Runtime, or batch inference serving'],
+        commonPitfallsToAvoid: 'Ignoring accuracy degradation during post-training quantization.',
+        hint: 'Compare memory footprint vs inference latency vs model perplexity.'
+      },
+      {
+        category: 'Technical (Evaluation & Metrics)',
+        questionText: `For an imbalanced classification problem in ${company}'s domain, why is accuracy misleading, and how do you evaluate Precision-Recall AUC versus ROC AUC?`,
+        expectedKeyPoints: ['True Negative dominance skewing ROC-AUC', 'PR-AUC focusing on the minority positive class', 'F-beta score and setting optimal decision thresholds based on business cost'],
+        commonPitfallsToAvoid: 'Relying solely on 99% accuracy when positive classes represent <1% of data.',
+        hint: 'Explain the denominator difference between False Positive Rate and Precision.'
+      }
+    ],
+
+    FRONTEND: [
+      {
+        category: 'Technical (Frontend Architecture)',
+        questionText: `In modern ${skill1} applications, how does the reconciliation/Virtual DOM algorithm minimize layout thrashing, and how do you prevent unnecessary re-render cascades in deeply nested component trees?`,
+        expectedKeyPoints: ['Component memoization (React.memo, useMemo, useCallback)', 'State colocation vs global store updates', 'Fiber reconciliation tree diffing and key prop semantics'],
+        commonPitfallsToAvoid: 'Wrapping every single variable in memoization without considering reference equality overhead.',
+        hint: 'Discuss how state changes propagate through the component render tree.'
+      },
+      {
+        category: 'Technical (Web Performance & Core Vitals)',
+        questionText: `If a web application at ${company} suffers from poor Largest Contentful Paint (LCP) and Interaction to Next Paint (INP), what diagnostic workflow and optimizations would you implement?`,
+        expectedKeyPoints: ['Code-splitting and dynamic route-based lazy loading', 'Asset preloading, modern image formats (WebP/AVIF), and CDN caching', 'Offloading long CPU tasks with Web Workers or requestIdleCallback'],
+        commonPitfallsToAvoid: 'Focusing only on bundle size while ignoring main-thread JavaScript execution bottlenecks.',
+        hint: 'Break down network fetch time, render blocking resources, and main-thread task durations.'
+      },
+      {
+        category: 'Technical (State Management & Async Flow)',
+        questionText: `How do you handle complex asynchronous state, optimistic UI updates, and cache invalidation when multiple components depend on shared mutating server data?`,
+        expectedKeyPoints: ['Server state management (TanStack Query, SWR, or Redux Toolkit Query)', 'Optimistic rollback on mutation errors', 'Deduplication and normalized client caching'],
+        commonPitfallsToAvoid: 'Storing duplicating server state in local component state causing synchronization drift.',
+        hint: 'Walk through an optimistic UI update scenario with network failure rollback.'
+      },
+      {
+        category: 'Technical (Accessibility & Responsive Design)',
+        questionText: `How do you architect reusable UI components that are fully compliant with WCAG 2.1 AA standards, keyboard navigable, and responsive across varied viewports?`,
+        expectedKeyPoints: ['Semantic HTML elements vs ARIA attributes', 'Focus management and trapping inside interactive modals/drawers', 'Fluid typography and modern CSS grid/flexbox without layout shifts'],
+        commonPitfallsToAvoid: 'Using generic <div> elements with click listeners without keyboard event handlers or role attributes.',
+        hint: 'Explain keyboard tab indexing, ARIA live regions, and semantic landmarks.'
+      }
+    ],
+
+    BACKEND: [
+      {
+        category: 'Technical (API Design & Concurrency)',
+        questionText: `When designing high-throughput REST or GraphQL APIs in ${skill1}, how do you manage connection pooling, thread/event concurrency, and gracefully handle traffic spikes without starving system resources?`,
+        expectedKeyPoints: ['Database connection pool sizing and lifecycle', 'Asynchronous non-blocking I/O vs thread workers', 'Rate limiting, token buckets, and exponential backoff on upstream services'],
+        commonPitfallsToAvoid: 'Creating new database connections per incoming request instead of leveraging pooled connections.',
+        hint: 'Contrast thread-per-request architectures with event-driven non-blocking loops.'
+      },
+      {
+        category: 'Technical (Database Optimization & Indexing)',
+        questionText: `In relational or NoSQL databases, how do you diagnose slow queries using EXPLAIN ANALYZE, and what are the trade-offs of composite B-Tree indexes versus partitioning?`,
+        expectedKeyPoints: ['Sequential scans vs Index scans / Index-Only scans', 'Leftmost prefix rule for composite indexes', 'Write amplification overhead on tables with heavy insert volume'],
+        commonPitfallsToAvoid: 'Adding indexes to every column without realizing the write performance penalty and disk space overhead.',
+        hint: 'Walk through how the query planner chooses an execution plan based on statistics.'
+      },
+      {
+        category: 'Technical (Distributed Systems & Caching)',
+        questionText: `How would you implement a distributed caching strategy (e.g., Redis) with Cache-Aside vs Write-Through patterns, and how do you protect against cache stampedes, penetration, and avalanche?`,
+        expectedKeyPoints: ['Cache-aside pattern and TTL jittering for avalanche prevention', 'Bloom filters to guard against cache penetration', 'Mutex/distributed locks to prevent cache stampedes on expired hot keys'],
+        commonPitfallsToAvoid: 'Setting identical expiration times across all cached keys leading to synchronized bulk misses.',
+        hint: 'Define what happens when a million requests hit an expired hot cache key simultaneously.'
+      },
+      {
+        category: 'Technical (Reliability & Transactions)',
+        questionText: `Explain how you ensure data consistency across multiple backend services (e.g. Sagas, 2-Phase Commit, or Outbox pattern) when handling financial or state-critical workflows.`,
+        expectedKeyPoints: ['ACID transaction isolation levels within single databases', 'Transactional Outbox pattern with message brokers (Kafka/RabbitMQ)', 'Compensating transactions in event-driven Saga choreography/orchestration'],
+        commonPitfallsToAvoid: 'Assuming dual-writes across a database and message queue will always succeed without distributed transaction patterns.',
+        hint: 'Walk through what happens if the network drops right after the database commit but before message publish.'
+      }
+    ],
+
+    DEVOPS_CLOUD: [
+      {
+        category: 'Technical (Containerization & Orchestration)',
+        questionText: `In Kubernetes and Docker environments, how do you architect multi-stage builds for minimal image attack surfaces, and how do Liveness vs Readiness vs Startup probes prevent traffic blackholes?`,
+        expectedKeyPoints: ['Multi-stage Docker builds separating compiler toolchains from runtime scratch images', 'Readiness probes removing unhealthy pods from Service endpoints before warm-up', 'Resource requests and limits preventing node OOMKilled panics'],
+        commonPitfallsToAvoid: 'Using Liveness probes to check external dependencies, which can trigger cascading cluster-wide pod restart loops.',
+        hint: 'Differentiate when a pod is booting up, ready to accept HTTP traffic, or fatally frozen.'
+      },
+      {
+        category: 'Technical (CI/CD & Deployment Strategies)',
+        questionText: `How do you implement zero-downtime Canary and Blue/Green deployment pipelines, and how do you automate fast rollbacks based on Prometheus/Datadog SLI threshold breaches?`,
+        expectedKeyPoints: ['Traffic shifting via ingress controllers (e.g. NGINX/Istio/Argo Rollouts)', 'Automated analysis of error rate and latency p99 metrics', 'Database migration backward compatibility (Expand and Contract pattern)'],
+        commonPitfallsToAvoid: 'Deploying breaking database schema changes that immediately crash the older active version before rollout completes.',
+        hint: 'Explain the Expand and Contract pattern for zero-downtime database migrations.'
+      },
+      {
+        category: 'Technical (Infrastructure as Code & Security)',
+        questionText: `When managing cloud infrastructure using Terraform, how do you maintain state locking, manage secrets securely, and enforce least-privilege IAM roles?`,
+        expectedKeyPoints: ['Remote backend state with DynamoDB/S3 distributed locking', 'Ephemeral credentials and Vault/KMS secrets injection', 'Scoped IAM policies avoiding wildcard permissions'],
+        commonPitfallsToAvoid: 'Committing raw terraform.tfstate files containing plain-text secrets to version control.',
+        hint: 'Discuss remote state locking and secret interpolation.'
+      }
+    ],
+
+    FULLSTACK: [
+      {
+        category: 'Technical (End-to-End System Architecture)',
+        questionText: `Can you walk through the full lifecycle of a user request in a ${skill1} & ${skill2} stack—from browser DNS lookup and TLS handshake through reverse proxies, authentication middleware, and database transaction commit?`,
+        expectedKeyPoints: ['DNS resolution, TLS 1.3 handshake, HTTP/2 multiplexing', 'Reverse proxy (NGINX/Cloudflare) SSL termination and load balancing', 'JWT/Session validation, ORM/DB transaction commit, and serialized response stream'],
+        commonPitfallsToAvoid: 'Skipping intermediate networking tiers and focusing solely on client click to server controller.',
+        hint: 'Trace the request packet layer-by-layer across network, server, and storage boundaries.'
+      },
+      {
+        category: 'Technical (Security & Authentication)',
+        questionText: `How do you secure a web platform against Cross-Site Scripting (XSS), Cross-Site Request Forgery (CSRF), and SQL Injection while implementing stateless JWT auth with refresh tokens?`,
+        expectedKeyPoints: ['HttpOnly, SameSite, Secure cookies for refresh tokens', 'Parameterized SQL queries and input sanitization', 'Content Security Policy (CSP) headers and DOM purification'],
+        commonPitfallsToAvoid: 'Storing sensitive long-lived JWT access tokens in localStorage where they are vulnerable to XSS.',
+        hint: 'Compare token storage options and their respective attack surfaces.'
+      },
+      {
+        category: 'Technical (Scalability & Microservices)',
+        questionText: `When transitioning a monolithic backend to modular microservices or serverless functions, how do you handle service discovery, shared authentication, and distributed logging/tracing?`,
+        expectedKeyPoints: ['API Gateway pattern with centralized authentication', 'Correlation IDs (OpenTelemetry/Jaeger) propagated across HTTP headers', 'Event-driven decoupling over synchronous point-to-point RPCs'],
+        commonPitfallsToAvoid: 'Creating a distributed monolith where every microservice synchronously calls three other services to fulfill one request.',
+        hint: 'Explain distributed trace IDs and asynchronous messaging patterns.'
+      }
+    ]
+  };
+
+  // General questions for resume, project, scenario, and behavioral
+  const generalPool = [
+    {
+      category: 'Resume-Based Technical Skills',
+      questionText: `Looking at your hands-on experience with ${skill1} and ${skill2}, what is the most complex bug or performance regression you diagnosed, and what telemetry or debugging tools did you use?`,
+      expectedKeyPoints: ['Systematic debugging methodology', 'Toolchain usage (profilers, debuggers, memory snapshots, logs)', 'Root cause identification and preventative unit/integration testing'],
+      commonPitfallsToAvoid: 'Describing trial-and-error code guessing rather than hypothesis-driven diagnostic workflows.',
+      hint: 'Walk through: Symptom -> Diagnostic tools used -> Root cause -> Solution -> Verification.'
+    },
+    {
+      category: 'Project-Based Architecture Deep-Dive',
+      questionText: `In your project "${projTitle}", what were the primary architectural trade-offs you evaluated when designing the data model and API contracts? What would you architect differently for 100x scale?`,
+      expectedKeyPoints: ['Rationale for technology selection over alternatives', 'Handling data consistency, indexing, and component modularity', 'Horizontal scaling strategies (sharding, caching, asynchronous queues)'],
+      commonPitfallsToAvoid: 'Only describing the UI features without addressing data flow, constraints, and scalability limits.',
+      hint: 'Structure: Business requirement -> Options considered -> Decision rationale -> Lessons learned.'
+    },
+    {
+      category: 'Role-Specific Production Scenario',
+      questionText: `As a ${role} at ${company}, imagine a critical production service begins experiencing a 5% error spike and elevated p99 latency right after a Friday release. What is your immediate incident response and mitigation plan?`,
+      expectedKeyPoints: ['Incident triage: acknowledge, communicate status, check telemetry/error dashboards', 'Immediate mitigation: roll back deployment or enable kill-switch feature flags', 'Post-mortem blameless RCA and automated regression tests'],
+      commonPitfallsToAvoid: 'Attempting to hotfix code directly in production during an active incident instead of executing a safe rollback.',
+      hint: 'Focus on containment, communication, rollback, and subsequent blameless post-mortem.'
+    },
+    {
+      category: 'HR / Behavioral',
+      questionText: `Describe a situation where you had a strong technical disagreement with a teammate or had to deliver on a critical deadline with ambiguous, shifting requirements. How did you handle it?`,
+      expectedKeyPoints: ['Situation & Task: Context and challenge', 'Action: Active listening, objective data-driven proof of concept, alignment', 'Result: Successful delivery and strengthened team collaboration'],
+      commonPitfallsToAvoid: 'Focusing on blaming others rather than collaborative problem solving and shared ownership.',
+      hint: 'Use the STAR format: Situation, Task, Action (what YOU did), and measurable Result.'
+    },
+    {
+      category: 'Technical (Engineering Hygiene & Testing)',
+      questionText: `How do you structure your testing pyramid (Unit, Integration, End-to-End) and maintain high test confidence without brittle, slow test suites?`,
+      expectedKeyPoints: ['Unit tests for pure functions and core logic', 'Integration tests with containerized dependencies (Testcontainers)', 'Mocking boundaries without testing implementation details'],
+      commonPitfallsToAvoid: 'Testing private implementation details instead of public interface contracts.',
+      hint: 'Explain when to mock versus when to run against real lightweight dependencies.'
+    }
+  ];
+
+  // Combine domain bank + general pool with randomization
+  const domainBank = domainQuestionBanks[domain] || domainQuestionBanks.FULLSTACK;
+  const combinedPool = [...domainBank, ...generalPool];
+
+  // Shuffle combined pool
+  const shuffled = combinedPool.sort(() => 0.5 - Math.random());
+  
+  // Select requested count
+  const selected = shuffled.slice(0, count);
+
+  return selected.map((item, idx) => ({
+    questionNumber: idx + 1,
+    category: item.category,
+    questionText: item.questionText,
+    expectedKeyPoints: item.expectedKeyPoints,
+    commonPitfallsToAvoid: item.commonPitfallsToAvoid,
+    hint: item.hint
+  }));
 }
 
 /**
@@ -221,80 +499,8 @@ Return valid JSON:
 }
 
 // -------------------------------------------------------------
-// HEURISTIC ENGINES FOR INTERVIEW PREPARATION AGENT
+// HEURISTIC EVALUATION FOR INTERVIEW PREPARATION AGENT
 // -------------------------------------------------------------
-
-function generateHeuristicCategorizedQuestions(internship, profile, difficulty) {
-  const role = internship.title || 'Software Engineering Intern';
-  const company = internship.company || 'Tech Enterprise';
-  const reqSkills = internship.required_skills_json ? (typeof internship.required_skills_json === 'string' ? JSON.parse(internship.required_skills_json) : internship.required_skills_json) : ['JavaScript', 'Python'];
-  const topReq = reqSkills[0] || 'Python';
-  const proj = profile.projects?.[0] || { title: 'Software Engineering Project' };
-  const projTitle = typeof proj === 'string' ? proj : (proj.title || 'Recent Project');
-
-  return [
-    {
-      questionNumber: 1,
-      category: 'Technical',
-      questionText: `Can you explain the difference between synchronous and asynchronous execution in ${topReq}, and how you prevent blocking the main thread or event loop during intensive operations?`,
-      expectedKeyPoints: [
-        'Non-blocking I/O vs synchronous execution model',
-        'Promises, async/await, or threading/multiprocessing constructs',
-        'Error handling and unhandled rejection strategies'
-      ],
-      commonPitfallsToAvoid: 'Only stating that async is "faster" without explaining how concurrency and the event loop actually handle task scheduling.',
-      hint: 'Think about network I/O calls versus CPU-heavy algorithmic loops.'
-    },
-    {
-      questionNumber: 2,
-      category: 'Resume-Based',
-      questionText: `Looking at your resume, you listed experience with ${profile.skills?.[0] || 'modern software stacks'}. How have you used this skill in practice, and what is a key architectural lesson you learned?`,
-      expectedKeyPoints: [
-        'Concrete context of where and how the skill was utilized',
-        'Specific challenges encountered and resolved',
-        'Demonstrated understanding of best practices'
-      ],
-      commonPitfallsToAvoid: 'Giving vague definitions rather than walking through your specific practical implementation.',
-      hint: 'Reference a specific feature or module you personally built.'
-    },
-    {
-      questionNumber: 3,
-      category: 'Project-Based',
-      questionText: `In your project "${projTitle}", how did you decide on the overall data architecture and database schema, and what trade-offs did you consider regarding scalability?`,
-      expectedKeyPoints: [
-        'Rationale behind database and tech stack selection',
-        'Data normalization, indexing, or state caching considerations',
-        'How the system handles increasing user load or query volume'
-      ],
-      commonPitfallsToAvoid: 'Describing only the frontend user interface rather than the end-to-end data flow and backend constraints.',
-      hint: 'Structure your response: Problem -> Options considered -> Chosen solution -> Outcome.'
-    },
-    {
-      questionNumber: 4,
-      category: 'Role-Specific Scenario',
-      questionText: `As a ${role} at ${company}, suppose a production API or service suddenly experiences high latency and times out under sudden traffic spikes. How would you systematically diagnose and mitigate the root cause?`,
-      expectedKeyPoints: [
-        'Systematic debugging: logs, metrics, APM profiling, and network diagnostics',
-        'Identifying common bottlenecks: database query locks, CPU thrashing, memory leaks',
-        'Short-term mitigation (caching, rate-limiting) vs long-term permanent fix'
-      ],
-      commonPitfallsToAvoid: 'Jumping immediately to random code changes without first checking telemetry, error logs, and metrics.',
-      hint: 'Walk through your diagnostic workflow from alert to resolution.'
-    },
-    {
-      questionNumber: 5,
-      category: 'HR / Behavioral',
-      questionText: `Tell me about a time when you were working on a tight project deadline with ambiguous requirements or a challenging team disagreement. How did you handle it and ensure successful delivery?`,
-      expectedKeyPoints: [
-        'Clear STAR format: Situation, Task, Action, Result',
-        'Proactive communication and alignment with stakeholders or peers',
-        'Positive outcome and key takeaways for future teamwork'
-      ],
-      commonPitfallsToAvoid: 'Blaming team members or mentors rather than focusing on constructive communication and problem-solving.',
-      hint: 'Focus on your initiative, active listening, and measurable resolution.'
-    }
-  ];
-}
 
 function generateHeuristicAnswerEvaluationM3(questionText, userAnswer, category) {
   const words = (userAnswer || '').trim().split(/\s+/).filter(Boolean);
