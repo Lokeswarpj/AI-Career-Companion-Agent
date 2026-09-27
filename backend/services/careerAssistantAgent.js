@@ -42,39 +42,42 @@ export function classifyUserIntent(message) {
  */
 export async function runCareerAssistantAgent(userMessage, studentContext, chatHistory = []) {
   const intent = classifyUserIntent(userMessage);
+  const hasValidResume = Boolean(studentContext.hasResume || (studentContext.skills && studentContext.skills.length > 0));
 
   // 1. Fetch relevant multi-agent artifacts dynamically based on intent
   let multiAgentData = {};
 
   try {
-    if (intent === 'INTERNSHIP_RECOMMEND' || intent === 'COMPARE_ROLES' || intent === 'EXPLAIN_MATCH') {
-      const recs = await runJobResumeMatchingAgent(studentContext, 6);
-      multiAgentData.topMatches = recs.slice(0, 3).map(r => ({
-        id: r.internship.id,
-        title: r.internship.title,
-        company: r.internship.company,
-        score: r.matchScore,
-        location: r.internship.location,
-        remote_type: r.internship.remote_type,
-        stipend: r.internship.stipend,
-        matchingSkills: r.skillMatrix.matchingSkills.map(m => m.skill),
-        missingSkills: r.skillMatrix.missingSkills.map(m => m.skill)
-      }));
-    }
+    if (hasValidResume) {
+      if (intent === 'INTERNSHIP_RECOMMEND' || intent === 'COMPARE_ROLES' || intent === 'EXPLAIN_MATCH') {
+        const recs = await runJobResumeMatchingAgent(studentContext, 6);
+        multiAgentData.topMatches = recs.slice(0, 3).map(r => ({
+          id: r.internship.id,
+          title: r.internship.title,
+          company: r.internship.company,
+          score: r.matchScore,
+          location: r.internship.location,
+          remote_type: r.internship.remote_type,
+          stipend: r.internship.stipend,
+          matchingSkills: r.skillMatrix.matchingSkills.map(m => m.skill),
+          missingSkills: r.skillMatrix.missingSkills.map(m => m.skill)
+        }));
+      }
 
-    if (intent === 'EXPLAIN_SKILL_GAPS' || intent === 'INTERVIEW_PLAN') {
-      // Find candidate's top matched job
-      const topJob = await db.get('SELECT * FROM internships LIMIT 1');
-      if (topJob) {
-        const gap = await runSkillGapAnalysisAgent(studentContext, topJob);
-        multiAgentData.skillGapSummary = {
-          role: topJob.title,
-          company: topJob.company,
-          readinessScore: gap.metrics.readinessScore,
-          criticalMissing: gap.gapClassifications.criticalMissing.map(s => s.skill),
-          partiallyDemonstrated: gap.gapClassifications.partiallyDemonstrated.map(s => s.skill),
-          roadmapTopics: gap.actionableRoadmap.slice(0, 3).map(r => `${r.skill}: ${r.timeEstimate} (${r.topics[0]})`)
-        };
+      if (intent === 'EXPLAIN_SKILL_GAPS' || intent === 'INTERVIEW_PLAN') {
+        // Find candidate's top matched job
+        const topJob = await db.get('SELECT * FROM internships LIMIT 1');
+        if (topJob) {
+          const gap = await runSkillGapAnalysisAgent(studentContext, topJob);
+          multiAgentData.skillGapSummary = {
+            role: topJob.title,
+            company: topJob.company,
+            readinessScore: gap.metrics.readinessScore,
+            criticalMissing: gap.gapClassifications.criticalMissing.map(s => s.skill),
+            partiallyDemonstrated: gap.gapClassifications.partiallyDemonstrated.map(s => s.skill),
+            roadmapTopics: gap.actionableRoadmap.slice(0, 3).map(r => `${r.skill}: ${r.timeEstimate} (${r.topics[0]})`)
+          };
+        }
       }
     }
   } catch (err) {
@@ -90,7 +93,7 @@ Student Profile Context:
 - Degree: ${studentContext.degree || 'B.Tech CS'} (${studentContext.university || 'Engineering College'}, Class of ${studentContext.graduation_year || 2026})
 - Technical Skills: ${JSON.stringify(studentContext.skills || [])}
 - Preferred Roles: ${JSON.stringify(studentContext.preferred_roles || ['Software Engineer Intern'])}
-- Uploaded Resume: ${studentContext.hasResume ? 'Yes (Parsed & Analyzed)' : 'No'}
+- Uploaded Resume: ${hasValidResume ? 'Yes (Parsed & Analyzed)' : 'No (Not uploaded yet)'}
 - Mock Interview Average: ${studentContext.avgScore ? studentContext.avgScore + '/100' : 'None yet'}
 - Saved Internships: ${JSON.stringify(studentContext.savedInternships || [])}
 
@@ -106,7 +109,7 @@ Student's Latest Message:
 "${userMessage}"
 
 Instructions:
-1. Provide a highly personalized, structured, and empathetic response.
+1. ${!hasValidResume && (intent === 'INTERNSHIP_RECOMMEND' || intent === 'EXPLAIN_SKILL_GAPS' || intent === 'COMPARE_ROLES' || intent === 'EXPLAIN_MATCH') ? 'IMPORTANT: The student has NOT uploaded a resume yet. Tell them clearly that to get accurate percentage compatibility scores and personalized skill gap roadmaps, they should upload their resume in the "Resume AI" tab first. Mention popular open tech internships from the catalog they can browse in the Internships tab in the meantime.' : 'Provide a highly personalized, structured, and empathetic response using the multi-agent context.'}
 2. Directly answer the student's question utilizing the multi-agent context (mention specific roles, skill matches, gaps, and metrics where relevant).
 3. Use clean GitHub Markdown formatting with bold headers, bullet points, and actionable next steps.
 4. If comparing roles, provide a clear structured comparison (Pros, Cons, Tech Alignment, Decision Recommendation).
@@ -121,14 +124,74 @@ Instructions:
   }
 
   // 3. Heuristic Engine Fallback for M3.4
-  return generateHeuristicAssistantResponse(intent, userMessage, studentContext, multiAgentData);
+  return generateHeuristicAssistantResponse(intent, userMessage, studentContext, multiAgentData, hasValidResume);
 }
 
-function generateHeuristicAssistantResponse(intent, message, context, multiAgentData) {
+function generateHeuristicAssistantResponse(intent, message, context, multiAgentData, hasValidResume) {
   const name = context.name || 'there';
-  const skills = context.skills || ['Python', 'JavaScript', 'React', 'SQL'];
-  const topSkillsStr = skills.slice(0, 4).join(', ');
+  const skills = (context.skills && context.skills.length > 0) ? context.skills : [];
+  const topSkillsStr = skills.length > 0 ? skills.slice(0, 4).join(', ') : '';
 
+  // Zero-Resume Guardrails
+  if (!hasValidResume) {
+    if (intent === 'INTERNSHIP_RECOMMEND') {
+      return `### 📄 No Resume Uploaded Yet
+
+Hello **${name}**! You haven't uploaded or parsed your resume yet, so our Multi-Agent Matching Engine cannot calculate verified compatibility scores against your individual background.
+
+👉 **To unlock personalized matches & percentage scores:**
+1. Navigate to the **Resume AI** tab.
+2. Upload your PDF/Word resume or paste your text to extract your verified skills and project highlights.
+3. Return here to get exact percentage match scores and tailored fit breakdowns!
+
+---
+
+### 🌐 Featured In-Demand Opportunities (Live Catalog)
+While you prepare your resume, here are top trending opportunities you can explore in the **Internships** tab:
+
+1. **AI & Machine Learning Engineering Intern** at **Infosys**
+   - **Domain**: AI / Data Science • **Location**: Bengaluru (Remote Eligible)
+   - **Key Technologies**: Python, PyTorch, Scikit-Learn, Docker
+
+2. **Full-Stack Web Development Intern** at **TCS Digital**
+   - **Domain**: Web Technologies • **Location**: Hyderabad (Hybrid)
+   - **Key Technologies**: React, Node.js, Express, PostgreSQL
+
+3. **Cloud Infrastructure & DevOps Intern** at **Amazon Web Services Partner**
+   - **Domain**: Cloud & Systems • **Location**: Remote
+   - **Key Technologies**: AWS, Docker, Kubernetes, CI/CD Pipelines
+
+👉 *Explore all 180+ verified listings anytime in the **Internships** tab!*`;
+    }
+
+    if (intent === 'EXPLAIN_SKILL_GAPS') {
+      return `### 📄 Upload Your Resume to Diagnose Skill Gaps
+
+Hello **${name}**! To identify your exact skill gaps and generate an actionable learning roadmap, our Skill Gap Agent needs to compare your verified technical skills against employer requirements.
+
+👉 **How to get your personalized Skill Gap Matrix:**
+1. Go to the **Resume AI** tab and upload your resume.
+2. Our AI will automatically extract your technical skills, tools, and domain proficiencies.
+3. Visit the **Skill Gap** tab to view your matched competencies, missing prerequisites, and customized 14-day study roadmaps for any internship!
+
+💡 *Tip: You can also test your current technical knowledge anytime in the **Mock Interview** tab!*`;
+    }
+
+    if (intent === 'COMPARE_ROLES' || intent === 'EXPLAIN_MATCH') {
+      return `### 📄 Upload Your Resume for Personalized Comparison
+
+Hello **${name}**! To compare internship opportunities side-by-side based on your specific background and skill overlap, please upload your resume in the **Resume AI** tab first!
+
+Once your resume is uploaded, our multi-agent matching engine will evaluate:
+- **Skill Overlap**: Exact technical competencies matching employer requirements.
+- **Experience Alignment**: Project and coursework relevance.
+- **Strategic Trade-offs**: Side-by-side comparisons of stipends, growth potential, and career trajectory.
+
+In the meantime, you can browse and bookmark live listings in the **Internships** tab!`;
+    }
+  }
+
+  // Populated Resume Branches
   switch (intent) {
     case 'COMPARE_ROLES': {
       const matches = multiAgentData.topMatches || [];
@@ -144,7 +207,7 @@ Here is a side-by-side strategic breakdown of your top opportunities:
 | **Compatibility Match** | **${roleA.score}%** (High Fit) | **${roleB.score}%** (Strong Potential) |
 | **Work Mode & Location** | ${roleA.remote_type} | ${roleA.remote_type} |
 | **Stipend** | ${roleA.stipend || 'Competitive'} | ${roleB.stipend || 'Competitive'} |
-| **Tech Stack Match** | High overlap with your skills in ${topSkillsStr} | High upside in Cloud, CI/CD & Distributed Systems |
+| **Tech Stack Match** | High overlap with your skills in ${topSkillsStr || 'Core Technologies'} | High upside in Cloud, CI/CD & Distributed Systems |
 | **Key Competitive Edge** | Direct match with your existing project portfolio | Exceptional resume accelerator for Cloud/DevOps careers |
 
 #### 🎯 Strategic Recommendation:
@@ -157,7 +220,7 @@ Would you like me to tailor your resume bullet points for either of these positi
     case 'EXPLAIN_SKILL_GAPS': {
       return `### 📊 Skill Gap Analysis & Learning Roadmap
 
-Based on your profile competencies (${topSkillsStr}):
+Based on your profile competencies (${topSkillsStr || 'Core Programming'}):
 
 1. **Critical Gap to Bridge**: **Containerization (Docker)**
    - **Why It Matters**: 85% of tech enterprise teams require containerized microservices for consistent local and production execution.
@@ -186,7 +249,7 @@ Our RAG-powered Job-Resume Matching Agent has evaluated the live knowledge base 
 ${recList.map((r, i) => `${i + 1}. **${r.title}** at **${r.company}**
    - **Match Score**: \`${r.score}%\` Compatibility
    - **Location / Mode**: ${r.location || r.remote_type || 'Hybrid'}
-   - **Why It Fits**: Direct alignment with your verified competencies in ${skills.slice(0, 2).join(' & ')}.`).join('\n\n')}
+   - **Why It Fits**: Direct alignment with your verified competencies in ${(skills.length > 0 ? skills.slice(0, 2).join(' & ') : 'Core Software Engineering')}.`).join('\n\n')}
 
 👉 **Next Step**: Click on any of these roles in the **Recommendations** or **Skill Gap** tabs to inspect detailed requirement breakdowns and generate customized application materials!`;
     }
