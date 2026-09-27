@@ -48,6 +48,14 @@ async function getStudentProfile(userId) {
 router.get('/prep-guide/:internshipId', authenticateToken, async (req, res) => {
   try {
     const { internshipId } = req.params;
+    const latestResume = await db.get('SELECT * FROM resumes WHERE user_id = ? ORDER BY uploaded_at DESC LIMIT 1', [req.user.id]);
+    if (!latestResume) {
+      return res.status(400).json({ 
+        error: 'Please upload your resume in the Resume AI tab first to generate your pre-interview revision guide.',
+        requiresResume: true 
+      });
+    }
+
     const internship = await db.get('SELECT * FROM internships WHERE id = ?', [internshipId]);
 
     if (!internship) {
@@ -67,6 +75,14 @@ router.get('/prep-guide/:internshipId', authenticateToken, async (req, res) => {
 // 2. Start a new mock interview session with customizable categorized questions
 router.post('/start', authenticateToken, async (req, res) => {
   try {
+    const latestResume = await db.get('SELECT * FROM resumes WHERE user_id = ? ORDER BY uploaded_at DESC LIMIT 1', [req.user.id]);
+    if (!latestResume) {
+      return res.status(400).json({ 
+        error: 'Please upload your resume in the Resume AI tab first to generate role-tailored mock interview questions.',
+        requiresResume: true 
+      });
+    }
+
     const { 
       internshipId, 
       roleTitle, 

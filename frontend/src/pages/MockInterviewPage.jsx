@@ -64,6 +64,10 @@ export default function MockInterviewPage({ selectedInternshipId, setSelectedInt
   const baseTextRef = useRef('');
   const pageTopRef = useRef(null);
 
+  // Resume status validation
+  const [hasResume, setHasResume] = useState(null);
+  const [checkingResume, setCheckingResume] = useState(true);
+
   const scrollToTop = () => {
     if (typeof window !== 'undefined') {
       window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
@@ -80,9 +84,22 @@ export default function MockInterviewPage({ selectedInternshipId, setSelectedInt
   }, [stage, currentQuestion?.questionNumber]);
 
   useEffect(() => {
+    checkResumeStatus();
     loadInternships();
     setupSpeechRecognition();
   }, []);
+
+  async function checkResumeStatus() {
+    try {
+      setCheckingResume(true);
+      const res = await api.getLatestResume().catch(() => null);
+      setHasResume(Boolean(res?.resume));
+    } catch {
+      setHasResume(false);
+    } finally {
+      setCheckingResume(false);
+    }
+  }
 
   useEffect(() => {
     if (internshipsList.length > 0) {
@@ -298,6 +315,71 @@ export default function MockInterviewPage({ selectedInternshipId, setSelectedInt
     setUserAnswer(demo);
     baseTextRef.current = demo;
   };
+
+  if (checkingResume) {
+    return (
+      <div className="container" style={{ padding: '4rem 1.5rem', textAlign: 'center' }}>
+        <LoadingSpinner text="Checking resume status..." />
+      </div>
+    );
+  }
+
+  if (hasResume === false) {
+    return (
+      <div ref={pageTopRef} className="container" style={{ padding: '2.5rem 1.5rem', maxWidth: '1020px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+          <div style={{ display: 'inline-flex', marginBottom: '0.75rem' }}>
+            <span className="badge badge-indigo">
+              <Sparkles size={13} style={{ marginRight: '0.35rem' }} />
+              Adaptive Multi-Agent Interview Engine
+            </span>
+          </div>
+          <h1 style={{ fontSize: '2.3rem', fontWeight: 800, letterSpacing: '-0.02em' }}>
+            AI Role-Specific Mock Interview
+          </h1>
+          <p style={{ color: 'var(--text-secondary)', maxWidth: '680px', margin: '0.5rem auto 0 auto', fontSize: '0.92rem' }}>
+            Simulate realistic, non-repetitive technical and behavioral interview loops tailored to your target role with voice dictation and 3D grading.
+          </p>
+        </div>
+
+        <div className="glass-panel" style={{ padding: '3.5rem 2rem', textAlign: 'center', maxWidth: '680px', margin: '1rem auto' }}>
+          <div style={{
+            width: '68px',
+            height: '68px',
+            borderRadius: '50%',
+            background: 'rgba(99, 102, 241, 0.12)',
+            color: '#818cf8',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: '0 auto 1.5rem auto'
+          }}>
+            <FileCheck size={34} />
+          </div>
+
+          <h2 style={{ fontSize: '1.65rem', fontWeight: 800, marginBottom: '0.65rem' }}>
+            Resume Required for Mock Interview
+          </h2>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.6, maxWidth: '540px', margin: '0 auto 2rem auto' }}>
+            Our Adaptive Interview Coach tailors every technical question, scenario, and project deep-dive specifically to your authentic resume competencies and target internship requirements. Please upload your resume in <strong>Resume AI</strong> to begin!
+          </p>
+
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+            {setActiveTab && (
+              <button
+                onClick={() => setActiveTab('resume')}
+                className="btn btn-primary btn-lg"
+                style={{ padding: '0.8rem 1.8rem', display: 'inline-flex', alignItems: 'center', gap: '0.55rem', fontSize: '0.95rem' }}
+              >
+                <Sparkles size={17} />
+                <span>Upload Resume in Resume AI</span>
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div ref={pageTopRef} className="container" style={{ padding: '2.5rem 1.5rem', maxWidth: '1020px' }}>
