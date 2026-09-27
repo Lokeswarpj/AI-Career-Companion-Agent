@@ -122,6 +122,7 @@ export default function App() {
   const handleNavigate = (tab) => {
     if (!tab) return;
     setActiveTab(tab);
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     setVisitedTabs(prev => {
       const next = new Set(prev);
       next.add(tab);
@@ -143,12 +144,14 @@ export default function App() {
       if (isAuthenticated) {
         if (VALID_AUTH_TABS.includes(hash)) {
           setActiveTab(hash);
+          window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
           localStorage.setItem('careerpulse_active_tab', hash);
           setVisitedTabs(prev => new Set(prev).add(hash));
         }
       } else {
         if (hash === 'auth' || hash === 'landing') {
           setActiveTab(hash);
+          window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
           setVisitedTabs(prev => new Set(prev).add(hash));
         }
       }
@@ -157,6 +160,22 @@ export default function App() {
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, [isAuthenticated]);
+
+  // Lock body overflow when on full-screen assistant view to completely prevent page-level scroll
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    if (activeTab === 'assistant') {
+      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    };
+  }, [activeTab]);
 
   // When auth state changes (login, logout, session restoration)
   useEffect(() => {
@@ -243,7 +262,9 @@ export default function App() {
           flex: 1,
           marginLeft: leftOffset,
           transition: 'margin-left 0.28s cubic-bezier(0.4, 0, 0.2, 1)',
-          paddingBottom: '2.5rem'
+          paddingBottom: currentTab === 'assistant' ? 0 : '2.5rem',
+          height: currentTab === 'assistant' ? 'calc(100vh - 4.25rem)' : 'auto',
+          overflow: currentTab === 'assistant' ? 'hidden' : 'visible'
         }}
       >
         {/* Unauthenticated Pages */}
@@ -338,7 +359,7 @@ export default function App() {
             )}
 
             {visitedTabs.has('assistant') && (
-              <div style={{ display: currentTab === 'assistant' ? 'block' : 'none' }}>
+              <div style={{ display: currentTab === 'assistant' ? 'flex' : 'none', height: '100%', flexDirection: 'column' }}>
                 <AssistantPage />
               </div>
             )}
@@ -346,15 +367,17 @@ export default function App() {
         )}
       </main>
 
-      {/* 4. Footer */}
-      <div 
-        style={{ 
-          marginLeft: leftOffset,
-          transition: 'margin-left 0.28s cubic-bezier(0.4, 0, 0.2, 1)'
-        }}
-      >
-        <Footer />
-      </div>
+      {/* 4. Footer - Hidden on conversational Assistant page to prevent scroll overflow */}
+      {currentTab !== 'assistant' && (
+        <div 
+          style={{ 
+            marginLeft: leftOffset,
+            transition: 'margin-left 0.28s cubic-bezier(0.4, 0, 0.2, 1)'
+          }}
+        >
+          <Footer />
+        </div>
+      )}
     </div>
   );
 }
