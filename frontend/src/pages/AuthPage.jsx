@@ -159,7 +159,7 @@ export default function AuthPage({ onSuccess, authMode = 'login', setAuthMode })
 
     const emailVal = googleEmailInput.trim().toLowerCase();
     if (!isValidEmail(emailVal)) {
-      notify.error('Please enter a valid email address (e.g. name@gmail.com).');
+      notify.error('Please enter a valid email ID.');
       return;
     }
 
@@ -187,14 +187,19 @@ export default function AuthPage({ onSuccess, authMode = 'login', setAuthMode })
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!email || !password) {
-      notify.error('Please fill in all required fields.');
+    if (!email || !email.trim()) {
+      notify.error('Please enter your email ID.');
       return;
     }
 
     const trimmedEmail = email.trim().toLowerCase();
     if (!isValidEmail(trimmedEmail)) {
-      notify.error('Please enter a valid email address (e.g. student@example.com).');
+      notify.error('Please enter a valid email ID.');
+      return;
+    }
+
+    if (!password) {
+      notify.error('Please enter your password.');
       return;
     }
 
@@ -378,7 +383,7 @@ export default function AuthPage({ onSuccess, authMode = 'login', setAuthMode })
         </div>
 
         {/* Main Form */}
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} noValidate>
           {isRegister && (
             <div className="form-group">
               <label className="form-label">Full Name</label>
@@ -564,7 +569,7 @@ export default function AuthPage({ onSuccess, authMode = 'login', setAuthMode })
                   </div>
                 </div>
 
-                <form onSubmit={handleSaveClientIdAndLaunch} style={{ marginTop: '0.9rem' }}>
+                <form onSubmit={handleSaveClientIdAndLaunch} noValidate style={{ marginTop: '0.9rem' }}>
                   <input
                     type="text"
                     className="form-input"
@@ -599,7 +604,7 @@ export default function AuthPage({ onSuccess, authMode = 'login', setAuthMode })
               </div>
 
               {/* Custom Google Account Form */}
-              <form onSubmit={handleModalGoogleSubmit}>
+              <form onSubmit={handleModalGoogleSubmit} noValidate>
                 <div className="form-group" style={{ marginBottom: '0.85rem' }}>
                   <label className="form-label" style={{ fontSize: '0.8rem' }}>Your Google / Gmail Address</label>
                   <input

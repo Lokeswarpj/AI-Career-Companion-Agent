@@ -30,7 +30,7 @@ router.post('/register', async (req, res) => {
 
     const normalizedEmail = email.toLowerCase().trim();
     if (!isValidEmail(normalizedEmail)) {
-      return res.status(400).json({ error: 'Please provide a valid email address (e.g. student@example.com).' });
+      return res.status(400).json({ error: 'Please enter a valid email ID.' });
     }
 
     if (password.length < 6) {
@@ -99,7 +99,7 @@ router.post('/login', async (req, res) => {
 
     const normalizedEmail = email.toLowerCase().trim();
     if (!isValidEmail(normalizedEmail)) {
-      return res.status(400).json({ error: 'Please enter a valid email address (e.g. student@example.com).' });
+      return res.status(400).json({ error: 'Please enter a valid email ID.' });
     }
 
     const user = await db.get('SELECT * FROM users WHERE email = ?', [normalizedEmail]);
