@@ -122,7 +122,9 @@ export default function AssistantPage() {
   const [inputText, setInputText] = useState('');
   const [sending, setSending] = useState(false);
   const [loadingHistory, setLoadingHistory] = useState(true);
-  const messagesEndRef = useRef(null);
+  
+  const chatContainerRef = useRef(null);
+  const isFirstLoad = useRef(true);
 
   const multiAgentSuggestions = [
     { label: "🎯 Recommend top internships for my profile", query: "Recommend suitable internships based on my profile skills and explain why they match." },
@@ -137,12 +139,20 @@ export default function AssistantPage() {
   }, []);
 
   useEffect(() => {
-    scrollToBottom();
+    // Only scroll inner message container smoothly on new message (prevents page-level scroll)
+    if (isFirstLoad.current) {
+      if (messages.length > 0) {
+        isFirstLoad.current = false;
+      }
+      return;
+    }
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTo({
+        top: chatContainerRef.current.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
   }, [messages, sending]);
-
-  function scrollToBottom() {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }
 
   async function loadChatHistory() {
     try {
@@ -212,16 +222,39 @@ export default function AssistantPage() {
   };
 
   return (
-    <div className="container" style={{ padding: '2.5rem 1.5rem', maxWidth: '1000px' }}>
+    <div 
+      className="container" 
+      style={{ 
+        padding: '1.25rem 1.5rem 0.5rem 1.5rem', 
+        maxWidth: '1020px',
+        display: 'flex',
+        flexDirection: 'column',
+        height: 'calc(100vh - 6rem)',
+        maxHeight: 'calc(100vh - 6rem)',
+        boxSizing: 'border-box'
+      }}
+    >
       
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        marginBottom: '0.85rem', 
+        flexWrap: 'wrap', 
+        gap: '0.75rem',
+        flexShrink: 0 
+      }}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span className="badge badge-indigo">Conversational Career Assistant</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.2rem' }}>
+            <span className="badge badge-indigo" style={{ fontSize: '0.72rem', padding: '0.18rem 0.55rem' }}>
+              Conversational Career Assistant
+            </span>
           </div>
-          <h1 style={{ fontSize: '2rem', fontWeight: 800 }}>AI Career Companion</h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.92rem' }}>
+          <h1 style={{ fontSize: '1.55rem', fontWeight: 800, margin: '0 0 0.15rem 0' }}>
+            AI Career Companion
+          </h1>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.84rem', margin: 0 }}>
             Multi-agent guidance orchestrator with real-time knowledge of your profile, live internships, and interview results.
           </p>
         </div>
@@ -229,47 +262,53 @@ export default function AssistantPage() {
         <button
           onClick={handleClearHistory}
           className="btn btn-outline btn-sm"
-          style={{ gap: '0.4rem' }}
+          style={{ gap: '0.4rem', padding: '0.4rem 0.75rem', fontSize: '0.8rem' }}
           title="Clear chat history"
         >
-          <Trash2 size={16} />
+          <Trash2 size={15} />
           <span>Reset Chat</span>
         </button>
       </div>
 
-      {/* Main Chat Box Container */}
+      {/* Main Chat Box Container - Perfectly Sized to Viewport */}
       <div 
         className="glass-panel"
         style={{
-          height: '640px',
+          flex: 1,
+          minHeight: 0,
           display: 'flex',
           flexDirection: 'column',
-          overflow: 'hidden'
+          overflow: 'hidden',
+          borderRadius: 'var(--radius-lg)',
+          boxShadow: 'var(--shadow-md)'
         }}
       >
         {/* Messages Scroll Area */}
-        <div style={{
-          flex: 1,
-          padding: '1.75rem',
-          overflowY: 'auto',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '1.25rem'
-        }}>
+        <div 
+          ref={chatContainerRef}
+          style={{
+            flex: 1,
+            padding: '1.25rem 1.5rem',
+            overflowY: 'auto',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '1rem'
+          }}
+        >
           {messages.map((msg, idx) => (
             <div
               key={msg.id || idx}
               style={{
                 display: 'flex',
-                gap: '1rem',
+                gap: '0.85rem',
                 alignItems: 'flex-start',
                 flexDirection: msg.role === 'user' ? 'row-reverse' : 'row'
               }}
             >
               {/* Avatar Icon */}
               <div style={{
-                width: '2.2rem',
-                height: '2.2rem',
+                width: '2rem',
+                height: '2rem',
                 borderRadius: '50%',
                 background: msg.role === 'user' ? 'var(--accent-primary)' : 'linear-gradient(135deg, #6366f1, #10b981)',
                 display: 'flex',
@@ -278,18 +317,18 @@ export default function AssistantPage() {
                 color: '#ffffff',
                 flexShrink: 0
               }}>
-                {msg.role === 'user' ? <User size={16} /> : <Bot size={16} />}
+                {msg.role === 'user' ? <User size={15} /> : <Bot size={15} />}
               </div>
 
               {/* Message Content Bubble */}
               <div style={{
                 maxWidth: '82%',
-                padding: '1.1rem 1.4rem',
+                padding: '0.95rem 1.25rem',
                 borderRadius: 'var(--radius-md)',
                 background: msg.role === 'user' ? 'var(--accent-primary)' : 'var(--bg-secondary)',
                 color: msg.role === 'user' ? '#ffffff' : 'var(--text-primary)',
-                fontSize: '0.92rem',
-                lineHeight: 1.65,
+                fontSize: '0.9rem',
+                lineHeight: 1.6,
                 boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
                 border: msg.role === 'user' ? 'none' : '1px solid var(--border-card)'
               }}>
@@ -299,10 +338,10 @@ export default function AssistantPage() {
           ))}
 
           {sending && (
-            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+            <div style={{ display: 'flex', gap: '0.85rem', alignItems: 'center' }}>
               <div style={{
-                width: '2.2rem',
-                height: '2.2rem',
+                width: '2rem',
+                height: '2rem',
                 borderRadius: '50%',
                 background: 'linear-gradient(135deg, #6366f1, #10b981)',
                 display: 'flex',
@@ -311,36 +350,36 @@ export default function AssistantPage() {
                 color: '#ffffff',
                 flexShrink: 0
               }}>
-                <Bot size={16} />
+                <Bot size={15} />
               </div>
               <div style={{
-                padding: '0.75rem 1.25rem',
+                padding: '0.65rem 1.1rem',
                 background: 'var(--bg-secondary)',
                 borderRadius: 'var(--radius-md)',
-                fontSize: '0.88rem',
+                fontSize: '0.85rem',
                 color: 'var(--text-secondary)',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.5rem'
+                gap: '0.5rem',
+                border: '1px solid var(--border-card)'
               }}>
-                <RefreshCw size={14} className="spin-slow" />
+                <RefreshCw size={13} className="spin-slow" />
                 <span>Multi-Agent Engine is synthesizing personalized career advice...</span>
               </div>
             </div>
           )}
-
-          <div ref={messagesEndRef} />
         </div>
 
         {/* Quick Suggestion Chips */}
         <div style={{
-          padding: '0.75rem 1.5rem',
+          padding: '0.5rem 1.25rem',
           background: 'rgba(99, 102, 241, 0.03)',
           borderTop: '1px solid var(--border-subtle)',
           display: 'flex',
           gap: '0.5rem',
           overflowX: 'auto',
-          whiteSpace: 'nowrap'
+          whiteSpace: 'nowrap',
+          flexShrink: 0
         }}>
           {multiAgentSuggestions.map((item, idx) => (
             <button
@@ -349,8 +388,8 @@ export default function AssistantPage() {
               onClick={() => handleSendMessage(item.query)}
               className="btn btn-outline btn-sm"
               style={{
-                fontSize: '0.78rem',
-                padding: '0.35rem 0.75rem',
+                fontSize: '0.76rem',
+                padding: '0.3rem 0.7rem',
                 borderRadius: '9999px',
                 borderColor: 'var(--border-card)'
               }}
@@ -362,16 +401,17 @@ export default function AssistantPage() {
 
         {/* Message Input Box */}
         <div style={{
-          padding: '1.25rem 1.5rem',
+          padding: '0.85rem 1.25rem',
           background: 'var(--bg-secondary)',
-          borderTop: '1px solid var(--border-card)'
+          borderTop: '1px solid var(--border-card)',
+          flexShrink: 0
         }}>
           <form
             onSubmit={(e) => {
               e.preventDefault();
               handleSendMessage();
             }}
-            style={{ display: 'flex', gap: '0.75rem' }}
+            style={{ display: 'flex', gap: '0.65rem' }}
           >
             <input
               type="text"
@@ -380,15 +420,15 @@ export default function AssistantPage() {
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               disabled={sending}
-              style={{ flex: 1 }}
+              style={{ flex: 1, padding: '0.65rem 1rem', fontSize: '0.88rem' }}
             />
             <button
               type="submit"
               disabled={sending || !inputText.trim()}
               className="btn btn-primary"
-              style={{ gap: '0.4rem', padding: '0.65rem 1.4rem' }}
+              style={{ gap: '0.35rem', padding: '0.65rem 1.25rem', fontSize: '0.88rem' }}
             >
-              <Send size={16} />
+              <Send size={15} />
               <span>Send</span>
             </button>
           </form>
