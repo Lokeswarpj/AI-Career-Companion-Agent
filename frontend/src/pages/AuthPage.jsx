@@ -5,6 +5,13 @@ import { Sparkles, Lock, Mail, User, ArrowRight, ShieldCheck, Eye, EyeOff, X, Ke
 
 const GOOGLE_OAUTH_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '887000506417-t38na8vq0j0qg13vih6dvutohrhh8ivi.apps.googleusercontent.com';
 
+// Standard email format validation regex
+const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+const isValidEmail = (val) => {
+  if (!val || typeof val !== 'string') return false;
+  return EMAIL_REGEX.test(val.trim());
+};
+
 export default function AuthPage({ onSuccess, authMode = 'login', setAuthMode }) {
   const { login, register, googleLogin } = useAuth();
   const notify = useNotification();
@@ -85,13 +92,13 @@ export default function AuthPage({ onSuccess, authMode = 'login', setAuthMode })
               });
               const profile = await profileRes.json();
 
-              if (!profile.email) {
-                throw new Error('Could not retrieve email from selected Google account.');
+              if (!profile.email || !isValidEmail(profile.email)) {
+                throw new Error('Could not retrieve a valid email from selected Google account.');
               }
 
               await googleLogin({
                 userInfo: {
-                  email: profile.email,
+                  email: profile.email.toLowerCase().trim(),
                   name: profile.name || profile.given_name || profile.email.split('@')[0],
                   picture: profile.picture || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(profile.name || profile.email)}`
                 }
@@ -150,9 +157,14 @@ export default function AuthPage({ onSuccess, authMode = 'login', setAuthMode })
       return;
     }
 
+    const emailVal = googleEmailInput.trim().toLowerCase();
+    if (!isValidEmail(emailVal)) {
+      notify.error('Please enter a valid email address (e.g. name@gmail.com).');
+      return;
+    }
+
     setGoogleLoading(true);
     try {
-      const emailVal = googleEmailInput.trim().toLowerCase();
       const nameVal = googleNameInput.trim() || emailVal.split('@')[0];
 
       await googleLogin({
@@ -179,18 +191,30 @@ export default function AuthPage({ onSuccess, authMode = 'login', setAuthMode })
       notify.error('Please fill in all required fields.');
       return;
     }
-    if (isRegister && !fullName) {
+
+    const trimmedEmail = email.trim().toLowerCase();
+    if (!isValidEmail(trimmedEmail)) {
+      notify.error('Please enter a valid email address (e.g. student@example.com).');
+      return;
+    }
+
+    if (isRegister && !fullName.trim()) {
       notify.error('Please enter your full name.');
+      return;
+    }
+
+    if (isRegister && password.length < 6) {
+      notify.error('Password must be at least 6 characters long.');
       return;
     }
 
     setLoading(true);
     try {
       if (isRegister) {
-        await register(email, password, fullName);
+        await register(trimmedEmail, password, fullName.trim());
         notify.success('Account created successfully! Welcome to CareerPulse AI.');
       } else {
-        await login(email, password);
+        await login(trimmedEmail, password);
         notify.success('Logged in successfully!');
       }
       if (onSuccess) onSuccess();

@@ -44,7 +44,7 @@ export async function callGemini(prompt, systemInstruction = '', jsonFormat = tr
       }
 
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3500);
+      const timeoutId = setTimeout(() => controller.abort(), 12000);
 
       const response = await fetch(url, {
         method: 'POST',

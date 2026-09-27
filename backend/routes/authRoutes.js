@@ -6,6 +6,16 @@ import { generateToken, authenticateToken } from '../middleware/auth.js';
 
 const router = express.Router();
 
+// Robust standard email format validation (RFC 5322 compliant subset)
+const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+export function isValidEmail(email) {
+  if (!email || typeof email !== 'string') return false;
+  const trimmed = email.trim();
+  if (trimmed.length < 5 || trimmed.length > 254) return false;
+  return EMAIL_REGEX.test(trimmed);
+}
+
 /**
  * Direct Legacy Register (Maintained for backward compatibility and automated test suite)
  * POST /api/auth/register
@@ -19,6 +29,14 @@ router.post('/register', async (req, res) => {
     }
 
     const normalizedEmail = email.toLowerCase().trim();
+    if (!isValidEmail(normalizedEmail)) {
+      return res.status(400).json({ error: 'Please provide a valid email address (e.g. student@example.com).' });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters long.' });
+    }
+
     const existing = await db.get('SELECT id FROM users WHERE email = ?', [normalizedEmail]);
     if (existing) {
       return res.status(400).json({ error: 'An account with this email already exists.' });
@@ -79,7 +97,12 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ error: 'Email and password are required.' });
     }
 
-    const user = await db.get('SELECT * FROM users WHERE email = ?', [email.toLowerCase().trim()]);
+    const normalizedEmail = email.toLowerCase().trim();
+    if (!isValidEmail(normalizedEmail)) {
+      return res.status(400).json({ error: 'Please enter a valid email address (e.g. student@example.com).' });
+    }
+
+    const user = await db.get('SELECT * FROM users WHERE email = ?', [normalizedEmail]);
     if (!user) {
       return res.status(401).json({ error: 'Invalid email or password.' });
     }
@@ -137,8 +160,8 @@ router.post('/google', async (req, res) => {
       avatarUrl = userInfo.picture || userInfo.avatar_url || '';
     }
 
-    if (!email) {
-      return res.status(400).json({ error: 'Could not verify Google authentication. Please try again.' });
+    if (!email || !isValidEmail(email)) {
+      return res.status(400).json({ error: 'Could not verify a valid Google email address. Please try again.' });
     }
 
     // 3. Check if user already exists

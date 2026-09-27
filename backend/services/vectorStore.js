@@ -101,32 +101,6 @@ export function generateLocalSemanticEmbedding(text) {
  * Generates vector embedding with dual-mode support (Gemini text-embedding API or local semantic vector model).
  */
 export async function getEmbedding(text) {
-  if (GEMINI_API_KEY && GEMINI_API_KEY !== 'your_gemini_api_key_here') {
-    try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key=${GEMINI_API_KEY}`;
-      const payload = {
-        model: 'models/text-embedding-004',
-        content: { parts: [{ text: text.slice(0, 2048) }] }
-      };
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      if (response.ok) {
-        const data = await response.json();
-        if (data.embedding?.values) {
-          // L2 normalize
-          const raw = data.embedding.values;
-          let norm = Math.sqrt(raw.reduce((acc, v) => acc + v * v, 0)) || 1.0;
-          return raw.map(v => Number((v / norm).toFixed(6)));
-        }
-      }
-    } catch (err) {
-      // Fallback to local semantic embedding
-    }
-  }
-
   return generateLocalSemanticEmbedding(text);
 }
 
