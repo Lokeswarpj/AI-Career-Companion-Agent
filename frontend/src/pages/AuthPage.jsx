@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
-import { Sparkles, Lock, Mail, User, ArrowRight, ShieldCheck, Eye, EyeOff, X, Key, CheckCircle, ExternalLink } from 'lucide-react';
+import { Sparkles, Lock, Mail, User, ArrowRight, ShieldCheck, Eye, EyeOff, X, Key, CheckCircle, ExternalLink, AlertCircle } from 'lucide-react';
 
 const GOOGLE_OAUTH_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '887000506417-t38na8vq0j0qg13vih6dvutohrhh8ivi.apps.googleusercontent.com';
 
@@ -24,6 +24,12 @@ export default function AuthPage({ onSuccess, authMode = 'login', setAuthMode })
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
 
+  // Field-level inline error states
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [fullNameError, setFullNameError] = useState('');
+  const [modalEmailError, setModalEmailError] = useState('');
+
   // Google Modal State (used for fallback if popup is blocked)
   const [showGoogleModal, setShowGoogleModal] = useState(false);
   const [googleEmailInput, setGoogleEmailInput] = useState('');
@@ -32,6 +38,9 @@ export default function AuthPage({ onSuccess, authMode = 'login', setAuthMode })
 
   useEffect(() => {
     setIsRegister(authMode === 'register');
+    setEmailError('');
+    setPasswordError('');
+    setFullNameError('');
   }, [authMode]);
 
   // Initialize Google Identity Services One Tap
@@ -135,6 +144,7 @@ export default function AuthPage({ onSuccess, authMode = 'login', setAuthMode })
     if (!triggered) {
       setGoogleEmailInput(email || '');
       setGoogleNameInput(fullName || '');
+      setModalEmailError('');
       setShowGoogleModal(true);
     }
   };
@@ -152,14 +162,16 @@ export default function AuthPage({ onSuccess, authMode = 'login', setAuthMode })
 
   const handleModalGoogleSubmit = async (e) => {
     e.preventDefault();
+    setModalEmailError('');
+
     if (!googleEmailInput || !googleEmailInput.trim()) {
-      notify.error('Please enter your Google / Gmail address.');
+      setModalEmailError('Please enter your email ID.');
       return;
     }
 
     const emailVal = googleEmailInput.trim().toLowerCase();
     if (!isValidEmail(emailVal)) {
-      notify.error('Please enter a valid email ID.');
+      setModalEmailError('Please enter a valid email ID.');
       return;
     }
 
@@ -179,7 +191,7 @@ export default function AuthPage({ onSuccess, authMode = 'login', setAuthMode })
       setShowGoogleModal(false);
       if (onSuccess) onSuccess();
     } catch (err) {
-      notify.error(err.message || 'Google login failed.');
+      setModalEmailError(err.message || 'Google login failed.');
     } finally {
       setGoogleLoading(false);
     }
@@ -187,29 +199,35 @@ export default function AuthPage({ onSuccess, authMode = 'login', setAuthMode })
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!email || !email.trim()) {
-      notify.error('Please enter your email ID.');
-      return;
-    }
+    setEmailError('');
+    setPasswordError('');
+    setFullNameError('');
 
+    let hasError = false;
     const trimmedEmail = email.trim().toLowerCase();
-    if (!isValidEmail(trimmedEmail)) {
-      notify.error('Please enter a valid email ID.');
-      return;
+
+    if (!trimmedEmail) {
+      setEmailError('Please enter your email ID.');
+      hasError = true;
+    } else if (!isValidEmail(trimmedEmail)) {
+      setEmailError('Please enter a valid email ID.');
+      hasError = true;
     }
 
     if (!password) {
-      notify.error('Please enter your password.');
-      return;
+      setPasswordError('Please enter your password.');
+      hasError = true;
+    } else if (isRegister && password.length < 6) {
+      setPasswordError('Password must be at least 6 characters long.');
+      hasError = true;
     }
 
     if (isRegister && !fullName.trim()) {
-      notify.error('Please enter your full name.');
-      return;
+      setFullNameError('Please enter your full name.');
+      hasError = true;
     }
 
-    if (isRegister && password.length < 6) {
-      notify.error('Password must be at least 6 characters long.');
+    if (hasError) {
       return;
     }
 
@@ -224,7 +242,14 @@ export default function AuthPage({ onSuccess, authMode = 'login', setAuthMode })
       }
       if (onSuccess) onSuccess();
     } catch (err) {
-      notify.error(err.message || 'Authentication failed. Please check credentials.');
+      const errMsg = err.message || 'Authentication failed. Please check credentials.';
+      if (errMsg.toLowerCase().includes('email') || errMsg.toLowerCase().includes('account with this email')) {
+        setEmailError(errMsg);
+      } else if (errMsg.toLowerCase().includes('password')) {
+        setPasswordError(errMsg);
+      } else {
+        setEmailError(errMsg);
+      }
     } finally {
       setLoading(false);
     }
@@ -286,6 +311,9 @@ export default function AuthPage({ onSuccess, authMode = 'login', setAuthMode })
             type="button"
             onClick={() => {
               setIsRegister(false);
+              setEmailError('');
+              setPasswordError('');
+              setFullNameError('');
               if (setAuthMode) setAuthMode('login');
             }}
             style={{
@@ -307,6 +335,9 @@ export default function AuthPage({ onSuccess, authMode = 'login', setAuthMode })
             type="button"
             onClick={() => {
               setIsRegister(true);
+              setEmailError('');
+              setPasswordError('');
+              setFullNameError('');
               if (setAuthMode) setAuthMode('register');
             }}
             style={{
@@ -393,12 +424,33 @@ export default function AuthPage({ onSuccess, authMode = 'login', setAuthMode })
                   className="form-input"
                   placeholder="e.g. Aarav Sharma"
                   value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  style={{ paddingLeft: '2.5rem' }}
+                  onChange={(e) => {
+                    setFullName(e.target.value);
+                    if (fullNameError) setFullNameError('');
+                  }}
+                  style={{ 
+                    paddingLeft: '2.5rem',
+                    borderColor: fullNameError ? '#ef4444' : undefined,
+                    boxShadow: fullNameError ? '0 0 0 2px rgba(239, 68, 68, 0.25)' : undefined
+                  }}
                   required
                 />
-                <User size={18} style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                <User size={18} style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: fullNameError ? '#ef4444' : 'var(--text-muted)' }} />
               </div>
+              {fullNameError && (
+                <div style={{
+                  color: '#ef4444',
+                  fontSize: '0.8rem',
+                  marginTop: '0.4rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.35rem',
+                  fontWeight: 500
+                }}>
+                  <AlertCircle size={14} style={{ flexShrink: 0 }} />
+                  <span>{fullNameError}</span>
+                </div>
+              )}
             </div>
           )}
 
@@ -410,12 +462,33 @@ export default function AuthPage({ onSuccess, authMode = 'login', setAuthMode })
                 className="form-input"
                 placeholder="name@example.com (Gmail, Outlook, College Mail)"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                style={{ paddingLeft: '2.5rem' }}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (emailError) setEmailError('');
+                }}
+                style={{ 
+                  paddingLeft: '2.5rem',
+                  borderColor: emailError ? '#ef4444' : undefined,
+                  boxShadow: emailError ? '0 0 0 2px rgba(239, 68, 68, 0.25)' : undefined
+                }}
                 required
               />
-              <Mail size={18} style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+              <Mail size={18} style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: emailError ? '#ef4444' : 'var(--text-muted)' }} />
             </div>
+            {emailError && (
+              <div style={{
+                color: '#ef4444',
+                fontSize: '0.8rem',
+                marginTop: '0.4rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.35rem',
+                fontWeight: 500
+              }}>
+                <AlertCircle size={14} style={{ flexShrink: 0 }} />
+                <span>{emailError}</span>
+              </div>
+            )}
           </div>
 
           <div className="form-group">
@@ -426,12 +499,20 @@ export default function AuthPage({ onSuccess, authMode = 'login', setAuthMode })
                 className="form-input"
                 placeholder="••••••••"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                style={{ paddingLeft: '2.5rem', paddingRight: '2.75rem' }}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (passwordError) setPasswordError('');
+                }}
+                style={{ 
+                  paddingLeft: '2.5rem',
+                  paddingRight: '2.75rem',
+                  borderColor: passwordError ? '#ef4444' : undefined,
+                  boxShadow: passwordError ? '0 0 0 2px rgba(239, 68, 68, 0.25)' : undefined
+                }}
                 required
                 minLength={6}
               />
-              <Lock size={18} style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+              <Lock size={18} style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: passwordError ? '#ef4444' : 'var(--text-muted)' }} />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
@@ -456,6 +537,20 @@ export default function AuthPage({ onSuccess, authMode = 'login', setAuthMode })
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
+            {passwordError && (
+              <div style={{
+                color: '#ef4444',
+                fontSize: '0.8rem',
+                marginTop: '0.4rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.35rem',
+                fontWeight: 500
+              }}>
+                <AlertCircle size={14} style={{ flexShrink: 0 }} />
+                <span>{passwordError}</span>
+              </div>
+            )}
           </div>
 
           <button
@@ -611,11 +706,33 @@ export default function AuthPage({ onSuccess, authMode = 'login', setAuthMode })
                     type="email"
                     className="form-input"
                     value={googleEmailInput}
-                    onChange={(e) => setGoogleEmailInput(e.target.value)}
+                    onChange={(e) => {
+                      setGoogleEmailInput(e.target.value);
+                      if (modalEmailError) setModalEmailError('');
+                    }}
                     placeholder="yourname@gmail.com"
                     required
-                    style={{ fontSize: '0.85rem', padding: '0.65rem 0.8rem' }}
+                    style={{ 
+                      fontSize: '0.85rem', 
+                      padding: '0.65rem 0.8rem',
+                      borderColor: modalEmailError ? '#ef4444' : undefined,
+                      boxShadow: modalEmailError ? '0 0 0 2px rgba(239, 68, 68, 0.25)' : undefined
+                    }}
                   />
+                  {modalEmailError && (
+                    <div style={{
+                      color: '#ef4444',
+                      fontSize: '0.78rem',
+                      marginTop: '0.35rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.35rem',
+                      fontWeight: 500
+                    }}>
+                      <AlertCircle size={14} style={{ flexShrink: 0 }} />
+                      <span>{modalEmailError}</span>
+                    </div>
+                  )}
                 </div>
 
                 <div className="form-group" style={{ marginBottom: '1.25rem' }}>
