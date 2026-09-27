@@ -161,20 +161,9 @@ export default function App() {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, [isAuthenticated]);
 
-  // Lock body overflow when on full-screen assistant view to completely prevent page-level scroll
+  // Synchronize scroll on tab change
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-    if (activeTab === 'assistant') {
-      document.body.style.overflow = 'hidden';
-      document.documentElement.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-      document.documentElement.style.overflow = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
-      document.documentElement.style.overflow = '';
-    };
   }, [activeTab]);
 
   // When auth state changes (login, logout, session restoration)
@@ -262,9 +251,7 @@ export default function App() {
           flex: 1,
           marginLeft: leftOffset,
           transition: 'margin-left 0.28s cubic-bezier(0.4, 0, 0.2, 1)',
-          paddingBottom: currentTab === 'assistant' ? 0 : '2.5rem',
-          height: currentTab === 'assistant' ? 'calc(100vh - 4.25rem)' : 'auto',
-          overflow: currentTab === 'assistant' ? 'hidden' : 'visible'
+          paddingBottom: '2.5rem'
         }}
       >
         {/* Unauthenticated Pages */}
@@ -359,7 +346,7 @@ export default function App() {
             )}
 
             {visitedTabs.has('assistant') && (
-              <div style={{ display: currentTab === 'assistant' ? 'flex' : 'none', height: '100%', flexDirection: 'column' }}>
+              <div style={{ display: currentTab === 'assistant' ? 'block' : 'none' }}>
                 <AssistantPage />
               </div>
             )}
@@ -367,17 +354,15 @@ export default function App() {
         )}
       </main>
 
-      {/* 4. Footer - Hidden on conversational Assistant page to prevent scroll overflow */}
-      {currentTab !== 'assistant' && (
-        <div 
-          style={{ 
-            marginLeft: leftOffset,
-            transition: 'margin-left 0.28s cubic-bezier(0.4, 0, 0.2, 1)'
-          }}
-        >
-          <Footer />
-        </div>
-      )}
+      {/* 4. Footer */}
+      <div 
+        style={{ 
+          marginLeft: leftOffset,
+          transition: 'margin-left 0.28s cubic-bezier(0.4, 0, 0.2, 1)'
+        }}
+      >
+        <Footer />
+      </div>
     </div>
   );
 }

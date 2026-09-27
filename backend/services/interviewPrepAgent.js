@@ -429,19 +429,38 @@ function generateHeuristicCategorizedQuestions(internship, profile, difficulty, 
     }
   ];
 
-  // Combine domain bank + general pool with randomization
+  // Combine domain bank + general pool with mode-aware structured distribution
   const domainBank = domainQuestionBanks[domain] || domainQuestionBanks.FULLSTACK;
-  const combinedPool = [...domainBank, ...generalPool];
-
-  // Shuffle combined pool
-  const shuffled = combinedPool.sort(() => 0.5 - Math.random());
   
-  // Select requested count
-  const selected = shuffled.slice(0, count);
+  let orderedPool = [];
+  if (focusMode === 'Technical Deep-Dive') {
+    orderedPool = [...domainBank, generalPool[0], generalPool[4], generalPool[1], generalPool[2]];
+  } else if (focusMode === 'System Architecture & Scenarios') {
+    orderedPool = [generalPool[1], generalPool[2], domainBank[1] || domainBank[0], domainBank[2] || domainBank[0], generalPool[0]];
+  } else if (focusMode === 'Behavioral & STAR Leadership') {
+    orderedPool = [generalPool[3], generalPool[0], generalPool[2], domainBank[0], generalPool[1]];
+  } else {
+    // Balanced Full-Loop: Guaranteed representation of Technical, Resume/Project, Production Scenario, and HR/Behavioral
+    orderedPool = [
+      domainBank[0] || { category: 'Core Technical', questionText: `Explain key architectural considerations in ${role}.` },
+      generalPool[0], // Resume-Based Technical Skills
+      generalPool[1], // Project-Based Architecture Deep-Dive
+      generalPool[2], // Role-Specific Production Scenario
+      generalPool[3], // HR / Behavioral
+      ...(domainBank.slice(1)),
+      generalPool[4]
+    ];
+  }
+
+  // Select requested count from the ordered pool, with fallback wrapping
+  const selected = [];
+  for (let i = 0; i < count; i++) {
+    selected.push(orderedPool[i % orderedPool.length]);
+  }
 
   return selected.map((item, idx) => ({
     questionNumber: idx + 1,
-    category: item.category,
+    category: item.category || 'Technical',
     questionText: item.questionText,
     expectedKeyPoints: item.expectedKeyPoints,
     commonPitfallsToAvoid: item.commonPitfallsToAvoid,

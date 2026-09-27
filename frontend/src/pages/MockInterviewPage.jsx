@@ -62,11 +62,22 @@ export default function MockInterviewPage({ selectedInternshipId, setSelectedInt
   const [isRecording, setIsRecording] = useState(false);
   const [recognitionInstance, setRecognitionInstance] = useState(null);
   const baseTextRef = useRef('');
-  const userAnswerRef = useRef(userAnswer);
+  const pageTopRef = useRef(null);
+
+  const scrollToTop = () => {
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      document.body.scrollTop = 0;
+      document.documentElement.scrollTop = 0;
+      if (pageTopRef.current) {
+        pageTopRef.current.scrollIntoView({ behavior: 'instant', block: 'start' });
+      }
+    }
+  };
 
   useEffect(() => {
-    userAnswerRef.current = userAnswer;
-  }, [userAnswer]);
+    scrollToTop();
+  }, [stage, currentQuestion?.questionNumber]);
 
   useEffect(() => {
     loadInternships();
@@ -201,6 +212,7 @@ export default function MockInterviewPage({ selectedInternshipId, setSelectedInt
       setIsFinalQuestion((res.totalQuestions || questionCount) <= 1);
       setShowPrepGuide(false);
       setStage('question');
+      scrollToTop();
       notify.success(`Mock interview initialized with ${res.totalQuestions || questionCount} role-tailored questions!`);
     } catch (err) {
       notify.error(err.message || 'Failed to start interview.');
@@ -234,6 +246,7 @@ export default function MockInterviewPage({ selectedInternshipId, setSelectedInt
         setCurrentQuestion(res.nextQuestion);
       }
       setStage('evaluated');
+      scrollToTop();
       notify.success('Answer evaluated with 3-dimensional scoring!');
     } catch (err) {
       notify.error(err.message || 'Failed to evaluate answer.');
@@ -251,6 +264,7 @@ export default function MockInterviewPage({ selectedInternshipId, setSelectedInt
       setCurrentEvaluation(null);
       setShowHint(false);
       setStage('question');
+      scrollToTop();
     }
   };
 
@@ -260,6 +274,7 @@ export default function MockInterviewPage({ selectedInternshipId, setSelectedInt
       const res = await api.completeInterview(sessionId);
       setFinalScorecard(res.scorecard);
       setStage('completed');
+      scrollToTop();
 
       // Trigger celebration confetti
       try {
@@ -285,7 +300,7 @@ export default function MockInterviewPage({ selectedInternshipId, setSelectedInt
   };
 
   return (
-    <div className="container" style={{ padding: '2.5rem 1.5rem', maxWidth: '1020px' }}>
+    <div ref={pageTopRef} className="container" style={{ padding: '2.5rem 1.5rem', maxWidth: '1020px' }}>
       
       {/* -------------------------------------------------------------
           STAGE 1: CONFIGURATION SCREEN & REVISION TOPICS

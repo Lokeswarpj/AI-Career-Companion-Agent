@@ -229,15 +229,13 @@ export default function AssistantPage() {
     <div 
       className="container" 
       style={{ 
-        padding: '0.85rem 1.25rem 0.65rem 1.25rem', 
-        maxWidth: '1080px',
+        padding: '1.75rem 1.5rem', 
+        maxWidth: '1100px',
         width: '100%',
+        margin: '0 auto',
         display: 'flex',
         flexDirection: 'column',
-        height: '100%',
-        maxHeight: '100%',
-        boxSizing: 'border-box',
-        overflow: 'hidden'
+        boxSizing: 'border-box'
       }}
     >
       
@@ -246,21 +244,21 @@ export default function AssistantPage() {
         display: 'flex', 
         justifyContent: 'space-between', 
         alignItems: 'center', 
-        marginBottom: '0.65rem', 
+        marginBottom: '1rem', 
         flexWrap: 'wrap', 
-        gap: '0.5rem',
+        gap: '0.75rem',
         flexShrink: 0 
       }}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.15rem' }}>
-            <span className="badge badge-indigo" style={{ fontSize: '0.7rem', padding: '0.15rem 0.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.2rem' }}>
+            <span className="badge badge-indigo" style={{ fontSize: '0.72rem', padding: '0.2rem 0.55rem' }}>
               Conversational Career Assistant
             </span>
           </div>
-          <h1 style={{ fontSize: '1.4rem', fontWeight: 800, margin: '0 0 0.1rem 0' }}>
+          <h1 style={{ fontSize: '1.65rem', fontWeight: 800, margin: '0 0 0.15rem 0' }}>
             AI Career Companion
           </h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', margin: 0 }}>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0 }}>
             Multi-agent guidance orchestrator with real-time knowledge of your profile, live internships, and interview results.
           </p>
         </div>
@@ -268,27 +266,27 @@ export default function AssistantPage() {
         <button
           onClick={handleClearHistory}
           className="btn btn-outline btn-sm"
-          style={{ gap: '0.4rem', padding: '0.35rem 0.65rem', fontSize: '0.78rem' }}
+          style={{ gap: '0.4rem', padding: '0.4rem 0.75rem', fontSize: '0.82rem' }}
           title="Clear chat history"
         >
-          <Trash2 size={14} />
+          <Trash2 size={15} />
           <span>Reset Chat</span>
         </button>
       </div>
 
-      {/* Main Chat Box Container - Perfectly Sized to Viewport */}
+      {/* Main Chat Box Container - Responsive Glass Card */}
       <div 
         className="glass-panel"
         style={{
-          flex: 1,
-          minHeight: 0,
           display: 'flex',
           flexDirection: 'column',
-          overflow: 'hidden',
+          height: '620px',
+          maxHeight: '72vh',
           borderRadius: 'var(--radius-lg)',
-          boxShadow: 'var(--shadow-md)',
+          boxShadow: 'var(--shadow-lg)',
           background: 'var(--bg-card)',
-          border: '1px solid var(--border-card)'
+          border: '1px solid var(--border-card)',
+          overflow: 'hidden'
         }}
       >
         {/* Messages Scroll Area */}
@@ -297,11 +295,11 @@ export default function AssistantPage() {
           style={{
             flex: 1,
             minHeight: 0,
-            padding: '1rem 1.25rem',
+            padding: '1.25rem 1.5rem',
             overflowY: 'auto',
             display: 'flex',
             flexDirection: 'column',
-            gap: '0.85rem'
+            gap: '1rem'
           }}
         >
           {messages.map((msg, idx) => (
@@ -316,8 +314,8 @@ export default function AssistantPage() {
             >
               {/* Avatar Icon */}
               <div style={{
-                width: '1.85rem',
-                height: '1.85rem',
+                width: '2rem',
+                height: '2rem',
                 borderRadius: '50%',
                 background: msg.role === 'user' ? 'var(--accent-primary)' : 'linear-gradient(135deg, #6366f1, #10b981)',
                 display: 'flex',
@@ -326,7 +324,7 @@ export default function AssistantPage() {
                 color: '#ffffff',
                 flexShrink: 0
               }}>
-                {msg.role === 'user' ? <User size={14} /> : <Bot size={14} />}
+                {msg.role === 'user' ? <User size={15} /> : <Bot size={15} />}
               </div>
 
               {/* Message Content Bubble */}
@@ -337,7 +335,7 @@ export default function AssistantPage() {
                 background: msg.role === 'user' ? 'var(--accent-primary)' : 'var(--bg-secondary)',
                 color: msg.role === 'user' ? '#ffffff' : 'var(--text-primary)',
                 fontSize: '0.88rem',
-                lineHeight: 1.55,
+                lineHeight: 1.6,
                 boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
                 border: msg.role === 'user' ? 'none' : '1px solid var(--border-card)'
               }}>
@@ -349,8 +347,8 @@ export default function AssistantPage() {
           {sending && (
             <div style={{ display: 'flex', gap: '0.85rem', alignItems: 'center' }}>
               <div style={{
-                width: '1.85rem',
-                height: '1.85rem',
+                width: '2rem',
+                height: '2rem',
                 borderRadius: '50%',
                 background: 'linear-gradient(135deg, #6366f1, #10b981)',
                 display: 'flex',
@@ -359,20 +357,20 @@ export default function AssistantPage() {
                 color: '#ffffff',
                 flexShrink: 0
               }}>
-                <Bot size={14} />
+                <Bot size={15} />
               </div>
               <div style={{
-                padding: '0.55rem 1rem',
+                padding: '0.6rem 1rem',
                 background: 'var(--bg-secondary)',
                 borderRadius: 'var(--radius-md)',
-                fontSize: '0.82rem',
+                fontSize: '0.84rem',
                 color: 'var(--text-secondary)',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.5rem',
                 border: '1px solid var(--border-card)'
               }}>
-                <RefreshCw size={13} className="spin-slow" />
+                <RefreshCw size={14} className="spin-slow" />
                 <span>Multi-Agent Engine is synthesizing personalized career advice...</span>
               </div>
             </div>
@@ -381,11 +379,11 @@ export default function AssistantPage() {
 
         {/* Quick Suggestion Chips */}
         <div style={{
-          padding: '0.45rem 1rem',
+          padding: '0.6rem 1.25rem',
           background: 'rgba(99, 102, 241, 0.04)',
           borderTop: '1px solid var(--border-subtle)',
           display: 'flex',
-          gap: '0.45rem',
+          gap: '0.5rem',
           overflowX: 'auto',
           whiteSpace: 'nowrap',
           flexShrink: 0
@@ -397,8 +395,8 @@ export default function AssistantPage() {
               onClick={() => handleSendMessage(item.query)}
               className="btn btn-outline btn-sm"
               style={{
-                fontSize: '0.75rem',
-                padding: '0.25rem 0.65rem',
+                fontSize: '0.78rem',
+                padding: '0.3rem 0.75rem',
                 borderRadius: '9999px',
                 borderColor: 'var(--border-card)'
               }}
@@ -410,7 +408,7 @@ export default function AssistantPage() {
 
         {/* Message Input Box */}
         <div style={{
-          padding: '0.65rem 1rem',
+          padding: '0.85rem 1.25rem',
           background: 'var(--bg-secondary)',
           borderTop: '1px solid var(--border-card)',
           flexShrink: 0
@@ -420,7 +418,7 @@ export default function AssistantPage() {
               e.preventDefault();
               handleSendMessage();
             }}
-            style={{ display: 'flex', gap: '0.5rem' }}
+            style={{ display: 'flex', gap: '0.65rem' }}
           >
             <input
               type="text"
@@ -429,15 +427,15 @@ export default function AssistantPage() {
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               disabled={sending}
-              style={{ flex: 1, padding: '0.55rem 0.85rem', fontSize: '0.86rem' }}
+              style={{ flex: 1, padding: '0.65rem 1rem', fontSize: '0.9rem' }}
             />
             <button
               type="submit"
               disabled={sending || !inputText.trim()}
               className="btn btn-primary"
-              style={{ gap: '0.35rem', padding: '0.55rem 1.15rem', fontSize: '0.86rem' }}
+              style={{ gap: '0.4rem', padding: '0.65rem 1.35rem', fontSize: '0.9rem', flexShrink: 0 }}
             >
-              <Send size={15} />
+              <Send size={16} />
               <span>Send</span>
             </button>
           </form>
