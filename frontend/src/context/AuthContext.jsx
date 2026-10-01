@@ -32,10 +32,17 @@ export function AuthProvider({ children }) {
     return data;
   };
 
-  const register = async (email, password, fullName) => {
-    const data = await api.register({ email, password, full_name: fullName });
+  const register = async (email, password, fullName, profileData = {}) => {
+    const data = await api.register({ email, password, full_name: fullName, ...profileData });
     localStorage.setItem('careerpulse_token', data.token);
     setUser(data.user);
+    if (data.token && profileData && Object.keys(profileData).length > 0) {
+      try {
+        await api.updateProfile(profileData);
+      } catch (err) {
+        console.warn('Post-register profile update notice:', err.message);
+      }
+    }
     return data;
   };
 
@@ -43,6 +50,13 @@ export function AuthProvider({ children }) {
     const data = await api.googleLogin(payload);
     localStorage.setItem('careerpulse_token', data.token);
     setUser(data.user);
+    if (data.token && payload.profileData && Object.keys(payload.profileData).length > 0) {
+      try {
+        await api.updateProfile(payload.profileData);
+      } catch (err) {
+        console.warn('Post-google profile update notice:', err.message);
+      }
+    }
     return data;
   };
 

@@ -16,13 +16,29 @@ export function isValidEmail(email) {
   return EMAIL_REGEX.test(trimmed);
 }
 
+// Password Validation Rules: 8+ chars, letters, numbers, special char
+export function isStrongPassword(password) {
+  if (!password || typeof password !== 'string') return false;
+  if (password.length < 8) return false;
+  const hasLetter = /[a-zA-Z]/.test(password);
+  const hasNumber = /[0-9]/.test(password);
+  const hasSpecial = /[^a-zA-Z0-9]/.test(password);
+  return hasLetter && hasNumber && hasSpecial;
+}
+
+// 10-digit mobile number validation
+export function isValidMobileNumber(phone) {
+  if (!phone || typeof phone !== 'string') return false;
+  return /^\d{10}$/.test(phone.trim());
+}
+
 /**
  * Direct Legacy Register (Maintained for backward compatibility and automated test suite)
  * POST /api/auth/register
  */
 router.post('/register', async (req, res) => {
   try {
-    const { email, password, full_name } = req.body;
+    const { email, password, full_name, phone, university, degree, graduation_year, location, technical_skills } = req.body;
 
     if (!email || !password || !full_name) {
       return res.status(400).json({ error: 'Please provide email, password, and full name.' });
@@ -33,8 +49,15 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ error: 'Please enter a valid email ID.' });
     }
 
-    if (password.length < 6) {
-      return res.status(400).json({ error: 'Password must be at least 6 characters long.' });
+    // Validate password strength (min 8 chars, letter, number, special char)
+    if (!isStrongPassword(password)) {
+      return res.status(400).json({ 
+        error: 'Password must be at least 8 characters long and contain letters, numbers, and a special character.' 
+      });
+    }
+
+    if (phone && !isValidMobileNumber(phone)) {
+      return res.status(400).json({ error: 'Mobile number must be exactly 10 digits.' });
     }
 
     const existing = await db.get('SELECT id FROM users WHERE email = ?', [normalizedEmail]);
@@ -53,16 +76,27 @@ router.post('/register', async (req, res) => {
       [userId, normalizedEmail, password_hash, full_name.trim()]
     );
 
-    // Initialize completely clean empty profile for new student
+    const parsedSkills = Array.isArray(technical_skills) 
+      ? technical_skills 
+      : (typeof technical_skills === 'string' && technical_skills.trim() 
+          ? technical_skills.split(',').map(s => s.trim()).filter(Boolean) 
+          : []);
+
+    // Initialize profile for new student with provided details
     await db.run(
       `INSERT INTO profiles 
-       (id, user_id, preferred_roles, technical_skills, soft_skills, experience_json, projects_json, certifications_json, preferred_industries) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       (id, user_id, phone, university, degree, graduation_year, location, preferred_roles, technical_skills, soft_skills, experience_json, projects_json, certifications_json, preferred_industries) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         profileId,
         userId,
+        phone ? phone.trim() : null,
+        university ? university.trim() : null,
+        degree ? degree.trim() : null,
+        graduation_year ? parseInt(graduation_year) : null,
+        location ? location.trim() : null,
         JSON.stringify([]),
-        JSON.stringify([]),
+        JSON.stringify(parsedSkills),
         JSON.stringify([]),
         JSON.stringify([]),
         JSON.stringify([]),
@@ -132,7 +166,7 @@ router.post('/login', async (req, res) => {
  */
 router.post('/google', async (req, res) => {
   try {
-    const { credential, userInfo } = req.body;
+    const { credential, userInfo, phone, university, degree, graduation_year, location, technical_skills } = req.body;
 
     let email = '';
     let fullName = '';
@@ -164,6 +198,10 @@ router.post('/google', async (req, res) => {
       return res.status(400).json({ error: 'Could not verify a valid Google email address. Please try again.' });
     }
 
+    if (phone && !isValidMobileNumber(phone)) {
+      return res.status(400).json({ error: 'Mobile number must be exactly 10 digits.' });
+    }
+
     // 3. Check if user already exists
     let user = await db.get('SELECT * FROM users WHERE email = ?', [email]);
 
@@ -180,17 +218,27 @@ router.post('/google', async (req, res) => {
         [userId, email, password_hash, fullName, avatarUrl]
       );
 
-      // Initialize clean empty profile for the new student
+      const parsedSkills = Array.isArray(technical_skills) 
+        ? technical_skills 
+        : (typeof technical_skills === 'string' && technical_skills.trim() 
+            ? technical_skills.split(',').map(s => s.trim()).filter(Boolean) 
+            : []);
+
+      // Initialize profile for the new student
       await db.run(
         `INSERT INTO profiles 
-         (id, user_id, preferred_roles, technical_skills, soft_skills, experience_json, projects_json, certifications_json, preferred_industries) 
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         (id, user_id, phone, university, degree, graduation_year, location, preferred_roles, technical_skills, soft_skills, experience_json, projects_json, certifications_json, preferred_industries) 
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           profileId,
           userId,
+          phone ? phone.trim() : null,
+          university ? university.trim() : null,
+          degree ? degree.trim() : null,
+          graduation_year ? parseInt(graduation_year) : null,
+          location ? location.trim() : null,
           JSON.stringify([]),
-          JSON.stringify([]),
-          JSON.stringify([]),
+          JSON.stringify(parsedSkills),
           JSON.stringify([]),
           JSON.stringify([]),
           JSON.stringify([]),
