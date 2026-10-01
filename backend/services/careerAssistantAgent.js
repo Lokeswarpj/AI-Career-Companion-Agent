@@ -90,7 +90,10 @@ You have access to the student's profile context and multi-agent system data.
 
 Student Profile Context:
 - Name: ${studentContext.name || 'Student'}
+- Contact Phone / Number: ${studentContext.phone || 'Not listed in profile'}
+- Email: ${studentContext.email || 'Not listed'}
 - Degree: ${studentContext.degree || 'B.Tech CS'} (${studentContext.university || 'Engineering College'}, Class of ${studentContext.graduation_year || 2026})
+- Location: ${studentContext.location || 'Not specified'} (Preferred: ${studentContext.preferred_location || 'Remote/Hybrid'})
 - Technical Skills: ${JSON.stringify(studentContext.skills || [])}
 - Preferred Roles: ${JSON.stringify(studentContext.preferred_roles || ['Software Engineer Intern'])}
 - Uploaded Resume: ${hasValidResume ? 'Yes (Parsed & Analyzed)' : 'No (Not uploaded yet)'}
@@ -109,7 +112,7 @@ Student's Latest Message:
 "${userMessage}"
 
 CRITICAL RESPONSE RULES:
-1. BE DIRECT & CONCISE FOR SIMPLE QUESTIONS: If the user is asking a simple, direct question (e.g., asking their name, greeting, asking about their profile info like degree/skills, or simple conversational chat), answer DIRECTLY in 1-2 sentences. DO NOT dump unrequested background info, multi-paragraph essays, skill lists, or unsolicited career lectures.
+1. BE DIRECT & CONCISE FOR SIMPLE QUESTIONS: If the user is asking a simple, direct question (e.g., asking their name, asking their phone number, asking their college/degree/skills, greeting, or simple conversational chat), answer DIRECTLY in 1-2 sentences using the profile context. DO NOT dump unrequested background info, multi-paragraph essays, skill lists, or unsolicited career lectures.
 2. STRUCTURED ADVICE FOR COMPLEX INTENTS:
    - If comparing roles (COMPARE_ROLES), provide a clear "Comparison" section with side-by-side trade-offs, compatibility scores, and an explicit "Recommendation" section.
    - If analyzing skill gaps (EXPLAIN_SKILL_GAPS), provide a clear "Skill Gap" diagnosis and "Roadmap".
@@ -134,8 +137,23 @@ function generateHeuristicAssistantResponse(intent, message, context, multiAgent
   const topSkillsStr = skills.length > 0 ? skills.slice(0, 4).join(', ') : '';
 
   const msgLower = (message || '').toLowerCase().trim();
-  if (msgLower.includes('my name') || msgLower.includes('what is my name') || msgLower.includes("what's my name")) {
+  if (msgLower.includes('my number') || msgLower.includes('phone') || msgLower.includes('contact number') || msgLower.includes('mobile')) {
+    return context.phone 
+      ? `Your contact phone number listed in your profile is **${context.phone}**.`
+      : `You haven't listed a contact phone number in your profile yet! You can add it anytime in the **Profile** tab.`;
+  }
+  if (msgLower.includes('my name') || msgLower.includes('what is my name') || msgLower.includes("what's my name") || msgLower.includes('who am i')) {
     return `Your name is **${name}**! How can I assist you with your career or internships today?`;
+  }
+  if (msgLower.includes('college') || msgLower.includes('university') || msgLower.includes('where do i study') || msgLower.includes('institute')) {
+    return context.university
+      ? `Your college/university listed in your profile is **${context.university}**.`
+      : `You haven't specified your college/university in your profile yet! You can update it in the **Profile** tab.`;
+  }
+  if (msgLower.includes('degree') || msgLower.includes('major') || msgLower.includes('branch')) {
+    return context.degree
+      ? `Your degree & major listed in your profile is **${context.degree}**.`
+      : `Your degree isn't specified in your profile yet. You can set it in the **Profile** tab.`;
   }
   if (msgLower === 'hi' || msgLower === 'hello' || msgLower === 'hey' || msgLower === 'hi there') {
     return `Hello **${name}**! 👋 I'm CareerPulse AI. How can I help you today?`;

@@ -16,7 +16,7 @@ router.post('/chat', authenticateToken, async (req, res) => {
     }
 
     // 1. Fetch student context
-    const user = await db.get('SELECT full_name FROM users WHERE id = ?', [req.user.id]);
+    const user = await db.get('SELECT full_name, email FROM users WHERE id = ?', [req.user.id]);
     const profile = await db.get('SELECT * FROM profiles WHERE user_id = ?', [req.user.id]);
     const latestResume = await db.get('SELECT * FROM resumes WHERE user_id = ? ORDER BY uploaded_at DESC LIMIT 1', [req.user.id]);
     const savedJobs = await db.all(
@@ -50,9 +50,13 @@ router.post('/chat', authenticateToken, async (req, res) => {
 
     const studentContext = {
       name: user?.full_name || req.user.full_name || 'Student',
-      degree: profile?.degree,
-      university: profile?.university,
+      email: user?.email || req.user.email || '',
+      phone: profile?.phone || '',
+      degree: profile?.degree || '',
+      university: profile?.university || '',
       graduation_year: profile?.graduation_year || 2026,
+      location: profile?.location || '',
+      preferred_location: profile?.preferred_location || '',
       skills: studentSkills,
       technical_skills: studentSkills,
       preferred_roles: studentRoles,
