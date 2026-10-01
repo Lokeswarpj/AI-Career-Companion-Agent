@@ -74,9 +74,6 @@ export default function MatchingPage({ setActiveTab, setSelectedInternshipId }) 
       const res = await api.importInternshipToTracker(item.id, { status: 'Applied', priority: 'High' });
       notify.success(res.message || `Successfully applied to ${item.company}! Added to Application Tracker.`);
       setAppliedMap(prev => ({ ...prev, [item.id]: true }));
-      if (item.apply_url) {
-        window.open(item.apply_url, '_blank');
-      }
     } catch (err) {
       notify.error('Failed to submit application.');
     } finally {
