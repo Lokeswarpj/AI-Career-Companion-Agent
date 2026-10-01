@@ -85,8 +85,8 @@ export async function runCareerAssistantAgent(userMessage, studentContext, chatH
   }
 
   // 2. Call Gemini with Full Multi-Agent Context Injection
-  const prompt = `You are "CareerPulse AI", an advanced conversational career companion agent for engineering and tech students.
-You are powered by a multi-agent system (RAG Vector Knowledge Base, Matching Agent, Skill Gap Agent, Application Customizer, and Interview Preparation Agent).
+  const prompt = `You are "CareerPulse AI", a smart, natural, and direct conversational career companion agent.
+You have access to the student's profile context and multi-agent system data.
 
 Student Profile Context:
 - Name: ${studentContext.name || 'Student'}
@@ -108,18 +108,16 @@ ${chatHistory.slice(-6).map(m => `${m.role === 'user' ? 'Student' : 'CareerPulse
 Student's Latest Message:
 "${userMessage}"
 
-Instructions:
-1. ${!hasValidResume && (intent === 'INTERNSHIP_RECOMMEND' || intent === 'EXPLAIN_SKILL_GAPS' || intent === 'COMPARE_ROLES' || intent === 'EXPLAIN_MATCH') ? 'IMPORTANT: The student has NOT uploaded a resume yet. Tell them clearly that to get accurate percentage compatibility scores and personalized skill gap roadmaps, they should upload their resume in the "Resume AI" tab first. Mention popular open tech internships from the catalog they can browse in the Internships tab in the meantime.' : 'Provide a highly personalized, structured, and empathetic response using the multi-agent context.'}
-2. Directly answer the student's question utilizing the multi-agent context (mention specific roles, skill matches, gaps, and metrics where relevant).
-3. Use clean GitHub Markdown formatting with bold headers, bullet points, and actionable next steps.
-4. If comparing roles, provide a clear structured comparison (Pros, Cons, Tech Alignment, Decision Recommendation).
-5. If discussing skills, offer concrete project ideas and timeframes.`;
+CRITICAL RESPONSE RULES:
+1. BE DIRECT & CONCISE FOR SIMPLE QUESTIONS: If the user is asking a simple, direct question (e.g., asking their name, greeting, asking about their profile info like degree/skills, or simple conversational chat), answer DIRECTLY in 1-2 sentences. DO NOT dump unrequested background info, multi-paragraph essays, skill lists, or unsolicited career lectures.
+2. ${!hasValidResume && (intent === 'INTERNSHIP_RECOMMEND' || intent === 'EXPLAIN_SKILL_GAPS' || intent === 'COMPARE_ROLES' || intent === 'EXPLAIN_MATCH') ? 'IMPORTANT: The student has NOT uploaded a resume yet. Tell them clearly that to get accurate percentage compatibility scores and personalized skill gap roadmaps, they should upload their resume in the "Resume AI" tab first.' : 'Only provide comprehensive structured breakdowns (tables, roadmap steps, internship cards) when the student specifically asks for recommendations, comparisons, skill gap analysis, or interview guidance.'}
+3. Maintain a natural, friendly, human tone. Speak directly to the student without sounding like a robotic template.`;
 
-  const systemPrompt = "You are an empathetic, world-class Career Mentor and Principal Tech Lead. Provide actionable, deeply tailored, and accurate career advice.";
+  const systemPrompt = "You are CareerPulse AI, a warm, intelligent, and direct Career Assistant. Answer simple questions in 1-2 concise, natural sentences, and provide rich structured advice when deep career guidance is requested.";
 
   let aiResult = await callGemini(prompt, systemPrompt, false);
 
-  if (aiResult && typeof aiResult === 'string' && aiResult.trim().length > 30) {
+  if (aiResult && typeof aiResult === 'string' && aiResult.trim().length > 10) {
     return aiResult;
   }
 
@@ -131,6 +129,19 @@ function generateHeuristicAssistantResponse(intent, message, context, multiAgent
   const name = context.name || 'there';
   const skills = (context.skills && context.skills.length > 0) ? context.skills : [];
   const topSkillsStr = skills.length > 0 ? skills.slice(0, 4).join(', ') : '';
+
+  const msgLower = (message || '').toLowerCase().trim();
+  if (msgLower.includes('my name') || msgLower.includes('what is my name') || msgLower.includes("what's my name")) {
+    return `Your name is **${name}**! How can I assist you with your career or internships today?`;
+  }
+  if (msgLower === 'hi' || msgLower === 'hello' || msgLower === 'hey' || msgLower === 'hi there') {
+    return `Hello **${name}**! 👋 I'm CareerPulse AI. How can I help you today?`;
+  }
+  if (msgLower.includes('my skill') || msgLower.includes('what skills') || msgLower.includes('my tech stack')) {
+    return skills.length > 0 
+      ? `Your verified profile skills are: **${skills.join(', ')}**.`
+      : `You haven't added any technical skills to your profile yet! You can upload your resume in the **Resume AI** tab to auto-extract them.`;
+  }
 
   // Zero-Resume Guardrails
   if (!hasValidResume) {
