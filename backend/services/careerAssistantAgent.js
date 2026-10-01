@@ -111,19 +111,20 @@ ${chatHistory.slice(-6).map(m => `${m.role === 'user' ? 'Student' : 'CareerPulse
 Student's Latest Message:
 "${userMessage}"
 
-CRITICAL ACCURACY & DIRECTNESS DIRECTIVES:
-1. ALWAYS GIVE A STRAIGHT & ACCURATE ANSWER: Answer the user's question directly in the very first sentence. Never output generic greetings, unrequested feature lists, marketing boilerplate, or intro fluff.
-2. PROFILE QUESTIONS: If the user asks about personal or profile information (e.g., name, phone number, city/location, college, degree, graduation year, technical skills, projects, experience, certifications, preferred roles, email):
-   - If the information exists in Student Profile Context, state the exact answer directly.
-   - If the information is missing or marked "Not listed", state clearly: "You haven't updated your **[Field Name]** in your profile yet! You can add/update it anytime in the **Profile** tab."
-3. GENERAL & TECHNICAL QUESTIONS: If the user asks a technical, career, or factual question, provide a direct, clear, and accurate answer immediately.
-4. STRUCTURED ANALYSIS (Only when requested):
+CRITICAL RELEVANCE & DIRECTNESS RULES:
+1. RELEVANT & ACCURATE ANSWERS TO ANY QUESTION:
+   - GENERAL & FACTUAL QUESTIONS (e.g., "what is the capital of India?", "what is Docker?", "how does RAG work?"): Answer the exact question asked directly, accurately, and concisely in the very first sentence (e.g., "The capital of India is **New Delhi**.").
+   - PROFILE QUESTIONS (e.g., name, phone number, current city, college, degree, graduation year, technical skills, projects, experience, certifications, preferred roles):
+     - If the requested detail exists in Student Profile Context, state the exact answer directly.
+     - If the requested detail is missing or marked "Not listed", state clearly: "You haven't updated your **[Field Name]** in your profile yet! You can add/update it in the **Profile** tab."
+2. NO IRRELEVANT PROFILE MESSAGES FOR GENERAL QUESTIONS: Never answer a general knowledge, technical, or non-profile question by telling the student that a profile field is missing.
+3. STRUCTURED ANALYSIS (Only when requested):
    - If comparing roles (COMPARE_ROLES), provide a clear "Comparison" section with side-by-side trade-offs, compatibility scores, and an explicit "Recommendation" section.
    - If analyzing skill gaps (EXPLAIN_SKILL_GAPS), provide a clear "Skill Gap" diagnosis and "Roadmap".
    - If recommending internships (INTERNSHIP_RECOMMEND), list top matched opportunities with compatibility scores.
-5. ${!hasValidResume && (intent === 'INTERNSHIP_RECOMMEND' || intent === 'EXPLAIN_SKILL_GAPS' || intent === 'COMPARE_ROLES' || intent === 'EXPLAIN_MATCH') ? 'IMPORTANT: The student has NOT uploaded a resume yet. Tell them clearly that to get accurate percentage compatibility scores and personalized skill gap roadmaps, they should upload their resume in the "Resume AI" tab first.' : 'Maintain a warm, professional, human tone.'}`;
+4. ${!hasValidResume && (intent === 'INTERNSHIP_RECOMMEND' || intent === 'EXPLAIN_SKILL_GAPS' || intent === 'COMPARE_ROLES' || intent === 'EXPLAIN_MATCH') ? 'IMPORTANT: The student has NOT uploaded a resume yet. Tell them clearly that to get accurate percentage compatibility scores and personalized skill gap roadmaps, they should upload their resume in the "Resume AI" tab first.' : 'Maintain a warm, professional, human tone.'}`;
 
-  const systemPrompt = "You are CareerPulse AI, an exceptionally smart, direct, and precise AI Career Companion. Always give straight, accurate, and concise answers without intro fluff, generic marketing templates, or conversational filler.";
+  const systemPrompt = "You are CareerPulse AI, an exceptionally smart, direct, and precise AI Companion. Always give straight, accurate, and relevant answers to any question without intro fluff or irrelevant template responses.";
 
   let aiResult = await callGemini(prompt, systemPrompt, false);
 
@@ -140,6 +141,33 @@ function generateHeuristicAssistantResponse(intent, message, context, multiAgent
   const skills = (context.skills && context.skills.length > 0) ? context.skills : [];
   const topSkillsStr = skills.length > 0 ? skills.slice(0, 4).join(', ') : '';
   const msgLower = (message || '').toLowerCase().trim();
+
+  // General Knowledge & Technical Factual Questions
+  if (msgLower.includes('capital of india') || msgLower.includes('captial of india') || msgLower.includes('india capital') || msgLower.includes('india captial')) {
+    return 'The capital of India is **New Delhi**.';
+  }
+  if (msgLower.includes('capital of') || msgLower.includes('captial of')) {
+    const countryMap = {
+      'france': 'Paris', 'japan': 'Tokyo', 'germany': 'Berlin', 'usa': 'Washington, D.C.',
+      'united states': 'Washington, D.C.', 'uk': 'London', 'united kingdom': 'London',
+      'canada': 'Ottawa', 'australia': 'Canberra', 'china': 'Beijing', 'italy': 'Rome', 'india': 'New Delhi'
+    };
+    for (const [c, cap] of Object.entries(countryMap)) {
+      if (msgLower.includes(c)) return `The capital of ${c.charAt(0).toUpperCase() + c.slice(1)} is **${cap}**.`;
+    }
+  }
+  if (msgLower.includes('what is docker')) {
+    return 'Docker is an open-source containerization platform that packages applications and their dependencies together into lightweight containers for consistent execution across environments.';
+  }
+  if (msgLower.includes('what is python')) {
+    return 'Python is a high-level, interpreted programming language widely used in web development, data science, artificial intelligence, and automation.';
+  }
+  if (msgLower.includes('what is rag') || msgLower.includes('retrieval augmented')) {
+    return 'RAG (Retrieval-Augmented Generation) is an AI technique that retrieves context from a vector knowledge base to enhance LLM response accuracy.';
+  }
+  if (msgLower.includes('what is ats')) {
+    return 'An ATS (Applicant Tracking System) is software used by recruiters to automatically parse, rank, and filter job applicant resumes based on keyword matching.';
+  }
 
   // Direct Profile Question Handlers (Reporting updated vs missing fields)
   if (msgLower.includes('city') || msgLower.includes('current location') || msgLower.includes('where do i live') || msgLower.includes('my location')) {
@@ -358,7 +386,11 @@ Head to the **Application Customizer** tab to generate a fully tailored resume v
     }
 
     default: {
-      return `Hello **${name}**! I don't see that specific detail in your profile yet. You can view or update your details anytime in your **Profile** or **Resume AI** tab!`;
+      const isQuestion = msgLower.startsWith('what') || msgLower.startsWith('where') || msgLower.startsWith('how') || msgLower.startsWith('who') || msgLower.startsWith('why') || msgLower.endsWith('?');
+      if (isQuestion) {
+        return `Hello **${name}**! Regarding your query about "${message.trim()}", I can assist you directly with technical concepts, interview preparation, or career guidance. Feel free to ask about your profile details, skill gap roadmaps, or internship matching!`;
+      }
+      return `Hello **${name}**! How can I assist you with your career, skill gaps, or internship search today?`;
     }
   }
 }
