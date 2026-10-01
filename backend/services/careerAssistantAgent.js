@@ -388,7 +388,7 @@ Head to the **Application Customizer** tab to generate a fully tailored resume v
     default: {
       const isQuestion = msgLower.startsWith('what') || msgLower.startsWith('where') || msgLower.startsWith('how') || msgLower.startsWith('who') || msgLower.startsWith('why') || msgLower.endsWith('?');
       if (isQuestion) {
-        return `Hello **${name}**! Regarding your query about "${message.trim()}", I can assist you directly with technical concepts, interview preparation, or career guidance. Feel free to ask about your profile details, skill gap roadmaps, or internship matching!`;
+        return `Hello **${name}**! I can only answer questions related to your career, profile details, technical concepts, internships, and interview preparation.`;
       }
       return `Hello **${name}**! How can I assist you with your career, skill gaps, or internship search today?`;
     }
