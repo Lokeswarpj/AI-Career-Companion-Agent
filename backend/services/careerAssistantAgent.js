@@ -135,12 +135,28 @@ function generateHeuristicAssistantResponse(intent, message, context, multiAgent
   const name = context.name || 'there';
   const skills = (context.skills && context.skills.length > 0) ? context.skills : [];
   const topSkillsStr = skills.length > 0 ? skills.slice(0, 4).join(', ') : '';
-
   const msgLower = (message || '').toLowerCase().trim();
+
+  // Direct Profile Question Handlers (Reporting updated vs missing fields)
+  if (msgLower.includes('city') || msgLower.includes('current location') || msgLower.includes('where do i live') || msgLower.includes('my location')) {
+    return context.location 
+      ? `Your current city listed in your profile is **${context.location}**.`
+      : `You haven't updated your **current city / location** in your profile yet! You can add it anytime in the **Profile** tab.`;
+  }
+  if (msgLower.includes('preferred location') || msgLower.includes('desired location') || msgLower.includes('work mode')) {
+    return context.preferred_location
+      ? `Your preferred internship location listed in your profile is **${context.preferred_location}**.`
+      : `You haven't updated your **preferred internship location** in your profile yet! You can set it in the **Profile** tab.`;
+  }
   if (msgLower.includes('my number') || msgLower.includes('phone') || msgLower.includes('contact number') || msgLower.includes('mobile')) {
     return context.phone 
       ? `Your contact phone number listed in your profile is **${context.phone}**.`
-      : `You haven't listed a contact phone number in your profile yet! You can add it anytime in the **Profile** tab.`;
+      : `You haven't updated your **contact phone number** in your profile yet! You can add it anytime in the **Profile** tab.`;
+  }
+  if (msgLower.includes('email') || msgLower.includes('mail id')) {
+    return context.email 
+      ? `Your registered email address is **${context.email}**.`
+      : `You haven't updated your **email address** in your profile yet!`;
   }
   if (msgLower.includes('my name') || msgLower.includes('what is my name') || msgLower.includes("what's my name") || msgLower.includes('who am i')) {
     return `Your name is **${name}**! How can I assist you with your career or internships today?`;
@@ -148,20 +164,45 @@ function generateHeuristicAssistantResponse(intent, message, context, multiAgent
   if (msgLower.includes('college') || msgLower.includes('university') || msgLower.includes('where do i study') || msgLower.includes('institute')) {
     return context.university
       ? `Your college/university listed in your profile is **${context.university}**.`
-      : `You haven't specified your college/university in your profile yet! You can update it in the **Profile** tab.`;
+      : `You haven't updated your **college / university** in your profile yet! You can add it anytime in the **Profile** tab.`;
   }
-  if (msgLower.includes('degree') || msgLower.includes('major') || msgLower.includes('branch')) {
+  if (msgLower.includes('degree') || msgLower.includes('major') || msgLower.includes('branch') || msgLower.includes('course')) {
     return context.degree
       ? `Your degree & major listed in your profile is **${context.degree}**.`
-      : `Your degree isn't specified in your profile yet. You can set it in the **Profile** tab.`;
+      : `You haven't updated your **degree & major** in your profile yet! You can set it in the **Profile** tab.`;
   }
-  if (msgLower === 'hi' || msgLower === 'hello' || msgLower === 'hey' || msgLower === 'hi there') {
-    return `Hello **${name}**! 👋 I'm CareerPulse AI. How can I help you today?`;
+  if (msgLower.includes('graduation') || msgLower.includes('grad year') || msgLower.includes('passing year')) {
+    return context.graduation_year
+      ? `Your expected graduation year listed in your profile is **${context.graduation_year}**.`
+      : `You haven't updated your **graduation year** in your profile yet! You can set it in the **Profile** tab.`;
+  }
+  if (msgLower.includes('project') || msgLower.includes('portfolio')) {
+    return (context.projects && context.projects.length > 0)
+      ? `Your profile includes **${context.projects.length} project(s)**: ${context.projects.map(p => typeof p === 'string' ? p : p.title || p.name).join(', ')}.`
+      : `You haven't updated your **projects** in your profile yet! You can add your projects in the **Profile** tab.`;
+  }
+  if (msgLower.includes('experience') || msgLower.includes('past work') || msgLower.includes('previous intern')) {
+    return (context.experience && context.experience.length > 0)
+      ? `Your profile lists **${context.experience.length} experience entry/entries**.`
+      : `You haven't updated your **work experience** in your profile yet! You can add past experience in the **Profile** tab.`;
+  }
+  if (msgLower.includes('certif') || msgLower.includes('licenses')) {
+    return (context.certifications && context.certifications.length > 0)
+      ? `Your profile lists certifications: **${context.certifications.map(c => typeof c === 'string' ? c : c.title || c.name).join(', ')}**.`
+      : `You haven't updated your **certifications** in your profile yet! You can add them in the **Profile** tab.`;
+  }
+  if (msgLower.includes('target role') || msgLower.includes('preferred role') || msgLower.includes('roles i want')) {
+    return (context.preferred_roles && context.preferred_roles.length > 0)
+      ? `Your preferred target roles are: **${context.preferred_roles.join(', ')}**.`
+      : `You haven't updated your **preferred target roles** in your profile yet! You can add them in the **Profile** tab.`;
   }
   if (msgLower.includes('my skill') || msgLower.includes('what skills') || msgLower.includes('my tech stack')) {
     return skills.length > 0 
       ? `Your verified profile skills are: **${skills.join(', ')}**.`
-      : `You haven't added any technical skills to your profile yet! You can upload your resume in the **Resume AI** tab to auto-extract them.`;
+      : `You haven't updated your **technical skills** in your profile yet! You can upload your resume in the **Resume AI** tab or add skills in your Profile.`;
+  }
+  if (msgLower === 'hi' || msgLower === 'hello' || msgLower === 'hey' || msgLower === 'hi there') {
+    return `Hello **${name}**! 👋 How can I help with your career, skill gaps, or internship search today?`;
   }
 
   // Zero-Resume Guardrails
@@ -313,17 +354,7 @@ Head to the **Application Customizer** tab to generate a fully tailored resume v
     }
 
     default: {
-      return `Hello ${name}! I am your **CareerPulse AI Companion** 🚀
-
-I am connected to your profile, live internship knowledge base, and multi-agent evaluation pipelines. Here is what we can do:
-
-- 🔍 **Recommend Top Internships**: Retrieve personalized roles ranked with our hybrid matching engine.
-- 📊 **Analyze Skill Gaps**: Identify missing requirements and get concrete project roadmaps.
-- ⚖️ **Compare Opportunities**: Contrast multiple internship offers side-by-side.
-- 📄 **Tailor Applications**: Optimize resume bullet points and generate targeted cover letters.
-- 🎯 **Practice Mock Interviews**: Test your answers with speech recognition and get real-time scores.
-
-How can I help advance your career today?`;
+      return `Hello **${name}**! I don't see that specific detail in your profile yet. You can view or update your details anytime in your **Profile** or **Resume AI** tab!`;
     }
   }
 }
