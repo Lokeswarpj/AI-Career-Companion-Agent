@@ -20,7 +20,8 @@ import {
   ChevronDown,
   ChevronUp,
   FlaskConical,
-  Compass
+  Compass,
+  Send
 } from 'lucide-react';
 
 export default function MatchingPage({ setActiveTab, setSelectedInternshipId }) {
@@ -32,6 +33,8 @@ export default function MatchingPage({ setActiveTab, setSelectedInternshipId }) 
   const [topSkillCount, setTopSkillCount] = useState(0);
   const [expandedId, setExpandedId] = useState(null);
   const [isBenchmarkModalOpen, setIsBenchmarkModalOpen] = useState(false);
+  const [appliedMap, setAppliedMap] = useState({});
+  const [applyingId, setApplyingId] = useState(null);
 
   useEffect(() => {
     loadRecommendations();
@@ -40,7 +43,10 @@ export default function MatchingPage({ setActiveTab, setSelectedInternshipId }) 
   async function loadRecommendations() {
     try {
       setLoading(true);
-      const res = await api.getRecommendations({ preview: previewAnyway });
+      const [res, appsRes] = await Promise.all([
+        api.getRecommendations({ preview: previewAnyway }),
+        api.getApplications().catch(() => ({ applications: [] }))
+      ]);
       const hasSkills = res.hasProfileSkills !== false && (res.topSkillOverlap > 0 || res.hasProfileSkills === true);
       setHasProfileSkills(hasSkills);
       setRecommendations(res.recommendations || []);
@@ -48,12 +54,35 @@ export default function MatchingPage({ setActiveTab, setSelectedInternshipId }) 
       if (res.recommendations && res.recommendations.length > 0) {
         setExpandedId(res.recommendations[0].internship.id);
       }
+
+      const apps = appsRes?.applications || [];
+      const map = {};
+      apps.forEach(a => {
+        if (a.internship_id) map[a.internship_id] = true;
+      });
+      setAppliedMap(map);
     } catch (err) {
       notify.error('Failed to calculate internship recommendations.');
     } finally {
       setLoading(false);
     }
   }
+
+  const handleApply = async (item) => {
+    try {
+      setApplyingId(item.id);
+      const res = await api.importInternshipToTracker(item.id, { status: 'Applied', priority: 'High' });
+      notify.success(res.message || `Successfully applied to ${item.company}! Added to Application Tracker.`);
+      setAppliedMap(prev => ({ ...prev, [item.id]: true }));
+      if (item.apply_url) {
+        window.open(item.apply_url, '_blank');
+      }
+    } catch (err) {
+      notify.error('Failed to submit application.');
+    } finally {
+      setApplyingId(null);
+    }
+  };
 
   if (loading) {
     return <LoadingSpinner message="Job-Resume Matching Agent evaluating candidate profile against 180 knowledge base postings..." />;
@@ -278,24 +307,61 @@ export default function MatchingPage({ setActiveTab, setSelectedInternshipId }) 
                       </div>
                     </div>
 
-                    {/* Match Score Meter */}
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '1rem',
-                      padding: '0.75rem 1.25rem',
-                      background: 'var(--bg-secondary)',
-                      borderRadius: 'var(--radius-md)',
-                      border: '1px solid var(--border-card)'
-                    }}>
-                      <div style={{ textAlign: 'right' }}>
-                        <div style={{ fontSize: '1.5rem', fontWeight: 900, color: scoreColor }}>
-                          {score}%
-                        </div>
-                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>
-                          Compatibility Fit
+                    {/* Match Score Meter & Apply Option */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', flexWrap: 'wrap' }}>
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '1rem',
+                        padding: '0.75rem 1.25rem',
+                        background: 'var(--bg-secondary)',
+                        borderRadius: 'var(--radius-md)',
+                        border: '1px solid var(--border-card)'
+                      }}>
+                        <div style={{ textAlign: 'right' }}>
+                          <div style={{ fontSize: '1.5rem', fontWeight: 900, color: scoreColor }}>
+                            {score}%
+                          </div>
+                          <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>
+                            Compatibility Fit
+                          </div>
                         </div>
                       </div>
+
+                      <button
+                        onClick={() => handleApply(item)}
+                        disabled={appliedMap[item.id] || applyingId === item.id}
+                        className="btn btn-primary"
+                        style={{
+                          padding: '0.75rem 1.25rem',
+                          fontWeight: 700,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.5rem',
+                          borderRadius: 'var(--radius-md)',
+                          background: appliedMap[item.id]
+                            ? 'rgba(16, 185, 129, 0.15)'
+                            : 'linear-gradient(135deg, #6366f1 0%, #06b6d4 100%)',
+                          color: appliedMap[item.id] ? '#10b981' : '#ffffff',
+                          border: appliedMap[item.id] ? '1px solid rgba(16, 185, 129, 0.4)' : 'none',
+                          cursor: appliedMap[item.id] ? 'default' : 'pointer',
+                          boxShadow: appliedMap[item.id] ? 'none' : '0 4px 12px rgba(99, 102, 241, 0.25)'
+                        }}
+                      >
+                        {appliedMap[item.id] ? (
+                          <>
+                            <CheckCircle2 size={18} color="#10b981" />
+                            <span>Applied</span>
+                          </>
+                        ) : applyingId === item.id ? (
+                          <span>Applying...</span>
+                        ) : (
+                          <>
+                            <Send size={18} />
+                            <span>Apply</span>
+                          </>
+                        )}
+                      </button>
                     </div>
                   </div>
 

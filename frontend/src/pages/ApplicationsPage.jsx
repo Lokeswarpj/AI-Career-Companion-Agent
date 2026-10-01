@@ -323,15 +323,6 @@ export default function ApplicationsPage({ setActiveTab, setSelectedInternshipId
               <span>List View</span>
             </button>
           </div>
-
-          <button
-            onClick={openAddModal}
-            className="btn btn-primary"
-            style={{ gap: '0.5rem', fontWeight: 700, padding: '0.65rem 1.25rem' }}
-          >
-            <Plus size={18} />
-            <span>Add Application</span>
-          </button>
         </div>
       </div>
 
@@ -537,18 +528,20 @@ export default function ApplicationsPage({ setActiveTab, setSelectedInternshipId
           <p style={{ color: 'var(--text-secondary)', maxWidth: '480px', margin: '0 auto 1.5rem auto', fontSize: '0.92rem' }}>
             {searchTerm || filterStage !== 'All' 
               ? 'No applications match your active search filters. Clear filters to see all entries.'
-              : 'Start tracking your dream internships! Add applications directly or import opportunities with 1 click from the Internships directory.'}
+              : 'Start tracking your dream internships! Apply to matched opportunities with 1 click directly from the AI Matching or Internships directory.'}
           </p>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '0.75rem' }}>
-            <button onClick={openAddModal} className="btn btn-primary">
-              <Plus size={16} />
-              <span>Add Your First Application</span>
-            </button>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
             {setActiveTab && (
-              <button onClick={() => setActiveTab('internships')} className="btn btn-secondary">
-                <Search size={16} />
-                <span>Explore 180 Curated Internships</span>
-              </button>
+              <>
+                <button onClick={() => setActiveTab('matching')} className="btn btn-primary">
+                  <Sparkles size={16} />
+                  <span>Go to AI Matching</span>
+                </button>
+                <button onClick={() => setActiveTab('internships')} className="btn btn-secondary">
+                  <Search size={16} />
+                  <span>Explore 180 Curated Internships</span>
+                </button>
+              </>
             )}
           </div>
         </div>
