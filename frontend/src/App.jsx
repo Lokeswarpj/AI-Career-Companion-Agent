@@ -98,7 +98,7 @@ function getInitialTab() {
 }
 
 export default function App() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
   const [activeTab, setActiveTab] = useState(getInitialTab);
   const [selectedInternshipId, setSelectedInternshipId] = useState(null);
   const [authMode, setAuthMode] = useState('login');
@@ -168,6 +168,8 @@ export default function App() {
 
   // When auth state changes (login, logout, session restoration)
   useEffect(() => {
+    if (loading) return; // Wait until initial session restoration (/auth/me) completes!
+
     if (isAuthenticated) {
       // Trigger background prefetching so all tab switches are instant (0ms)
       prefetchSecondaryPages();
@@ -194,7 +196,11 @@ export default function App() {
       }
       setVisitedTabs(new Set(['landing', 'auth']));
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, loading]);
+
+  if (loading) {
+    return <PageLoader />;
+  }
 
   // Safety fallback for unauthenticated users accessing protected tabs
   const currentTab = !isAuthenticated && !['landing', 'auth'].includes(activeTab) 

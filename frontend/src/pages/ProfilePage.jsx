@@ -70,6 +70,10 @@ export default function ProfilePage() {
       }
     }
     loadProfile();
+
+    const handleUpdate = () => loadProfile();
+    window.addEventListener('careerpulse_data_updated', handleUpdate);
+    return () => window.removeEventListener('careerpulse_data_updated', handleUpdate);
   }, []);
 
   const handleSave = async (e) => {

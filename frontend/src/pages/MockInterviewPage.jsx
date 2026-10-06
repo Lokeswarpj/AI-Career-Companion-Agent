@@ -87,6 +87,10 @@ export default function MockInterviewPage({ selectedInternshipId, setSelectedInt
     checkResumeStatus();
     loadInternships();
     setupSpeechRecognition();
+
+    const handleUpdate = () => checkResumeStatus();
+    window.addEventListener('careerpulse_data_updated', handleUpdate);
+    return () => window.removeEventListener('careerpulse_data_updated', handleUpdate);
   }, []);
 
   async function checkResumeStatus() {

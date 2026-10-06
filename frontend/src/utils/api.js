@@ -98,26 +98,25 @@ export const api = {
   // Profile
   getProfile: (opts) => apiRequest('/profile', opts),
   updateProfile: async (payload) => {
-    clearApiCache('/profile');
-    clearApiCache('/matching');
-    clearApiCache('/skill-gap');
-    return apiRequest('/profile', { method: 'PUT', body: JSON.stringify(payload) });
+    clearApiCache();
+    const res = await apiRequest('/profile', { method: 'PUT', body: JSON.stringify(payload) });
+    if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('careerpulse_data_updated'));
+    return res;
   },
 
   // Resume
   uploadResume: async (formData) => {
-    clearApiCache('/resume');
-    clearApiCache('/matching');
-    clearApiCache('/skill-gap');
-    clearApiCache('/profile');
-    return apiRequest('/resume/upload', { method: 'POST', body: formData });
+    clearApiCache();
+    const res = await apiRequest('/resume/upload', { method: 'POST', body: formData });
+    if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('careerpulse_data_updated'));
+    return res;
   },
   getLatestResume: (opts) => apiRequest('/resume/latest', opts),
   deleteResume: async (id) => {
-    clearApiCache('/resume');
-    clearApiCache('/matching');
-    clearApiCache('/skill-gap');
-    return apiRequest(`/resume/${id}`, { method: 'DELETE' });
+    clearApiCache();
+    const res = await apiRequest(`/resume/${id}`, { method: 'DELETE' });
+    if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('careerpulse_data_updated'));
+    return res;
   },
 
   // Internships

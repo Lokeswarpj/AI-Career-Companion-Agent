@@ -74,6 +74,10 @@ export default function ApplicationCustomizerPage({ selectedInternshipId, setSel
       }
     }
     initPage();
+
+    const handleUpdate = () => initPage();
+    window.addEventListener('careerpulse_data_updated', handleUpdate);
+    return () => window.removeEventListener('careerpulse_data_updated', handleUpdate);
   }, []);
 
   useEffect(() => {

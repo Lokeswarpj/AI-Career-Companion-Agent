@@ -67,7 +67,12 @@ export default function SkillGapPage({ selectedInternshipId, setSelectedInternsh
     }
 
     initPage();
-    return () => { isMounted = false; };
+    const handleUpdate = () => initPage();
+    window.addEventListener('careerpulse_data_updated', handleUpdate);
+    return () => { 
+      isMounted = false; 
+      window.removeEventListener('careerpulse_data_updated', handleUpdate);
+    };
   }, []);
 
   async function loadGapAnalysis(id) {

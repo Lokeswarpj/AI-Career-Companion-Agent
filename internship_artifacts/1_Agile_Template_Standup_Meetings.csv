@@ -5,3 +5,5 @@
 "Day 9 (Sprint 2)","Sprint 2","Developed multi-factor matching formula (Skills, Role, Location).","Ran benchmark test suite across 6 multi-domain student profiles.","None"
 "Day 12 (Sprint 3)","Sprint 3","Built 5-category Skill Gap Agent and learning roadmaps.","Developed Resume & Cover Letter Customizer with anti-hallucination check.","None"
 "Day 15 (Sprint 3)","Sprint 3","Built Mock Interview Coach with 3D scoring and Web Speech API.","Implemented Conversational Career Assistant orchestrator and 3D UI.","None"
+"Day 18 (Sprint 4)","Sprint 4","Designed 10-stage application lifecycle schema and API endpoints.","Built Kanban drag-and-drop UI with urgency deadline indicators.","None"
+"Day 21 (Sprint 4)","Sprint 4","Added Application Analytics summary metrics and table filter controls.","Executed Milestone 4 test suite (21 assertions) and end-to-end pipeline validation (105 assertions total).","None"

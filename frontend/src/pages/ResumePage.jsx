@@ -34,6 +34,9 @@ export default function ResumePage({ setActiveTab, setSelectedInternshipId }) {
 
   useEffect(() => {
     loadLatestResume();
+    const handleUpdate = () => loadLatestResume();
+    window.addEventListener('careerpulse_data_updated', handleUpdate);
+    return () => window.removeEventListener('careerpulse_data_updated', handleUpdate);
   }, []);
 
   async function loadLatestResume() {

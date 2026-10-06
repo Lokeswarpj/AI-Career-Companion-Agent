@@ -38,6 +38,9 @@ export default function MatchingPage({ setActiveTab, setSelectedInternshipId }) 
 
   useEffect(() => {
     loadRecommendations();
+    const handleUpdate = () => loadRecommendations();
+    window.addEventListener('careerpulse_data_updated', handleUpdate);
+    return () => window.removeEventListener('careerpulse_data_updated', handleUpdate);
   }, [previewAnyway]);
 
   async function loadRecommendations() {

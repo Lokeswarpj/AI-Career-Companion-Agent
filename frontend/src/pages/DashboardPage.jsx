@@ -52,6 +52,10 @@ export default function DashboardPage({ setActiveTab, setSelectedInternshipId })
       }
     }
     loadDashboardData();
+
+    const handleUpdate = () => loadDashboardData();
+    window.addEventListener('careerpulse_data_updated', handleUpdate);
+    return () => window.removeEventListener('careerpulse_data_updated', handleUpdate);
   }, []);
 
   if (loading) {
