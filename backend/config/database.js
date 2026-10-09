@@ -33,10 +33,6 @@ if (databaseUrl && !databaseUrl.includes('placeholder')) {
     });
 
     console.log('[Database] 🌐 Supabase / PostgreSQL Cloud Pool Configured.');
-    initPgTables().catch(err => {
-      pgInitError = err.message;
-      console.warn('[Database] Initial PG table bootstrap notice:', err.message);
-    });
   } catch (pgErr) {
     pgInitError = pgErr.message;
     console.warn('[Database] PostgreSQL pool configuration notice:', pgErr.message);
