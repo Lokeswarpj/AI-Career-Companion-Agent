@@ -21,6 +21,9 @@ execSync('npm run build --prefix frontend', {
 // Ensure root dist exists and is synchronized
 if (fs.existsSync(frontendDist)) {
   console.log(`[Build] 📦 Synchronizing ${frontendDist} -> ${rootDist}...`);
+  if (fs.existsSync(rootDist)) {
+    fs.rmSync(rootDist, { recursive: true, force: true });
+  }
   fs.mkdirSync(rootDist, { recursive: true });
   fs.cpSync(frontendDist, rootDist, { recursive: true });
   console.log('[Build] ✅ Root dist synchronized successfully with index.html verified:', fs.existsSync(path.join(rootDist, 'index.html')));
