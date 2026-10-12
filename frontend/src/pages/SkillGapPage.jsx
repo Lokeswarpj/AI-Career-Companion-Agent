@@ -40,20 +40,33 @@ export default function SkillGapPage({ selectedInternshipId, setSelectedInternsh
       try {
         setLoading(true);
         setError(null);
-        const res = await api.getInternships();
-        if (!isMounted) return;
-        const list = res?.internships || [];
-        setInternshipsList(list);
 
-        const targetId = selectedInternshipId || list[0]?.id;
-        if (targetId) {
-          if (!selectedInternshipId && setSelectedInternshipId) {
-            setSelectedInternshipId(targetId);
-          }
-          const analysis = await api.analyzeSkillGap(targetId);
-          if (isMounted) {
-            setGapData(analysis);
-            setError(null);
+        if (selectedInternshipId) {
+          // Parallelize internship catalog fetch and skill gap analysis concurrently
+          const [internshipsRes, analysisRes] = await Promise.all([
+            api.getInternships(),
+            api.analyzeSkillGap(selectedInternshipId)
+          ]);
+          if (!isMounted) return;
+          const list = internshipsRes?.internships || [];
+          setInternshipsList(list);
+          setGapData(analysisRes);
+        } else {
+          const res = await api.getInternships();
+          if (!isMounted) return;
+          const list = res?.internships || [];
+          setInternshipsList(list);
+
+          const targetId = list[0]?.id;
+          if (targetId) {
+            if (setSelectedInternshipId) {
+              setSelectedInternshipId(targetId);
+            }
+            const analysis = await api.analyzeSkillGap(targetId);
+            if (isMounted) {
+              setGapData(analysis);
+              setError(null);
+            }
           }
         }
       } catch (err) {

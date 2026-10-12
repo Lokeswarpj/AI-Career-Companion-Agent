@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
-const GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+const GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-flash-latest'];
 
 /**
  * Executes a Gemini prompt with JSON output support, fallback models, and offline mock resilience.
@@ -44,7 +44,7 @@ export async function callGemini(prompt, systemInstruction = '', jsonFormat = tr
       }
 
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 12000);
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
 
       const response = await fetch(url, {
         method: 'POST',

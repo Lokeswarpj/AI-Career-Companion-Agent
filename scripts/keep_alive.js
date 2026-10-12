@@ -1,6 +1,6 @@
 import https from 'https';
 
-const PING_URL = 'https://careerpulse-ai-9q9s.onrender.com/api';
+const PING_URL = 'https://careerpulse-ai-9q9s.onrender.com/api/health';
 const INTERVAL_MS = 10 * 60 * 1000; // 10 minutes
 
 function pingServer() {

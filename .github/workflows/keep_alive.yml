@@ -10,13 +10,15 @@ jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping CareerPulse AI API Gateway
+      - name: Ping CareerPulse AI API Gateway & DB Health Check
         run: |
-          echo "Sending keep-alive ping to Render service..."
-          STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" https://careerpulse-ai-9q9s.onrender.com/api)
-          echo "Render Service API response status: $STATUS_CODE"
+          echo "Sending keep-alive heartbeat to Render service & database pool..."
+          STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 60 https://careerpulse-ai-9q9s.onrender.com/api/health)
+          echo "Render Service API /api/health status code: $STATUS_CODE"
           if [ "$STATUS_CODE" -eq 200 ]; then
-            echo "✅ Service is WARM and healthy."
+            echo "✅ Service and database pool are WARM and healthy."
           else
-            echo "⚠️ Warning: Received HTTP $STATUS_CODE"
+            echo "⚠️ Warning: Received HTTP $STATUS_CODE. Performing fallback heartbeat to root API..."
+            FALLBACK_CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 https://careerpulse-ai-9q9s.onrender.com/api)
+            echo "Fallback status code: $FALLBACK_CODE"
           fi
