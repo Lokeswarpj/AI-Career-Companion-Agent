@@ -216,7 +216,7 @@ export default function InterviewHistoryPage({ setActiveTab }) {
                   Overall Score: {selectedSessionTranscript.session.overall_score}/100
                 </div>
                 <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                  Technical: {selectedSessionTranscript.session.technical_score}% | Communication: {selectedSessionTranscript.session.communication_score}%
+                  Technical: {selectedSessionTranscript.session.technical_score}% | Communication: {selectedSessionTranscript.session.communication_score}% | Relevance: {selectedSessionTranscript.session.relevance_score ?? 0}%
                 </div>
               </div>
               <span className="badge badge-emerald">Verified</span>

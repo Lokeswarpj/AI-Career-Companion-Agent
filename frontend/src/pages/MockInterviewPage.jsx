@@ -887,7 +887,7 @@ export default function MockInterviewPage({ selectedInternshipId, setSelectedInt
 
                 <div style={{ textAlign: 'center', padding: '0.5rem 0.85rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-card)' }}>
                   <div style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--accent-amber)' }}>
-                    {currentEvaluation.relevanceScore || 85}%
+                    {currentEvaluation.relevanceScore ?? 0}%
                   </div>
                   <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>Relevance</div>
                 </div>
