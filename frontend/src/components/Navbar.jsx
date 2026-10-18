@@ -175,26 +175,13 @@ export default function Navbar({
               <span>← Back to Overview</span>
             </button>
           ) : isAuthenticated ? (
-            <>
-              {/* Inside App Workspace: Status Badge */}
-              <div className="desktop-nav" style={{ display: 'flex', alignItems: 'center' }}>
-                <span className="badge badge-indigo" style={{ fontSize: '0.75rem', padding: '0.3rem 0.75rem' }}>
-                  <Sparkles size={13} />
-                  <span>Multi-Agent Active</span>
-                </span>
-              </div>
-
-              {/* Switch Account Button */}
-              <button 
-                className="btn btn-secondary btn-sm"
-                onClick={handleOpenLogin}
-                title="Log in with another account"
-                style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', padding: '0.4rem 0.7rem' }}
-              >
-                <LogIn size={14} color="var(--accent-primary)" />
-                <span>Switch Account</span>
-              </button>
-            </>
+            /* Inside App Workspace: Status Badge */
+            <div className="desktop-nav" style={{ display: 'flex', alignItems: 'center' }}>
+              <span className="badge badge-indigo" style={{ fontSize: '0.75rem', padding: '0.3rem 0.75rem' }}>
+                <Sparkles size={13} />
+                <span>Multi-Agent Active</span>
+              </span>
+            </div>
           ) : null}
         </div>
 
