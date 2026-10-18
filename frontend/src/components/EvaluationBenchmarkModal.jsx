@@ -17,7 +17,7 @@ const BENCHMARK_PROFILES = [
     name: "Aanya Sharma",
     track: "Artificial Intelligence & ML",
     icon: Cpu,
-    color: "#818cf8",
+    color: "#4f46e5",
     degree: "B.Tech in Artificial Intelligence & Data Science",
     university: "Institute of Technology",
     graduation_year: 2026,
@@ -35,7 +35,7 @@ const BENCHMARK_PROFILES = [
     name: "Rohan Mehta",
     track: "Full-Stack Web Engineering",
     icon: Code2,
-    color: "#22d3ee",
+    color: "#0284c7",
     degree: "B.Tech Computer Science and Engineering",
     university: "National Institute of Technology",
     graduation_year: 2026,
@@ -53,7 +53,7 @@ const BENCHMARK_PROFILES = [
     name: "Priya Patel",
     track: "Cloud & DevOps Engineering",
     icon: Cloud,
-    color: "#34d399",
+    color: "#059669",
     degree: "B.E. Information Technology",
     university: "Pune Engineering College",
     graduation_year: 2026,
@@ -71,7 +71,7 @@ const BENCHMARK_PROFILES = [
     name: "Aditya Verma",
     track: "Data Engineering & Analytics",
     icon: BarChart3,
-    color: "#fbbf24",
+    color: "#d97706",
     degree: "B.Sc Statistics & Data Analytics",
     university: "Chennai University",
     graduation_year: 2026,
@@ -89,7 +89,7 @@ const BENCHMARK_PROFILES = [
     name: "Sneha Nair",
     track: "Cybersecurity & InfoSec",
     icon: ShieldCheck,
-    color: "#f43f5e",
+    color: "#e11d48",
     degree: "B.Tech in Cybersecurity and Digital Forensics",
     university: "Kerala Technical University",
     graduation_year: 2026,
@@ -177,11 +177,11 @@ export default function EvaluationBenchmarkModal({ isOpen, onClose }) {
           </div>
           <div>
             <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>Knowledge Base</div>
-            <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#22d3ee' }}>180 Postings</div>
+            <div style={{ fontSize: '1.2rem', fontWeight: 900, color: 'var(--accent-cyan)' }}>180 Postings</div>
           </div>
           <div>
             <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>Indexed Vectors</div>
-            <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#fbbf24' }}>720 Chunks</div>
+            <div style={{ fontSize: '1.2rem', fontWeight: 900, color: 'var(--accent-amber)' }}>720 Chunks</div>
           </div>
         </div>
 
@@ -289,7 +289,7 @@ export default function EvaluationBenchmarkModal({ isOpen, onClose }) {
                       </div>
 
                       <div style={{ textAlign: 'right' }}>
-                        <div style={{ fontSize: '1.2rem', fontWeight: 900, color: score >= 80 ? '#10b981' : '#6366f1' }}>
+                        <div style={{ fontSize: '1.2rem', fontWeight: 900, color: score >= 80 ? 'var(--accent-emerald)' : 'var(--accent-primary)' }}>
                           {score}%
                         </div>
                         <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Fit Score</div>

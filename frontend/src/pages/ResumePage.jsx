@@ -156,9 +156,9 @@ EXPERIENCE & LEADERSHIP
             onClick={handleSampleResume}
             disabled={analyzing}
             className="btn btn-secondary"
-            style={{ gap: '0.5rem', border: '1px solid rgba(99, 102, 241, 0.4)' }}
+            style={{ gap: '0.5rem', border: '1px solid rgba(79, 70, 229, 0.4)' }}
           >
-            <Sparkles size={16} color="#818cf8" />
+            <Sparkles size={16} color="var(--accent-primary)" />
             <span>📄 Test with Sample Tech Resume</span>
           </button>
         </div>
@@ -200,12 +200,12 @@ EXPERIENCE & LEADERSHIP
           width: '3.5rem',
           height: '3.5rem',
           borderRadius: '50%',
-          background: 'rgba(99, 102, 241, 0.15)',
+          background: 'rgba(79, 70, 229, 0.12)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           margin: '0 auto 1rem auto',
-          color: '#818cf8'
+          color: 'var(--accent-primary)'
         }}>
           {analyzing ? <RefreshCw size={28} style={{ animation: 'spin 1.5s linear infinite' }} /> : <Upload size={28} />}
         </div>
@@ -229,7 +229,7 @@ EXPERIENCE & LEADERSHIP
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <FileText size={20} color="#818cf8" />
+                  <FileText size={20} color="var(--accent-primary)" />
                   <h3 style={{ fontSize: '1.25rem', fontWeight: 700 }}>{resumeData.filename}</h3>
                   <span className="badge badge-emerald">Screened by Gemini AI</span>
                 </div>
@@ -271,8 +271,8 @@ EXPERIENCE & LEADERSHIP
 
             <div className="grid-3">
               {/* Programming */}
-              <div style={{ padding: '1rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)' }}>
-                <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#818cf8', marginBottom: '0.6rem' }}>
+              <div style={{ padding: '1rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-card)' }}>
+                <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--accent-primary)', marginBottom: '0.6rem' }}>
                   CORE PROGRAMMING
                 </div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
@@ -284,8 +284,8 @@ EXPERIENCE & LEADERSHIP
               </div>
 
               {/* Web Development */}
-              <div style={{ padding: '1rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)' }}>
-                <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#22d3ee', marginBottom: '0.6rem' }}>
+              <div style={{ padding: '1rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-card)' }}>
+                <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--accent-cyan)', marginBottom: '0.6rem' }}>
                   WEB & APIS
                 </div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
@@ -297,8 +297,8 @@ EXPERIENCE & LEADERSHIP
               </div>
 
               {/* AI & Data */}
-              <div style={{ padding: '1rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)' }}>
-                <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#34d399', marginBottom: '0.6rem' }}>
+              <div style={{ padding: '1rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-card)' }}>
+                <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--accent-emerald)', marginBottom: '0.6rem' }}>
                   DATA & AI
                 </div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
@@ -310,8 +310,8 @@ EXPERIENCE & LEADERSHIP
               </div>
 
               {/* Cloud & DevOps */}
-              <div style={{ padding: '1rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)' }}>
-                <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#fbbf24', marginBottom: '0.6rem' }}>
+              <div style={{ padding: '1rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-card)' }}>
+                <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--accent-amber)', marginBottom: '0.6rem' }}>
                   CLOUD & DEVOPS
                 </div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
@@ -323,8 +323,8 @@ EXPERIENCE & LEADERSHIP
               </div>
 
               {/* Developer Tools */}
-              <div style={{ padding: '1rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)' }}>
-                <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#c084fc', marginBottom: '0.6rem' }}>
+              <div style={{ padding: '1rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-card)' }}>
+                <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--accent-secondary)', marginBottom: '0.6rem' }}>
                   TOOLS & PLATFORMS
                 </div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
@@ -336,8 +336,8 @@ EXPERIENCE & LEADERSHIP
               </div>
 
               {/* Soft Skills */}
-              <div style={{ padding: '1rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)' }}>
-                <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#fb7185', marginBottom: '0.6rem' }}>
+              <div style={{ padding: '1rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-card)' }}>
+                <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--accent-rose)', marginBottom: '0.6rem' }}>
                   SOFT COMPETENCIES
                 </div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
@@ -354,15 +354,15 @@ EXPERIENCE & LEADERSHIP
           <div className="grid-2">
             
             {/* Strengths */}
-            <div className="glass-panel" style={{ padding: '2rem', borderTop: '4px solid #10b981' }}>
-              <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#34d399' }}>
+            <div className="glass-panel" style={{ padding: '2rem', borderTop: '4px solid var(--accent-emerald)' }}>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--accent-emerald)' }}>
                 <CheckCircle size={20} />
                 <span>Identified Strengths</span>
               </h3>
               <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', listStyle: 'none' }}>
                 {(resumeData.strengths_json || []).map((str, idx) => (
-                  <li key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.6rem', fontSize: '0.9rem' }}>
-                    <span style={{ color: '#10b981', fontWeight: 800 }}>•</span>
+                  <li key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.6rem', fontSize: '0.9rem', color: 'var(--text-primary)' }}>
+                    <span style={{ color: 'var(--accent-emerald)', fontWeight: 800 }}>•</span>
                     <span>{str}</span>
                   </li>
                 ))}
@@ -370,8 +370,8 @@ EXPERIENCE & LEADERSHIP
             </div>
 
             {/* Areas for Improvement */}
-            <div className="glass-panel" style={{ padding: '2rem', borderTop: '4px solid #f59e0b' }}>
-              <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#fbbf24' }}>
+            <div className="glass-panel" style={{ padding: '2rem', borderTop: '4px solid var(--accent-amber)' }}>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--accent-amber)' }}>
                 <AlertTriangle size={20} />
                 <span>Potential Gaps & Weaknesses</span>
               </h3>

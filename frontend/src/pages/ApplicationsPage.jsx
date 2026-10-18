@@ -37,23 +37,23 @@ import {
 } from 'lucide-react';
 
 const STAGE_CONFIG = {
-  'Saved': { color: '#94a3b8', bg: 'rgba(148, 163, 184, 0.12)', border: 'rgba(148, 163, 184, 0.3)' },
-  'Planning to Apply': { color: '#38bdf8', bg: 'rgba(56, 189, 248, 0.12)', border: 'rgba(56, 189, 248, 0.3)' },
-  'Applied': { color: '#818cf8', bg: 'rgba(129, 140, 248, 0.12)', border: 'rgba(129, 140, 248, 0.3)' },
-  'Under Review': { color: '#c084fc', bg: 'rgba(192, 132, 252, 0.12)', border: 'rgba(192, 132, 252, 0.3)' },
-  'Shortlisted': { color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.12)', border: 'rgba(245, 158, 11, 0.3)' },
-  'Interview Scheduled': { color: '#06b6d4', bg: 'rgba(6, 182, 212, 0.15)', border: 'rgba(6, 182, 212, 0.4)' },
-  'Interview Completed': { color: '#2dd4bf', bg: 'rgba(45, 212, 191, 0.12)', border: 'rgba(45, 212, 191, 0.3)' },
-  'Offer Received': { color: '#10b981', bg: 'rgba(16, 185, 129, 0.15)', border: 'rgba(16, 185, 129, 0.4)' },
-  'Rejected': { color: '#f43f5e', bg: 'rgba(244, 63, 94, 0.12)', border: 'rgba(244, 63, 94, 0.3)' },
-  'Withdrawn': { color: '#64748b', bg: 'rgba(100, 116, 139, 0.12)', border: 'rgba(100, 116, 139, 0.3)' }
+  'Saved': { color: '#475569', bg: 'rgba(71, 85, 105, 0.1)', border: 'rgba(71, 85, 105, 0.25)' },
+  'Planning to Apply': { color: '#0284c7', bg: 'rgba(2, 132, 199, 0.1)', border: 'rgba(2, 132, 199, 0.25)' },
+  'Applied': { color: '#4f46e5', bg: 'rgba(79, 70, 229, 0.1)', border: 'rgba(79, 70, 229, 0.25)' },
+  'Under Review': { color: '#7c3aed', bg: 'rgba(124, 58, 237, 0.1)', border: 'rgba(124, 58, 237, 0.25)' },
+  'Shortlisted': { color: '#d97706', bg: 'rgba(217, 119, 6, 0.1)', border: 'rgba(217, 119, 6, 0.25)' },
+  'Interview Scheduled': { color: '#0891b2', bg: 'rgba(8, 145, 178, 0.12)', border: 'rgba(8, 145, 178, 0.25)' },
+  'Interview Completed': { color: '#0d9488', bg: 'rgba(13, 148, 136, 0.1)', border: 'rgba(13, 148, 136, 0.25)' },
+  'Offer Received': { color: '#059669', bg: 'rgba(5, 150, 105, 0.12)', border: 'rgba(5, 150, 105, 0.25)' },
+  'Rejected': { color: '#e11d48', bg: 'rgba(225, 29, 72, 0.1)', border: 'rgba(225, 29, 72, 0.25)' },
+  'Withdrawn': { color: '#475569', bg: 'rgba(71, 85, 105, 0.1)', border: 'rgba(71, 85, 105, 0.25)' }
 };
 
 const KANBAN_COLUMNS = [
-  { id: 'saved_planning', title: 'Saved & Planning', stages: ['Saved', 'Planning to Apply'], icon: BookmarkIcon, accent: '#38bdf8' },
-  { id: 'applied_review', title: 'Applied & In Review', stages: ['Applied', 'Under Review'], icon: SendIcon, accent: '#818cf8' },
-  { id: 'interviewing', title: 'Interviews & Next Steps', stages: ['Shortlisted', 'Interview Scheduled', 'Interview Completed'], icon: Mic, accent: '#06b6d4' },
-  { id: 'decisions', title: 'Offers & Final Decisions', stages: ['Offer Received', 'Rejected', 'Withdrawn'], icon: Award, accent: '#10b981' }
+  { id: 'saved_planning', title: 'Saved & Planning', stages: ['Saved', 'Planning to Apply'], icon: BookmarkIcon, accent: '#0284c7' },
+  { id: 'applied_review', title: 'Applied & In Review', stages: ['Applied', 'Under Review'], icon: SendIcon, accent: '#4f46e5' },
+  { id: 'interviewing', title: 'Interviews & Next Steps', stages: ['Shortlisted', 'Interview Scheduled', 'Interview Completed'], icon: Mic, accent: '#0891b2' },
+  { id: 'decisions', title: 'Offers & Final Decisions', stages: ['Offer Received', 'Rejected', 'Withdrawn'], icon: Award, accent: '#059669' }
 ];
 
 function BookmarkIcon(props) {
@@ -611,7 +611,7 @@ export default function ApplicationsPage({ setActiveTab, setSelectedInternshipId
                       textAlign: 'center',
                       color: 'var(--text-muted)',
                       fontSize: '0.82rem',
-                      border: '1px dashed rgba(255, 255, 255, 0.1)',
+                      border: '1px dashed var(--border-subtle)',
                       borderRadius: 'var(--radius-md)'
                     }}>
                       No applications in this phase
@@ -1119,7 +1119,7 @@ function KanbanCard({ app, onEdit, onDelete, onStatusChange, setActiveTab, setSe
 
       {/* Quick Status Shift & Multi-Agent Prep Buttons */}
       <div 
-        style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '0.65rem', borderTop: '1px solid rgba(255, 255, 255, 0.06)' }}
+        style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '0.65rem', borderTop: '1px solid var(--border-subtle)' }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Quick Launch Mock Prep for this Role */}

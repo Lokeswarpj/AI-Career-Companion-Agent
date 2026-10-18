@@ -122,7 +122,7 @@ export default function MatchingPage({ setActiveTab, setSelectedInternshipId }) 
         border: '1px solid rgba(99, 102, 241, 0.25)'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
-          <Sliders size={18} color="#818cf8" />
+          <Sliders size={18} color="var(--accent-primary)" />
           <h3 style={{ fontSize: '1rem', fontWeight: 700 }}>Multi-Factor Weighted Compatibility Model</h3>
         </div>
 
@@ -132,24 +132,24 @@ export default function MatchingPage({ setActiveTab, setSelectedInternshipId }) 
           gap: '1rem',
           fontSize: '0.85rem'
         }}>
-          <div style={{ padding: '0.75rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-sm)' }}>
-            <span style={{ color: '#818cf8', fontWeight: 700 }}>40% Skill Match</span>
+          <div style={{ padding: '0.75rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
+            <span style={{ color: 'var(--accent-primary)', fontWeight: 700 }}>40% Skill Match</span>
             <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Required tech & preferred bonus</div>
           </div>
-          <div style={{ padding: '0.75rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-sm)' }}>
-            <span style={{ color: '#22d3ee', fontWeight: 700 }}>25% Projects & Experience</span>
+          <div style={{ padding: '0.75rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
+            <span style={{ color: 'var(--accent-cyan)', fontWeight: 700 }}>25% Projects & Experience</span>
             <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Responsibilities & project alignment</div>
           </div>
-          <div style={{ padding: '0.75rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-sm)' }}>
-            <span style={{ color: '#34d399', fontWeight: 700 }}>15% Target Role Fit</span>
+          <div style={{ padding: '0.75rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
+            <span style={{ color: 'var(--accent-emerald)', fontWeight: 700 }}>15% Target Role Fit</span>
             <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Domain & title keyword overlap</div>
           </div>
-          <div style={{ padding: '0.75rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-sm)' }}>
-            <span style={{ color: '#fbbf24', fontWeight: 700 }}>10% Academic Fit</span>
+          <div style={{ padding: '0.75rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
+            <span style={{ color: 'var(--accent-amber)', fontWeight: 700 }}>10% Academic Fit</span>
             <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Degree & graduation timeline</div>
           </div>
-          <div style={{ padding: '0.75rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-sm)' }}>
-            <span style={{ color: '#f43f5e', fontWeight: 700 }}>10% Work Mode / Location</span>
+          <div style={{ padding: '0.75rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
+            <span style={{ color: 'var(--accent-rose)', fontWeight: 700 }}>10% Work Mode / Location</span>
             <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Remote/Hybrid preference</div>
           </div>
         </div>
@@ -163,7 +163,7 @@ export default function MatchingPage({ setActiveTab, setSelectedInternshipId }) 
             height: '64px',
             borderRadius: '50%',
             background: 'rgba(99, 102, 241, 0.12)',
-            color: '#818cf8',
+            color: 'var(--accent-primary)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -421,32 +421,32 @@ export default function MatchingPage({ setActiveTab, setSelectedInternshipId }) 
                   }}>
                     <div>
                       <div style={{ color: 'var(--text-muted)', marginBottom: '0.2rem' }}>Skills (40%): <strong>{breakdown.skillScore || 0}%</strong></div>
-                      <div style={{ height: '4px', background: 'var(--bg-tertiary)', borderRadius: '2px', overflow: 'hidden' }}>
-                        <div style={{ height: '100%', width: `${breakdown.skillScore || 0}%`, background: '#818cf8' }} />
+                      <div style={{ height: '4px', background: 'var(--border-subtle)', borderRadius: '2px', overflow: 'hidden' }}>
+                        <div style={{ height: '100%', width: `${breakdown.skillScore || 0}%`, background: 'var(--accent-primary)' }} />
                       </div>
                     </div>
                     <div>
                       <div style={{ color: 'var(--text-muted)', marginBottom: '0.2rem' }}>Projects (25%): <strong>{breakdown.experienceAndProjectsScore || 80}%</strong></div>
-                      <div style={{ height: '4px', background: 'var(--bg-tertiary)', borderRadius: '2px', overflow: 'hidden' }}>
-                        <div style={{ height: '100%', width: `${breakdown.experienceAndProjectsScore || 80}%`, background: '#22d3ee' }} />
+                      <div style={{ height: '4px', background: 'var(--border-subtle)', borderRadius: '2px', overflow: 'hidden' }}>
+                        <div style={{ height: '100%', width: `${breakdown.experienceAndProjectsScore || 80}%`, background: 'var(--accent-cyan)' }} />
                       </div>
                     </div>
                     <div>
                       <div style={{ color: 'var(--text-muted)', marginBottom: '0.2rem' }}>Role Fit (15%): <strong>{breakdown.roleScore || 100}%</strong></div>
-                      <div style={{ height: '4px', background: 'var(--bg-tertiary)', borderRadius: '2px', overflow: 'hidden' }}>
-                        <div style={{ height: '100%', width: `${breakdown.roleScore || 100}%`, background: '#34d399' }} />
+                      <div style={{ height: '4px', background: 'var(--border-subtle)', borderRadius: '2px', overflow: 'hidden' }}>
+                        <div style={{ height: '100%', width: `${breakdown.roleScore || 100}%`, background: 'var(--accent-emerald)' }} />
                       </div>
                     </div>
                     <div>
                       <div style={{ color: 'var(--text-muted)', marginBottom: '0.2rem' }}>Academic (10%): <strong>{breakdown.educationScore || 90}%</strong></div>
-                      <div style={{ height: '4px', background: 'var(--bg-tertiary)', borderRadius: '2px', overflow: 'hidden' }}>
-                        <div style={{ height: '100%', width: `${breakdown.educationScore || 90}%`, background: '#fbbf24' }} />
+                      <div style={{ height: '4px', background: 'var(--border-subtle)', borderRadius: '2px', overflow: 'hidden' }}>
+                        <div style={{ height: '100%', width: `${breakdown.educationScore || 90}%`, background: 'var(--accent-amber)' }} />
                       </div>
                     </div>
                     <div>
                       <div style={{ color: 'var(--text-muted)', marginBottom: '0.2rem' }}>Location (10%): <strong>{breakdown.locationScore || 100}%</strong></div>
-                      <div style={{ height: '4px', background: 'var(--bg-tertiary)', borderRadius: '2px', overflow: 'hidden' }}>
-                        <div style={{ height: '100%', width: `${breakdown.locationScore || 100}%`, background: '#f43f5e' }} />
+                      <div style={{ height: '4px', background: 'var(--border-subtle)', borderRadius: '2px', overflow: 'hidden' }}>
+                        <div style={{ height: '100%', width: `${breakdown.locationScore || 100}%`, background: 'var(--accent-rose)' }} />
                       </div>
                     </div>
                   </div>
@@ -479,7 +479,7 @@ export default function MatchingPage({ setActiveTab, setSelectedInternshipId }) 
                       </div>
 
                       <div>
-                        <span style={{ fontWeight: 700, color: '#22d3ee' }}>Recommended Action Roadmap: </span>
+                        <span style={{ fontWeight: 700, color: 'var(--accent-cyan)' }}>Recommended Action Roadmap: </span>
                         <span style={{ color: 'var(--text-secondary)' }}>{explanation.recommendedPreparation}</span>
                       </div>
                     </div>
@@ -513,7 +513,7 @@ export default function MatchingPage({ setActiveTab, setSelectedInternshipId }) 
                         className="btn btn-secondary btn-sm"
                         style={{ gap: '0.4rem' }}
                       >
-                        <Sparkles size={14} color="#818cf8" />
+                        <Sparkles size={14} color="var(--accent-primary)" />
                         <span>Deep Diagnostics</span>
                       </button>
 

@@ -236,8 +236,8 @@ export default function App() {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', position: 'relative' }}>
       
-      {/* 3D Interactive Spatial Background */}
-      <Background3D />
+      {/* 3D Interactive Spatial Background (Active on landing and auth pages) */}
+      {(!isAuthenticated || currentTab === 'landing' || currentTab === 'auth') && <Background3D />}
 
       {/* 1. Left Sidebar: Navigation Options + Bottom-Aligned Account */}
       {showAuthenticatedNav && (

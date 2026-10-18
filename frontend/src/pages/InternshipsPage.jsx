@@ -196,7 +196,7 @@ export default function InternshipsPage({ setActiveTab, setSelectedInternshipId 
           </div>
           <div>
             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>Vector Index</div>
-            <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#22d3ee' }}>{stats.totalIndexedChunks} Chunks</div>
+            <div style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--accent-cyan)' }}>{stats.totalIndexedChunks} Chunks</div>
           </div>
           <div>
             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>Tech Tracks</div>
@@ -204,7 +204,7 @@ export default function InternshipsPage({ setActiveTab, setSelectedInternshipId 
           </div>
           <div>
             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>Embedding Engine</div>
-            <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#fbbf24', marginTop: '0.35rem' }}>Dual Gemini / High-Dim Vector</div>
+            <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--accent-amber)', marginTop: '0.35rem' }}>Dual Gemini / High-Dim Vector</div>
           </div>
         </div>
       )}
@@ -540,34 +540,34 @@ export default function InternshipsPage({ setActiveTab, setSelectedInternshipId 
                 gap: '0.75rem'
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 800, fontSize: '0.95rem', color: '#10b981' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 800, fontSize: '0.95rem', color: 'var(--accent-emerald)' }}>
                     <Target size={16} />
                     <span>Your Resume Match Compatibility</span>
                   </div>
                   <div style={{
                     fontSize: '1.25rem',
                     fontWeight: 900,
-                    color: resumeMatchMap[selectedItem.id].matchScore >= 80 ? '#10b981' : '#6366f1'
+                    color: resumeMatchMap[selectedItem.id].matchScore >= 80 ? 'var(--accent-emerald)' : 'var(--accent-primary)'
                   }}>
                     {resumeMatchMap[selectedItem.id].matchScore}% Match
                   </div>
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: '0.5rem', fontSize: '0.78rem' }}>
-                  <div style={{ padding: '0.4rem 0.6rem', background: 'var(--bg-secondary)', borderRadius: '4px' }}>
-                    Skills: <strong style={{ color: '#818cf8' }}>{resumeMatchMap[selectedItem.id].breakdown?.skillScore || 0}%</strong>
+                  <div style={{ padding: '0.4rem 0.6rem', background: 'var(--bg-secondary)', borderRadius: '4px', border: '1px solid var(--border-subtle)' }}>
+                    Skills: <strong style={{ color: 'var(--accent-primary)' }}>{resumeMatchMap[selectedItem.id].breakdown?.skillScore || 0}%</strong>
                   </div>
-                  <div style={{ padding: '0.4rem 0.6rem', background: 'var(--bg-secondary)', borderRadius: '4px' }}>
-                    Projects: <strong style={{ color: '#22d3ee' }}>{resumeMatchMap[selectedItem.id].breakdown?.experienceAndProjectsScore || 0}%</strong>
+                  <div style={{ padding: '0.4rem 0.6rem', background: 'var(--bg-secondary)', borderRadius: '4px', border: '1px solid var(--border-subtle)' }}>
+                    Projects: <strong style={{ color: 'var(--accent-cyan)' }}>{resumeMatchMap[selectedItem.id].breakdown?.experienceAndProjectsScore || 0}%</strong>
                   </div>
-                  <div style={{ padding: '0.4rem 0.6rem', background: 'var(--bg-secondary)', borderRadius: '4px' }}>
-                    Role Fit: <strong style={{ color: '#34d399' }}>{resumeMatchMap[selectedItem.id].breakdown?.roleScore || 0}%</strong>
+                  <div style={{ padding: '0.4rem 0.6rem', background: 'var(--bg-secondary)', borderRadius: '4px', border: '1px solid var(--border-subtle)' }}>
+                    Role Fit: <strong style={{ color: 'var(--accent-emerald)' }}>{resumeMatchMap[selectedItem.id].breakdown?.roleScore || 0}%</strong>
                   </div>
-                  <div style={{ padding: '0.4rem 0.6rem', background: 'var(--bg-secondary)', borderRadius: '4px' }}>
-                    Academic: <strong style={{ color: '#fbbf24' }}>{resumeMatchMap[selectedItem.id].breakdown?.educationScore || 0}%</strong>
+                  <div style={{ padding: '0.4rem 0.6rem', background: 'var(--bg-secondary)', borderRadius: '4px', border: '1px solid var(--border-subtle)' }}>
+                    Academic: <strong style={{ color: 'var(--accent-amber)' }}>{resumeMatchMap[selectedItem.id].breakdown?.educationScore || 0}%</strong>
                   </div>
-                  <div style={{ padding: '0.4rem 0.6rem', background: 'var(--bg-secondary)', borderRadius: '4px' }}>
-                    Work Mode: <strong style={{ color: '#f43f5e' }}>{resumeMatchMap[selectedItem.id].breakdown?.locationScore || 0}%</strong>
+                  <div style={{ padding: '0.4rem 0.6rem', background: 'var(--bg-secondary)', borderRadius: '4px', border: '1px solid var(--border-subtle)' }}>
+                    Work Mode: <strong style={{ color: 'var(--accent-rose)' }}>{resumeMatchMap[selectedItem.id].breakdown?.locationScore || 0}%</strong>
                   </div>
                 </div>
 
@@ -650,7 +650,7 @@ export default function InternshipsPage({ setActiveTab, setSelectedInternshipId 
                     setSelectedItem(null);
                   }}
                   className="btn btn-outline btn-sm"
-                  style={{ gap: '0.4rem', borderColor: '#06b6d4', color: '#06b6d4' }}
+                  style={{ gap: '0.4rem', borderColor: 'var(--accent-cyan)', color: 'var(--accent-cyan)' }}
                 >
                   <ClipboardList size={14} />
                   <span>Track Application</span>
@@ -666,7 +666,7 @@ export default function InternshipsPage({ setActiveTab, setSelectedInternshipId 
                 className="btn btn-secondary btn-sm"
                 style={{ gap: '0.4rem' }}
               >
-                <Sparkles size={14} color="#818cf8" />
+                <Sparkles size={14} color="var(--accent-primary)" />
                 <span>Evaluate Skill Gaps</span>
               </button>
             </div>

@@ -481,16 +481,16 @@ export default function MockInterviewPage({ selectedInternshipId, setSelectedInt
                       style={{
                         padding: '0.55rem 0.35rem',
                         borderRadius: 'var(--radius-md)',
-                        border: questionCount === preset.count ? '1px solid var(--accent-primary)' : '1px solid var(--border-card)',
-                        background: questionCount === preset.count ? 'rgba(99, 102, 241, 0.22)' : 'var(--bg-secondary)',
-                        color: questionCount === preset.count ? '#ffffff' : 'var(--text-secondary)',
+                        border: questionCount === preset.count ? '2px solid var(--accent-primary)' : '1px solid var(--border-card)',
+                        background: questionCount === preset.count ? 'rgba(79, 70, 229, 0.12)' : 'var(--bg-secondary)',
+                        color: questionCount === preset.count ? 'var(--accent-primary)' : 'var(--text-primary)',
                         cursor: 'pointer',
                         textAlign: 'center',
                         transition: 'all 0.18s ease'
                       }}
                     >
-                      <div style={{ fontSize: '0.82rem', fontWeight: 700 }}>{preset.label}</div>
-                      <div style={{ fontSize: '0.68rem', color: questionCount === preset.count ? '#c7d2fe' : 'var(--text-muted)' }}>{preset.desc}</div>
+                      <div style={{ fontSize: '0.84rem', fontWeight: 800, color: questionCount === preset.count ? 'var(--accent-primary)' : 'var(--text-primary)' }}>{preset.label}</div>
+                      <div style={{ fontSize: '0.7rem', color: questionCount === preset.count ? 'var(--accent-primary)' : 'var(--text-muted)' }}>{preset.desc}</div>
                     </button>
                   ))}
                 </div>
@@ -528,18 +528,19 @@ export default function MockInterviewPage({ selectedInternshipId, setSelectedInt
                       type="button"
                       onClick={() => setFocusMode(mode.id)}
                       style={{
-                        padding: '0.6rem 0.75rem',
+                        padding: '0.65rem 0.85rem',
                         borderRadius: 'var(--radius-md)',
-                        border: focusMode === mode.id ? '1px solid var(--accent-cyan)' : '1px solid var(--border-card)',
-                        background: focusMode === mode.id ? 'rgba(6, 182, 212, 0.15)' : 'var(--bg-secondary)',
-                        color: focusMode === mode.id ? '#ffffff' : 'var(--text-secondary)',
+                        border: focusMode === mode.id ? '2px solid var(--accent-primary)' : '1px solid var(--border-card)',
+                        background: focusMode === mode.id ? 'rgba(79, 70, 229, 0.08)' : 'var(--bg-secondary)',
+                        color: focusMode === mode.id ? 'var(--accent-primary)' : 'var(--text-primary)',
                         textAlign: 'left',
                         cursor: 'pointer',
-                        transition: 'all 0.18s ease'
+                        transition: 'all 0.18s ease',
+                        boxShadow: focusMode === mode.id ? '0 2px 8px rgba(79, 70, 229, 0.12)' : 'none'
                       }}
                     >
-                      <div style={{ fontSize: '0.82rem', fontWeight: 700 }}>{mode.label}</div>
-                      <div style={{ fontSize: '0.68rem', color: focusMode === mode.id ? '#a5f3fc' : 'var(--text-muted)', marginTop: '0.1rem' }}>{mode.hint}</div>
+                      <div style={{ fontSize: '0.86rem', fontWeight: 700, color: focusMode === mode.id ? 'var(--accent-primary)' : 'var(--text-primary)' }}>{mode.label}</div>
+                      <div style={{ fontSize: '0.74rem', color: focusMode === mode.id ? 'var(--text-secondary)' : 'var(--text-muted)', marginTop: '0.2rem' }}>{mode.hint}</div>
                     </button>
                   ))}
                 </div>
@@ -558,11 +559,11 @@ export default function MockInterviewPage({ selectedInternshipId, setSelectedInt
                         flex: 1,
                         padding: '0.55rem',
                         borderRadius: 'var(--radius-md)',
-                        border: '1px solid var(--border-card)',
+                        border: difficulty === lvl ? '2px solid var(--accent-primary)' : '1px solid var(--border-card)',
                         background: difficulty === lvl ? 'var(--accent-primary)' : 'var(--bg-secondary)',
-                        color: difficulty === lvl ? '#ffffff' : 'var(--text-secondary)',
-                        fontWeight: 600,
-                        fontSize: '0.82rem',
+                        color: difficulty === lvl ? '#ffffff' : 'var(--text-primary)',
+                        fontWeight: 700,
+                        fontSize: '0.84rem',
                         cursor: 'pointer',
                         transition: 'all 0.2s'
                       }}
@@ -686,7 +687,7 @@ export default function MockInterviewPage({ selectedInternshipId, setSelectedInt
             </div>
 
             {/* Dynamic Progress Bar */}
-            <div style={{ width: '100%', height: '6px', background: 'rgba(255,255,255,0.08)', borderRadius: '9999px', overflow: 'hidden' }}>
+            <div style={{ width: '100%', height: '6px', background: 'var(--border-subtle)', borderRadius: '9999px', overflow: 'hidden' }}>
               <div style={{
                 height: '100%',
                 width: `${((currentQuestion.questionNumber || 1) / totalQuestions) * 100}%`,
@@ -872,22 +873,22 @@ export default function MockInterviewPage({ selectedInternshipId, setSelectedInt
 
             {/* Key points mentioned vs missed */}
             <div className="grid-2" style={{ marginBottom: '1.35rem', gap: '1rem' }}>
-              <div style={{ padding: '0.95rem', background: 'rgba(16, 185, 129, 0.06)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
-                <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#34d399', marginBottom: '0.4rem' }}>
+              <div style={{ padding: '0.95rem', background: 'rgba(16, 185, 129, 0.08)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(16, 185, 129, 0.25)' }}>
+                <div style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--accent-emerald)', marginBottom: '0.4rem' }}>
                   ✓ Concepts You Articulated Well:
                 </div>
-                <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.35rem', fontSize: '0.82rem', padding: 0, margin: 0 }}>
+                <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.35rem', fontSize: '0.84rem', padding: 0, margin: 0, color: 'var(--text-primary)' }}>
                   {(currentEvaluation.keyPointsMentioned || []).map((kp, idx) => (
                     <li key={idx}>• {kp}</li>
                   ))}
                 </ul>
               </div>
 
-              <div style={{ padding: '0.95rem', background: 'rgba(244, 63, 94, 0.06)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(244, 63, 94, 0.2)' }}>
-                <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#fb7185', marginBottom: '0.4rem' }}>
+              <div style={{ padding: '0.95rem', background: 'rgba(244, 63, 94, 0.08)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(244, 63, 94, 0.25)' }}>
+                <div style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--accent-rose)', marginBottom: '0.4rem' }}>
                   ✕ Missed Points to Cover Next Time:
                 </div>
-                <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.35rem', fontSize: '0.82rem', padding: 0, margin: 0 }}>
+                <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.35rem', fontSize: '0.84rem', padding: 0, margin: 0, color: 'var(--text-primary)' }}>
                   {(currentEvaluation.missedPoints || []).map((mp, idx) => (
                     <li key={idx}>• {mp}</li>
                   ))}
@@ -996,11 +997,11 @@ export default function MockInterviewPage({ selectedInternshipId, setSelectedInt
           <div className="grid-2" style={{ gap: '1.25rem' }}>
             
             <div className="glass-panel" style={{ padding: '1.75rem' }}>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.85rem', color: '#34d399', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.85rem', color: 'var(--accent-emerald)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <CheckCircle2 size={18} />
                 <span>Observed Key Strengths</span>
               </h3>
-              <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', listStyle: 'none', fontSize: '0.88rem', padding: 0, margin: 0 }}>
+              <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', listStyle: 'none', fontSize: '0.88rem', padding: 0, margin: 0, color: 'var(--text-primary)' }}>
                 {(finalScorecard.strengths || []).map((s, idx) => (
                   <li key={idx}>• {s}</li>
                 ))}
@@ -1008,11 +1009,11 @@ export default function MockInterviewPage({ selectedInternshipId, setSelectedInt
             </div>
 
             <div className="glass-panel" style={{ padding: '1.75rem' }}>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.85rem', color: '#fbbf24', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.85rem', color: 'var(--accent-amber)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <TrendingUp size={18} />
                 <span>Targeted Action Recommendations</span>
               </h3>
-              <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', listStyle: 'none', fontSize: '0.88rem', padding: 0, margin: 0 }}>
+              <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', listStyle: 'none', fontSize: '0.88rem', padding: 0, margin: 0, color: 'var(--text-primary)' }}>
                 {(finalScorecard.recommendations || []).map((r, idx) => (
                   <li key={idx}>• {r}</li>
                 ))}

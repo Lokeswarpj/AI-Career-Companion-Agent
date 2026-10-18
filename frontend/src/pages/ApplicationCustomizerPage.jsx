@@ -221,7 +221,7 @@ export default function ApplicationCustomizerPage({ selectedInternshipId, setSel
             height: '64px',
             borderRadius: '50%',
             background: 'rgba(99, 102, 241, 0.12)',
-            color: '#818cf8',
+            color: 'var(--accent-primary)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -812,7 +812,7 @@ export default function ApplicationCustomizerPage({ selectedInternshipId, setSel
                             notify.success('Downloading PDF resume...');
                           }}
                           className="btn btn-secondary"
-                          style={{ fontSize: '0.78rem', padding: '0.35rem 0.6rem', gap: '0.25rem', color: '#f87171' }}
+                          style={{ fontSize: '0.78rem', padding: '0.35rem 0.6rem', gap: '0.25rem', color: 'var(--accent-rose)' }}
                           title="Download Resume as PDF"
                         >
                           <Download size={13} /> Resume PDF
@@ -827,7 +827,7 @@ export default function ApplicationCustomizerPage({ selectedInternshipId, setSel
                             notify.success('Downloaded Word document (.docx)!');
                           }}
                           className="btn btn-secondary"
-                          style={{ fontSize: '0.78rem', padding: '0.35rem 0.6rem', gap: '0.25rem', color: '#60a5fa' }}
+                          style={{ fontSize: '0.78rem', padding: '0.35rem 0.6rem', gap: '0.25rem', color: 'var(--accent-primary)' }}
                           title="Download Resume as Word (.docx)"
                         >
                           <Download size={13} /> Resume DOCX
@@ -871,7 +871,7 @@ export default function ApplicationCustomizerPage({ selectedInternshipId, setSel
                         }
                       }}
                       className="btn btn-outline"
-                      style={{ fontSize: '0.78rem', padding: '0.35rem 0.6rem', gap: '0.25rem', borderColor: '#06b6d4', color: '#06b6d4' }}
+                      style={{ fontSize: '0.78rem', padding: '0.35rem 0.6rem', gap: '0.25rem', borderColor: 'var(--accent-cyan)', color: 'var(--accent-cyan)' }}
                       title="Track this customized application in Application Tracker"
                     >
                       <Sparkles size={13} /> Track Application

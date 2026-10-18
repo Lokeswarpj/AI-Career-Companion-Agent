@@ -93,7 +93,7 @@ export default function DashboardPage({ setActiveTab, setSelectedInternshipId })
         <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1.5rem', position: 'relative', zIndex: 1 }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.4rem' }}>
-              <span style={{ fontSize: '0.85rem', color: '#818cf8', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              <span style={{ fontSize: '0.85rem', color: 'var(--accent-primary)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 Student Command Center
               </span>
               <span className="badge badge-emerald">Active Session</span>
@@ -122,7 +122,7 @@ export default function DashboardPage({ setActiveTab, setSelectedInternshipId })
               className="btn btn-secondary"
               style={{ gap: '0.5rem' }}
             >
-              <Mic size={18} color="#06b6d4" />
+              <Mic size={18} color="var(--accent-cyan)" />
               <span>Start AI Mock Interview</span>
             </button>
             <button 
@@ -130,7 +130,7 @@ export default function DashboardPage({ setActiveTab, setSelectedInternshipId })
               className="btn btn-secondary"
               style={{ gap: '0.5rem' }}
             >
-              <Sparkles size={18} color="#818cf8" />
+              <Sparkles size={18} color="var(--accent-primary)" />
               <span>View Ranked Matches</span>
             </button>
           </div>
@@ -144,11 +144,11 @@ export default function DashboardPage({ setActiveTab, setSelectedInternshipId })
         <div className="glass-panel" style={{ padding: '1.5rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
             <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>CAREER READINESS</span>
-            <div style={{ padding: '0.5rem', borderRadius: '8px', background: 'rgba(99, 102, 241, 0.15)', color: '#818cf8' }}>
+            <div style={{ padding: '0.5rem', borderRadius: '8px', background: 'rgba(79, 70, 229, 0.12)', color: 'var(--accent-primary)' }}>
               <TrendingUp size={18} />
             </div>
           </div>
-          <div style={{ fontSize: '2.2rem', fontWeight: 800, color: readinessPercent >= 80 ? '#10b981' : '#818cf8' }}>
+          <div style={{ fontSize: '2.2rem', fontWeight: 800, color: readinessPercent >= 80 ? 'var(--accent-emerald)' : 'var(--accent-primary)' }}>
             {readinessPercent}%
           </div>
           <div style={{ width: '100%', height: '6px', background: 'var(--bg-tertiary)', borderRadius: '3px', marginTop: '0.75rem', overflow: 'hidden' }}>
@@ -163,7 +163,7 @@ export default function DashboardPage({ setActiveTab, setSelectedInternshipId })
         <div className="glass-panel" style={{ padding: '1.5rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
             <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>TOP MATCHES</span>
-            <div style={{ padding: '0.5rem', borderRadius: '8px', background: 'rgba(6, 182, 212, 0.15)', color: '#22d3ee' }}>
+            <div style={{ padding: '0.5rem', borderRadius: '8px', background: 'rgba(2, 132, 199, 0.12)', color: 'var(--accent-cyan)' }}>
               <Target size={18} />
             </div>
           </div>
@@ -186,7 +186,7 @@ export default function DashboardPage({ setActiveTab, setSelectedInternshipId })
         <div className="glass-panel" style={{ padding: '1.5rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
             <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>RESUME INTELLIGENCE</span>
-            <div style={{ padding: '0.5rem', borderRadius: '8px', background: 'rgba(16, 185, 129, 0.15)', color: '#34d399' }}>
+            <div style={{ padding: '0.5rem', borderRadius: '8px', background: 'rgba(5, 150, 105, 0.12)', color: 'var(--accent-emerald)' }}>
               <FileText size={18} />
             </div>
           </div>
@@ -209,7 +209,7 @@ export default function DashboardPage({ setActiveTab, setSelectedInternshipId })
         <div className="glass-panel" style={{ padding: '1.5rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
             <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>MOCK INTERVIEW AVG</span>
-            <div style={{ padding: '0.5rem', borderRadius: '8px', background: 'rgba(168, 85, 247, 0.15)', color: '#c084fc' }}>
+            <div style={{ padding: '0.5rem', borderRadius: '8px', background: 'rgba(124, 58, 237, 0.12)', color: 'var(--accent-secondary)' }}>
               <Award size={18} />
             </div>
           </div>
@@ -237,7 +237,7 @@ export default function DashboardPage({ setActiveTab, setSelectedInternshipId })
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
             <h3 style={{ fontSize: '1.3rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Sparkles size={20} color="#818cf8" />
+              <Sparkles size={20} color="var(--accent-primary)" />
               <span>Top Recommended for You</span>
             </h3>
             <button 
@@ -315,7 +315,7 @@ export default function DashboardPage({ setActiveTab, setSelectedInternshipId })
                       textAlign: 'right'
                     }}>
                       <div style={{
-                        color: rec.matchScore >= 80 ? '#34d399' : '#818cf8',
+                        color: rec.matchScore >= 80 ? 'var(--accent-emerald)' : 'var(--accent-primary)',
                         fontWeight: 900,
                         fontSize: '1.05rem',
                         lineHeight: 1

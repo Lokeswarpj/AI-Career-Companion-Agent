@@ -190,7 +190,7 @@ export default function SkillGapPage({ selectedInternshipId, setSelectedInternsh
                 height: '64px',
                 borderRadius: '50%',
                 background: 'rgba(99, 102, 241, 0.12)',
-                color: '#818cf8',
+                color: 'var(--accent-primary)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -522,7 +522,7 @@ export default function SkillGapPage({ selectedInternshipId, setSelectedInternsh
                   <Briefcase size={16} /> Practical Experience Analysis
                 </h4>
                 {gaps?.experienceGaps?.length === 0 ? (
-                  <div style={{ padding: '1rem', background: 'rgba(16, 185, 129, 0.05)', borderRadius: 'var(--radius-sm)', color: '#10b981', fontSize: '0.9rem' }}>
+                  <div style={{ padding: '1rem', background: 'rgba(16, 185, 129, 0.08)', borderRadius: 'var(--radius-sm)', color: 'var(--accent-emerald)', fontSize: '0.9rem', border: '1px solid rgba(16, 185, 129, 0.25)', fontWeight: 600 }}>
                     ✓ Candidate project portfolio satisfies practical requirements for {internship.title}.
                   </div>
                 ) : (
@@ -538,7 +538,7 @@ export default function SkillGapPage({ selectedInternshipId, setSelectedInternsh
                   <GraduationCap size={16} /> Academic & Degree Prerequisites
                 </h4>
                 {gaps?.qualificationGaps?.length === 0 ? (
-                  <div style={{ padding: '1rem', background: 'rgba(16, 185, 129, 0.05)', borderRadius: 'var(--radius-sm)', color: '#10b981', fontSize: '0.9rem' }}>
+                  <div style={{ padding: '1rem', background: 'rgba(16, 185, 129, 0.08)', borderRadius: 'var(--radius-sm)', color: 'var(--accent-emerald)', fontSize: '0.9rem', border: '1px solid rgba(16, 185, 129, 0.25)', fontWeight: 600 }}>
                     ✓ Candidate degree and academic timeline align with {internship.company}'s requirements.
                   </div>
                 ) : (
@@ -557,7 +557,7 @@ export default function SkillGapPage({ selectedInternshipId, setSelectedInternsh
           {/* Actionable Learning Roadmap Cards */}
           <div className="glass-panel" style={{ padding: '2rem' }}>
             <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <TrendingUp size={20} color="#34d399" />
+              <TrendingUp size={20} color="var(--accent-emerald)" />
               <span>Personalized Actionable Learning Roadmap</span>
             </h3>
 

@@ -135,7 +135,7 @@ export default function ProfilePage() {
         {/* Section 1: Academic Background */}
         <div className="glass-panel" style={{ padding: '2rem' }}>
           <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <GraduationCap size={20} color="#818cf8" />
+            <GraduationCap size={20} color="var(--accent-primary)" />
             <span>Academic Background & Location</span>
           </h3>
 
@@ -211,7 +211,7 @@ export default function ProfilePage() {
         {/* Section 2: Target Roles & Technical Skills */}
         <div className="glass-panel" style={{ padding: '2rem' }}>
           <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Code size={20} color="#22d3ee" />
+            <Code size={20} color="var(--accent-cyan)" />
             <span>Target Roles & Verified Skills</span>
           </h3>
 
@@ -314,7 +314,7 @@ export default function ProfilePage() {
         <div className="glass-panel" style={{ padding: '2rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
             <h3 style={{ fontSize: '1.2rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <FolderGit2 size={20} color="#34d399" />
+              <FolderGit2 size={20} color="var(--accent-emerald)" />
               <span>Key Projects & Experience</span>
             </h3>
             <button
