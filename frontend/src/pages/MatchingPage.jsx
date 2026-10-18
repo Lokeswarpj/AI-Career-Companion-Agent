@@ -107,9 +107,9 @@ export default function MatchingPage({ setActiveTab, setSelectedInternshipId }) 
         <button
           onClick={() => setIsBenchmarkModalOpen(true)}
           className="btn btn-primary"
-          style={{ gap: '0.5rem', background: 'linear-gradient(135deg, #6366f1 0%, #06b6d4 100%)', boxShadow: '0 4px 14px rgba(99, 102, 241, 0.35)' }}
+          style={{ gap: '0.5rem', background: '#171e19', color: '#ffe17c', border: '1px solid transparent', boxShadow: '0 4px 14px rgba(23, 30, 25, 0.25)', fontWeight: 800 }}
         >
-          <FlaskConical size={18} />
+          <FlaskConical size={18} color="#ffe17c" />
           <span>Launch Evaluation Benchmark Lab</span>
         </button>
       </div>
@@ -118,12 +118,13 @@ export default function MatchingPage({ setActiveTab, setSelectedInternshipId }) 
       <div className="glass-panel" style={{
         padding: '1.5rem',
         marginBottom: '2.5rem',
-        background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(6, 182, 212, 0.06) 100%)',
-        border: '1px solid rgba(99, 102, 241, 0.25)'
+        background: '#ffffff',
+        border: '1px solid rgba(23, 30, 25, 0.12)',
+        boxShadow: '0 2px 10px rgba(23, 30, 25, 0.04)'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
-          <Sliders size={18} color="var(--accent-primary)" />
-          <h3 style={{ fontSize: '1rem', fontWeight: 700 }}>Multi-Factor Weighted Compatibility Model</h3>
+          <Sliders size={18} color="#171e19" />
+          <h3 style={{ fontSize: '1rem', fontWeight: 800, color: '#171e19' }}>Multi-Factor Weighted Compatibility Model</h3>
         </div>
 
         <div style={{
@@ -133,23 +134,23 @@ export default function MatchingPage({ setActiveTab, setSelectedInternshipId }) 
           fontSize: '0.85rem'
         }}>
           <div style={{ padding: '0.75rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
-            <span style={{ color: 'var(--accent-primary)', fontWeight: 700 }}>40% Skill Match</span>
+            <span style={{ color: '#171e19', fontWeight: 800 }}>40% Skill Match</span>
             <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Required tech & preferred bonus</div>
           </div>
           <div style={{ padding: '0.75rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
-            <span style={{ color: 'var(--accent-cyan)', fontWeight: 700 }}>25% Projects & Experience</span>
+            <span style={{ color: '#171e19', fontWeight: 800 }}>25% Projects & Experience</span>
             <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Responsibilities & project alignment</div>
           </div>
           <div style={{ padding: '0.75rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
-            <span style={{ color: 'var(--accent-emerald)', fontWeight: 700 }}>15% Target Role Fit</span>
+            <span style={{ color: '#171e19', fontWeight: 800 }}>15% Target Role Fit</span>
             <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Domain & title keyword overlap</div>
           </div>
           <div style={{ padding: '0.75rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
-            <span style={{ color: 'var(--accent-amber)', fontWeight: 700 }}>10% Academic Fit</span>
+            <span style={{ color: '#171e19', fontWeight: 800 }}>10% Academic Fit</span>
             <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Degree & graduation timeline</div>
           </div>
           <div style={{ padding: '0.75rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
-            <span style={{ color: 'var(--accent-rose)', fontWeight: 700 }}>10% Work Mode / Location</span>
+            <span style={{ color: '#171e19', fontWeight: 800 }}>10% Work Mode / Location</span>
             <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Remote/Hybrid preference</div>
           </div>
         </div>
@@ -162,7 +163,7 @@ export default function MatchingPage({ setActiveTab, setSelectedInternshipId }) 
             width: '64px',
             height: '64px',
             borderRadius: '50%',
-            background: 'rgba(99, 102, 241, 0.12)',
+            background: 'rgba(23, 30, 25, 0.06)',
             color: 'var(--accent-primary)',
             display: 'flex',
             alignItems: 'center',
@@ -217,8 +218,8 @@ export default function MatchingPage({ setActiveTab, setSelectedInternshipId }) 
           {/* Optional preview banner if user chose to preview */}
           {!hasProfileSkills && previewAnyway && (
             <div style={{
-              background: 'rgba(99, 102, 241, 0.08)',
-              border: '1px solid rgba(99, 102, 241, 0.25)',
+              background: 'rgba(255, 225, 124, 0.25)',
+              border: '1px solid rgba(23, 30, 25, 0.18)',
               borderRadius: 'var(--radius-md)',
               padding: '1rem 1.25rem',
               marginBottom: '1.5rem',
@@ -253,7 +254,7 @@ export default function MatchingPage({ setActiveTab, setSelectedInternshipId }) 
               const breakdown = rec.breakdown || {};
               const explanation = rec.explanation || {};
               const isExpanded = expandedId === item.id;
-              const scoreColor = score >= 80 ? '#10b981' : score >= 65 ? '#6366f1' : '#f59e0b';
+              const scoreColor = score >= 80 ? '#107e54' : score >= 65 ? '#171e19' : '#d97706';
 
               return (
                 <div 
@@ -274,14 +275,15 @@ export default function MatchingPage({ setActiveTab, setSelectedInternshipId }) 
                         width: '38px',
                         height: '38px',
                         borderRadius: '50%',
-                        background: index === 0 ? 'linear-gradient(135deg, #f59e0b, #d97706)' : 'var(--bg-tertiary)',
-                        color: index === 0 ? '#000000' : 'var(--text-primary)',
+                        background: index === 0 ? '#ffe17c' : 'rgba(23, 30, 25, 0.08)',
+                        color: '#171e19',
                         fontWeight: 800,
                         fontSize: '1rem',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        flexShrink: 0
+                        flexShrink: 0,
+                        border: '1px solid rgba(23, 30, 25, 0.15)'
                       }}>
                         #{index + 1}
                       </div>
@@ -334,30 +336,30 @@ export default function MatchingPage({ setActiveTab, setSelectedInternshipId }) 
                         className="btn btn-primary"
                         style={{
                           padding: '0.75rem 1.25rem',
-                          fontWeight: 700,
+                          fontWeight: 800,
                           display: 'inline-flex',
                           alignItems: 'center',
                           gap: '0.5rem',
                           borderRadius: 'var(--radius-md)',
                           background: appliedMap[item.id]
-                            ? 'rgba(16, 185, 129, 0.15)'
-                            : 'linear-gradient(135deg, #6366f1 0%, #06b6d4 100%)',
-                          color: appliedMap[item.id] ? '#10b981' : '#ffffff',
-                          border: appliedMap[item.id] ? '1px solid rgba(16, 185, 129, 0.4)' : 'none',
+                            ? 'rgba(16, 126, 84, 0.12)'
+                            : '#171e19',
+                          color: appliedMap[item.id] ? '#107e54' : '#ffe17c',
+                          border: appliedMap[item.id] ? '1px solid rgba(16, 126, 84, 0.3)' : '1px solid transparent',
                           cursor: appliedMap[item.id] ? 'default' : 'pointer',
-                          boxShadow: appliedMap[item.id] ? 'none' : '0 4px 12px rgba(99, 102, 241, 0.25)'
+                          boxShadow: appliedMap[item.id] ? 'none' : '0 4px 12px rgba(23, 30, 25, 0.2)'
                         }}
                       >
                         {appliedMap[item.id] ? (
                           <>
-                            <CheckCircle2 size={18} color="#10b981" />
+                            <CheckCircle2 size={18} color="#107e54" />
                             <span>Applied</span>
                           </>
                         ) : applyingId === item.id ? (
                           <span>Applying...</span>
                         ) : (
                           <>
-                            <Send size={18} />
+                            <Send size={18} color="#ffe17c" />
                             <span>Apply</span>
                           </>
                         )}
@@ -416,7 +418,7 @@ export default function MatchingPage({ setActiveTab, setSelectedInternshipId }) 
                     gap: '0.75rem',
                     fontSize: '0.75rem',
                     padding: '0.75rem 1rem',
-                    background: 'rgba(99, 102, 241, 0.04)',
+                    background: 'rgba(23, 30, 25, 0.04)',
                     borderRadius: 'var(--radius-sm)'
                   }}>
                     <div>

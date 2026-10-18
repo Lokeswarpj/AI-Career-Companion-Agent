@@ -39,7 +39,7 @@ import {
 const STAGE_CONFIG = {
   'Saved': { color: '#475569', bg: 'rgba(71, 85, 105, 0.1)', border: 'rgba(71, 85, 105, 0.25)' },
   'Planning to Apply': { color: '#0284c7', bg: 'rgba(2, 132, 199, 0.1)', border: 'rgba(2, 132, 199, 0.25)' },
-  'Applied': { color: '#4f46e5', bg: 'rgba(79, 70, 229, 0.1)', border: 'rgba(79, 70, 229, 0.25)' },
+  'Applied': { color: '#171e19', bg: 'rgba(23, 30, 25, 0.08)', border: 'rgba(23, 30, 25, 0.2)' },
   'Under Review': { color: '#7c3aed', bg: 'rgba(124, 58, 237, 0.1)', border: 'rgba(124, 58, 237, 0.25)' },
   'Shortlisted': { color: '#d97706', bg: 'rgba(217, 119, 6, 0.1)', border: 'rgba(217, 119, 6, 0.25)' },
   'Interview Scheduled': { color: '#0891b2', bg: 'rgba(8, 145, 178, 0.12)', border: 'rgba(8, 145, 178, 0.25)' },
@@ -51,7 +51,7 @@ const STAGE_CONFIG = {
 
 const KANBAN_COLUMNS = [
   { id: 'saved_planning', title: 'Saved & Planning', stages: ['Saved', 'Planning to Apply'], icon: BookmarkIcon, accent: '#0284c7' },
-  { id: 'applied_review', title: 'Applied & In Review', stages: ['Applied', 'Under Review'], icon: SendIcon, accent: '#4f46e5' },
+  { id: 'applied_review', title: 'Applied & In Review', stages: ['Applied', 'Under Review'], icon: SendIcon, accent: '#171e19' },
   { id: 'interviewing', title: 'Interviews & Next Steps', stages: ['Shortlisted', 'Interview Scheduled', 'Interview Completed'], icon: Mic, accent: '#0891b2' },
   { id: 'decisions', title: 'Offers & Final Decisions', stages: ['Offer Received', 'Rejected', 'Withdrawn'], icon: Award, accent: '#059669' }
 ];

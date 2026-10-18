@@ -34,31 +34,32 @@ export default function LandingPage({ onGetStarted, onDemoLogin }) {
           transform: 'translateX(-50%)',
           width: '600px',
           height: '350px',
-          background: 'radial-gradient(ellipse at center, rgba(79, 70, 229, 0.12) 0%, rgba(2, 132, 199, 0.06) 50%, rgba(255, 255, 255, 0) 80%)',
+          background: 'radial-gradient(ellipse at center, rgba(255, 225, 124, 0.22) 0%, rgba(183, 198, 194, 0.12) 50%, rgba(255, 255, 255, 0) 80%)',
           pointerEvents: 'none',
           zIndex: 0
         }} />
 
         <div className="container" style={{ position: 'relative', zIndex: 1 }}>
           
-          {/* Badge */}
+          {/* Badge with yellow dot indicator */}
           <div style={{ display: 'inline-flex', marginBottom: '1.5rem' }}>
-            <div className="badge badge-indigo" style={{ padding: '0.45rem 1rem', fontSize: '0.85rem' }}>
-              <Sparkles size={16} />
+            <div className="badge badge-indigo" style={{ padding: '0.45rem 1.1rem', fontSize: '0.82rem', background: '#ffffff', border: '1px solid rgba(23, 30, 25, 0.15)', color: '#171e19' }}>
+              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ffe17c', display: 'inline-block', marginRight: '6px' }} />
               <span>Next-Gen Career Intelligence for Students</span>
             </div>
           </div>
 
-          {/* Main Headline */}
+          {/* Main Headline with 15-deg rotated golden yellow highlights */}
           <h1 style={{
             fontSize: 'clamp(2.4rem, 5vw, 4.2rem)',
             fontWeight: 900,
             letterSpacing: '-0.03em',
             lineHeight: 1.15,
             maxWidth: '960px',
-            margin: '0 auto 1.5rem auto'
+            margin: '0 auto 1.5rem auto',
+            color: '#171e19'
           }}>
-            Bridge the Gap Between Your <span className="gradient-text">Skills</span> and Your Dream <span className="gradient-text-emerald">Internship</span>
+            Bridge the Gap Between Your <span className="highlight-rotate">Skills</span> and Your Dream <span className="highlight-rotate">Internship</span>
           </h1>
 
           {/* Subtitle */}
@@ -84,36 +85,45 @@ export default function LandingPage({ onGetStarted, onDemoLogin }) {
             <button 
               onClick={onGetStarted}
               className="btn btn-primary btn-lg"
-              style={{ gap: '0.75rem', fontSize: '1.1rem', padding: '0.85rem 2rem' }}
+              style={{ 
+                gap: '0.75rem', 
+                fontSize: '1.1rem', 
+                padding: '0.9rem 2.25rem',
+                background: '#ffe17c',
+                color: '#171e19',
+                fontWeight: 800,
+                border: '1px solid rgba(23, 30, 25, 0.15)',
+                boxShadow: '0 4px 18px rgba(255, 225, 124, 0.45)'
+              }}
             >
               <span>Explore Platform & Get Started</span>
-              <ArrowRight size={20} />
+              <ArrowRight size={20} color="#171e19" />
             </button>
           </div>
 
           {/* Key Metric Highlights */}
           <div className="grid-4" style={{ marginTop: '2rem' }}>
-            <div className="glass-panel" style={{ padding: '1.5rem', textAlign: 'center' }}>
-              <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--accent-primary)' }}>100%</div>
-              <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
+            <div className="glass-panel" style={{ padding: '1.5rem', textAlign: 'center', border: '1px solid rgba(23, 30, 25, 0.12)', background: '#ffffff' }}>
+              <div style={{ fontSize: '2rem', fontWeight: 900, color: '#171e19' }}>100%</div>
+              <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', marginTop: '0.25rem', fontWeight: 600 }}>
                 Deterministic Scoring Transparency
               </div>
             </div>
-            <div className="glass-panel" style={{ padding: '1.5rem', textAlign: 'center' }}>
-              <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--accent-cyan)' }}>6-Category</div>
-              <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
+            <div className="glass-panel" style={{ padding: '1.5rem', textAlign: 'center', border: '1px solid rgba(23, 30, 25, 0.12)', background: '#ffffff' }}>
+              <div style={{ fontSize: '2rem', fontWeight: 900, color: '#171e19' }}>6-Category</div>
+              <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', marginTop: '0.25rem', fontWeight: 600 }}>
                 AI Resume Skill Extraction
               </div>
             </div>
-            <div className="glass-panel" style={{ padding: '1.5rem', textAlign: 'center' }}>
-              <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--accent-emerald)' }}>3-Tier</div>
-              <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
+            <div className="glass-panel" style={{ padding: '1.5rem', textAlign: 'center', border: '1px solid rgba(23, 30, 25, 0.12)', background: '#ffffff' }}>
+              <div style={{ fontSize: '2rem', fontWeight: 900, color: '#171e19' }}>3-Tier</div>
+              <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', marginTop: '0.25rem', fontWeight: 600 }}>
                 Skill Gap Prioritization Matrix
               </div>
             </div>
-            <div className="glass-panel" style={{ padding: '1.5rem', textAlign: 'center' }}>
-              <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--accent-secondary)' }}>Real-Time</div>
-              <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
+            <div className="glass-panel" style={{ padding: '1.5rem', textAlign: 'center', border: '1px solid rgba(23, 30, 25, 0.12)', background: '#ffffff' }}>
+              <div style={{ fontSize: '2rem', fontWeight: 900, color: '#171e19' }}>Real-Time</div>
+              <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', marginTop: '0.25rem', fontWeight: 600 }}>
                 AI Mock Interview Evaluator
               </div>
             </div>
@@ -137,152 +147,158 @@ export default function LandingPage({ onGetStarted, onDemoLogin }) {
           <div className="grid-3">
             
             {/* Card 1 */}
-            <div className="glass-panel" style={{ padding: '2rem', transition: 'transform 0.2s', display: 'flex', flexDirection: 'column' }}>
+            <div className="glass-panel" style={{ padding: '2rem', transition: 'transform 0.2s', display: 'flex', flexDirection: 'column', border: '1px solid rgba(23, 30, 25, 0.12)', background: '#ffffff' }}>
               <div style={{
-                width: '3rem',
-                height: '3rem',
+                width: '3.2rem',
+                height: '3.2rem',
                 borderRadius: '12px',
-                background: 'rgba(99, 102, 241, 0.15)',
+                background: '#171e19',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: '#818cf8',
-                marginBottom: '1.25rem'
+                color: '#ffe17c',
+                marginBottom: '1.25rem',
+                boxShadow: '0 4px 12px rgba(23, 30, 25, 0.15)'
               }}>
                 <FileText size={24} />
               </div>
-              <h3 style={{ fontSize: '1.25rem', marginBottom: '0.75rem' }}>AI Resume Intelligence</h3>
+              <h3 style={{ fontSize: '1.25rem', marginBottom: '0.75rem', color: '#171e19', fontWeight: 800 }}>AI Resume Intelligence</h3>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.92rem', lineHeight: 1.6, flexGrow: 1 }}>
                 Upload PDF or DOCX resumes. Gemini AI extracts structured competencies across 6 core categories, evaluates strengths and gaps, and delivers an instant SWOT analysis.
               </p>
               <div style={{ marginTop: '1.25rem', display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
                 <span className="badge badge-indigo">PDF / DOCX Parsing</span>
-                <span className="badge badge-cyan">SWOT Analysis</span>
+                <span className="badge badge-yellow">SWOT Analysis</span>
               </div>
             </div>
 
             {/* Card 2 */}
-            <div className="glass-panel" style={{ padding: '2rem', transition: 'transform 0.2s', display: 'flex', flexDirection: 'column' }}>
+            <div className="glass-panel" style={{ padding: '2rem', transition: 'transform 0.2s', display: 'flex', flexDirection: 'column', border: '1px solid rgba(23, 30, 25, 0.12)', background: '#ffffff' }}>
               <div style={{
-                width: '3rem',
-                height: '3rem',
+                width: '3.2rem',
+                height: '3.2rem',
                 borderRadius: '12px',
-                background: 'rgba(6, 182, 212, 0.15)',
+                background: '#ffe17c',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: '#22d3ee',
-                marginBottom: '1.25rem'
+                color: '#171e19',
+                marginBottom: '1.25rem',
+                boxShadow: '0 4px 12px rgba(255, 225, 124, 0.35)'
               }}>
                 <Target size={24} />
               </div>
-              <h3 style={{ fontSize: '1.25rem', marginBottom: '0.75rem' }}>Hybrid Internship Matching</h3>
+              <h3 style={{ fontSize: '1.25rem', marginBottom: '0.75rem', color: '#171e19', fontWeight: 800 }}>Hybrid Internship Matching</h3>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.92rem', lineHeight: 1.6, flexGrow: 1 }}>
                 Combines deterministic mathematical algorithms (Skill overlap 45%, Role 25%, Location 15%, Background 15%) with Gemini AI qualitative explanations for unbiased transparency.
               </p>
               <div style={{ marginTop: '1.25rem', display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
-                <span className="badge badge-cyan">Formula Driven</span>
+                <span className="badge badge-indigo">Formula Driven</span>
                 <span className="badge badge-emerald">Ranked Fits</span>
               </div>
             </div>
 
             {/* Card 3 */}
-            <div className="glass-panel" style={{ padding: '2rem', transition: 'transform 0.2s', display: 'flex', flexDirection: 'column' }}>
+            <div className="glass-panel" style={{ padding: '2rem', transition: 'transform 0.2s', display: 'flex', flexDirection: 'column', border: '1px solid rgba(23, 30, 25, 0.12)', background: '#ffffff' }}>
               <div style={{
-                width: '3rem',
-                height: '3rem',
+                width: '3.2rem',
+                height: '3.2rem',
                 borderRadius: '12px',
-                background: 'rgba(16, 185, 129, 0.15)',
+                background: '#171e19',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: '#34d399',
-                marginBottom: '1.25rem'
+                color: '#ffe17c',
+                marginBottom: '1.25rem',
+                boxShadow: '0 4px 12px rgba(23, 30, 25, 0.15)'
               }}>
                 <TrendingUp size={24} />
               </div>
-              <h3 style={{ fontSize: '1.25rem', marginBottom: '0.75rem' }}>Actionable Skill-Gap Matrix</h3>
+              <h3 style={{ fontSize: '1.25rem', marginBottom: '0.75rem', color: '#171e19', fontWeight: 800 }}>Actionable Skill-Gap Matrix</h3>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.92rem', lineHeight: 1.6, flexGrow: 1 }}>
                 Instantly cross-references your student profile against any internship requirement. Visualizes Strong vs. Moderate vs. Missing skills with priority ratings and learning roadmaps.
               </p>
               <div style={{ marginTop: '1.25rem', display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
-                <span className="badge badge-emerald">Priority Matrix</span>
-                <span className="badge badge-amber">Learning Action</span>
+                <span className="badge badge-yellow">Priority Matrix</span>
+                <span className="badge badge-indigo">Learning Action</span>
               </div>
             </div>
 
             {/* Card 4 */}
-            <div className="glass-panel" style={{ padding: '2rem', transition: 'transform 0.2s', display: 'flex', flexDirection: 'column' }}>
+            <div className="glass-panel" style={{ padding: '2rem', transition: 'transform 0.2s', display: 'flex', flexDirection: 'column', border: '1px solid rgba(23, 30, 25, 0.12)', background: '#ffffff' }}>
               <div style={{
-                width: '3rem',
-                height: '3rem',
+                width: '3.2rem',
+                height: '3.2rem',
                 borderRadius: '12px',
-                background: 'rgba(168, 85, 247, 0.15)',
+                background: '#ffe17c',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: '#c084fc',
-                marginBottom: '1.25rem'
+                color: '#171e19',
+                marginBottom: '1.25rem',
+                boxShadow: '0 4px 12px rgba(255, 225, 124, 0.35)'
               }}>
                 <Mic size={24} />
               </div>
-              <h3 style={{ fontSize: '1.25rem', marginBottom: '0.75rem' }}>Interactive AI Mock Interview</h3>
+              <h3 style={{ fontSize: '1.25rem', marginBottom: '0.75rem', color: '#171e19', fontWeight: 800 }}>Interactive AI Mock Interview</h3>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.92rem', lineHeight: 1.6, flexGrow: 1 }}>
                 Select difficulty (Beginner/Intermediate/Advanced) and practice 5 tailored technical or behavioral questions. Receive immediate AI grading across correctness, clarity, and relevance.
               </p>
               <div style={{ marginTop: '1.25rem', display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
                 <span className="badge badge-indigo">Voice / Text Input</span>
-                <span className="badge badge-cyan">Model Answers</span>
+                <span className="badge badge-yellow">Model Answers</span>
               </div>
             </div>
 
             {/* Card 5 */}
-            <div className="glass-panel" style={{ padding: '2rem', transition: 'transform 0.2s', display: 'flex', flexDirection: 'column' }}>
+            <div className="glass-panel" style={{ padding: '2rem', transition: 'transform 0.2s', display: 'flex', flexDirection: 'column', border: '1px solid rgba(23, 30, 25, 0.12)', background: '#ffffff' }}>
               <div style={{
-                width: '3rem',
-                height: '3rem',
+                width: '3.2rem',
+                height: '3.2rem',
                 borderRadius: '12px',
-                background: 'rgba(245, 158, 11, 0.15)',
+                background: '#171e19',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: '#fbbf24',
-                marginBottom: '1.25rem'
+                color: '#ffe17c',
+                marginBottom: '1.25rem',
+                boxShadow: '0 4px 12px rgba(23, 30, 25, 0.15)'
               }}>
                 <Award size={24} />
               </div>
-              <h3 style={{ fontSize: '1.25rem', marginBottom: '0.75rem' }}>Interview Performance Analytics</h3>
+              <h3 style={{ fontSize: '1.25rem', marginBottom: '0.75rem', color: '#171e19', fontWeight: 800 }}>Interview Performance Analytics</h3>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.92rem', lineHeight: 1.6, flexGrow: 1 }}>
                 Track session scores over time, review complete transcripts of previous answers, and identify recurring strengths and improvement areas to build confidence.
               </p>
               <div style={{ marginTop: '1.25rem', display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
-                <span className="badge badge-amber">Score Trends</span>
+                <span className="badge badge-yellow">Score Trends</span>
                 <span className="badge badge-emerald">Historical Logs</span>
               </div>
             </div>
 
             {/* Card 6 */}
-            <div className="glass-panel" style={{ padding: '2rem', transition: 'transform 0.2s', display: 'flex', flexDirection: 'column' }}>
+            <div className="glass-panel" style={{ padding: '2rem', transition: 'transform 0.2s', display: 'flex', flexDirection: 'column', border: '1px solid rgba(23, 30, 25, 0.12)', background: '#ffffff' }}>
               <div style={{
-                width: '3rem',
-                height: '3rem',
+                width: '3.2rem',
+                height: '3.2rem',
                 borderRadius: '12px',
-                background: 'rgba(244, 63, 94, 0.15)',
+                background: '#ffe17c',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: '#fb7185',
-                marginBottom: '1.25rem'
+                color: '#171e19',
+                marginBottom: '1.25rem',
+                boxShadow: '0 4px 12px rgba(255, 225, 124, 0.35)'
               }}>
                 <Sparkles size={24} />
               </div>
-              <h3 style={{ fontSize: '1.25rem', marginBottom: '0.75rem' }}>Context-Aware AI Companion</h3>
+              <h3 style={{ fontSize: '1.25rem', marginBottom: '0.75rem', color: '#171e19', fontWeight: 800 }}>Context-Aware AI Companion</h3>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.92rem', lineHeight: 1.6, flexGrow: 1 }}>
                 A personal 24/7 career mentor that understands your specific college degree, extracted resume skills, saved target internships, and mock interview test scores.
               </p>
               <div style={{ marginTop: '1.25rem', display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
-                <span className="badge badge-rose">Student Memory</span>
-                <span className="badge badge-indigo">Targeted Advice</span>
+                <span className="badge badge-indigo">Student Memory</span>
+                <span className="badge badge-yellow">Targeted Advice</span>
               </div>
             </div>
 
@@ -294,7 +310,7 @@ export default function LandingPage({ onGetStarted, onDemoLogin }) {
       <section style={{ padding: '4rem 0', background: 'var(--bg-secondary)', borderTop: '1px solid var(--border-subtle)', borderBottom: '1px solid var(--border-subtle)' }}>
         <div className="container">
           <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
-            <h2 style={{ fontSize: '2.2rem', fontWeight: 800, marginBottom: '0.75rem' }}>
+            <h2 style={{ fontSize: '2.2rem', fontWeight: 800, marginBottom: '0.75rem', color: '#171e19' }}>
               The 5-Step Path to Placement Success
             </h2>
             <p style={{ color: 'var(--text-secondary)' }}>
@@ -309,7 +325,7 @@ export default function LandingPage({ onGetStarted, onDemoLogin }) {
                 width: '45px',
                 height: '45px',
                 borderRadius: '50%',
-                background: 'var(--accent-primary)',
+                background: '#171e19',
                 color: '#ffffff',
                 fontWeight: 800,
                 fontSize: '1.2rem',
@@ -318,7 +334,7 @@ export default function LandingPage({ onGetStarted, onDemoLogin }) {
                 justifyContent: 'center',
                 margin: '0 auto 1rem auto'
               }}>1</div>
-              <h4 style={{ fontSize: '1.1rem', marginBottom: '0.4rem' }}>Build Profile & Resume</h4>
+              <h4 style={{ fontSize: '1.1rem', marginBottom: '0.4rem', color: '#171e19', fontWeight: 700 }}>Build Profile & Resume</h4>
               <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Upload your resume and customize career aspirations.</p>
             </div>
 
@@ -327,8 +343,8 @@ export default function LandingPage({ onGetStarted, onDemoLogin }) {
                 width: '45px',
                 height: '45px',
                 borderRadius: '50%',
-                background: 'var(--accent-cyan)',
-                color: '#ffffff',
+                background: '#ffe17c',
+                color: '#171e19',
                 fontWeight: 800,
                 fontSize: '1.2rem',
                 display: 'flex',
@@ -336,7 +352,7 @@ export default function LandingPage({ onGetStarted, onDemoLogin }) {
                 justifyContent: 'center',
                 margin: '0 auto 1rem auto'
               }}>2</div>
-              <h4 style={{ fontSize: '1.1rem', marginBottom: '0.4rem' }}>AI Resume Analysis</h4>
+              <h4 style={{ fontSize: '1.1rem', marginBottom: '0.4rem', color: '#171e19', fontWeight: 700 }}>AI Resume Analysis</h4>
               <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Extract technical strengths and categorized competencies.</p>
             </div>
 
@@ -345,7 +361,7 @@ export default function LandingPage({ onGetStarted, onDemoLogin }) {
                 width: '45px',
                 height: '45px',
                 borderRadius: '50%',
-                background: 'var(--accent-emerald)',
+                background: '#171e19',
                 color: '#ffffff',
                 fontWeight: 800,
                 fontSize: '1.2rem',
@@ -354,7 +370,7 @@ export default function LandingPage({ onGetStarted, onDemoLogin }) {
                 justifyContent: 'center',
                 margin: '0 auto 1rem auto'
               }}>3</div>
-              <h4 style={{ fontSize: '1.1rem', marginBottom: '0.4rem' }}>Discover & Match</h4>
+              <h4 style={{ fontSize: '1.1rem', marginBottom: '0.4rem', color: '#171e19', fontWeight: 700 }}>Discover & Match</h4>
               <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Explore curated internship listings with transparent match scores.</p>
             </div>
 
@@ -363,8 +379,8 @@ export default function LandingPage({ onGetStarted, onDemoLogin }) {
                 width: '45px',
                 height: '45px',
                 borderRadius: '50%',
-                background: 'var(--accent-amber)',
-                color: '#ffffff',
+                background: '#ffe17c',
+                color: '#171e19',
                 fontWeight: 800,
                 fontSize: '1.2rem',
                 display: 'flex',
@@ -372,7 +388,7 @@ export default function LandingPage({ onGetStarted, onDemoLogin }) {
                 justifyContent: 'center',
                 margin: '0 auto 1rem auto'
               }}>4</div>
-              <h4 style={{ fontSize: '1.1rem', marginBottom: '0.4rem' }}>Analyze Skill Gaps</h4>
+              <h4 style={{ fontSize: '1.1rem', marginBottom: '0.4rem', color: '#171e19', fontWeight: 700 }}>Analyze Skill Gaps</h4>
               <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Identify high-priority missing skills and study roadmaps.</p>
             </div>
 
@@ -381,7 +397,7 @@ export default function LandingPage({ onGetStarted, onDemoLogin }) {
                 width: '45px',
                 height: '45px',
                 borderRadius: '50%',
-                background: 'var(--accent-secondary)',
+                background: '#171e19',
                 color: '#ffffff',
                 fontWeight: 800,
                 fontSize: '1.2rem',
@@ -390,7 +406,7 @@ export default function LandingPage({ onGetStarted, onDemoLogin }) {
                 justifyContent: 'center',
                 margin: '0 auto 1rem auto'
               }}>5</div>
-              <h4 style={{ fontSize: '1.1rem', marginBottom: '0.4rem' }}>Live Mock Interview</h4>
+              <h4 style={{ fontSize: '1.1rem', marginBottom: '0.4rem', color: '#171e19', fontWeight: 700 }}>Live Mock Interview</h4>
               <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Practice role-specific questions and refine answers with AI feedback.</p>
             </div>
 
@@ -398,26 +414,27 @@ export default function LandingPage({ onGetStarted, onDemoLogin }) {
         </div>
       </section>
 
-      {/* CTA Bottom Banner */}
+      {/* CTA Bottom Banner (High-Impact Golden Yellow #ffe17c from Spec) */}
       <section style={{ padding: '4.5rem 0' }}>
         <div className="container">
           <div className="glass-panel" style={{
             padding: '3.5rem 2rem',
             textAlign: 'center',
-            background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(6, 182, 212, 0.15) 100%)',
-            borderColor: 'rgba(99, 102, 241, 0.3)'
+            background: '#ffe17c',
+            borderColor: 'rgba(23, 30, 25, 0.15)',
+            boxShadow: '0 8px 32px rgba(255, 225, 124, 0.35)'
           }}>
-            <h2 style={{ fontSize: '2.4rem', fontWeight: 800, marginBottom: '1rem' }}>
+            <h2 style={{ fontSize: '2.4rem', fontWeight: 900, marginBottom: '1rem', color: '#171e19' }}>
               Ready to Accelerate Your Career Preparation?
             </h2>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', maxWidth: '640px', margin: '0 auto 2rem auto' }}>
+            <p style={{ color: '#272727', fontSize: '1.1rem', maxWidth: '640px', margin: '0 auto 2rem auto', fontWeight: 500 }}>
               Join thousands of university students landing premier technical internships with personalized AI guidance.
             </p>
             <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
               <button 
                 onClick={onGetStarted}
-                className="btn btn-primary btn-lg"
-                style={{ padding: '0.85rem 2.5rem' }}
+                className="btn btn-dark btn-lg"
+                style={{ padding: '0.9rem 2.5rem', fontWeight: 800, fontSize: '1.05rem', boxShadow: '0 4px 18px rgba(23, 30, 25, 0.3)' }}
               >
                 Create Free Student Account
               </button>

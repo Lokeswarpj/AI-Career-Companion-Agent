@@ -384,8 +384,8 @@ export default function MockInterviewPage({ selectedInternshipId, setSelectedInt
             width: '68px',
             height: '68px',
             borderRadius: '50%',
-            background: 'rgba(99, 102, 241, 0.12)',
-            color: '#818cf8',
+            background: 'rgba(23, 30, 25, 0.06)',
+            color: '#171e19',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -724,7 +724,7 @@ export default function MockInterviewPage({ selectedInternshipId, setSelectedInt
               <div style={{
                 height: '100%',
                 width: `${((currentQuestion.questionNumber || 1) / totalQuestions) * 100}%`,
-                background: 'linear-gradient(90deg, #6366f1, #06b6d4, #10b981)',
+                background: 'linear-gradient(90deg, #171e19, #ffe17c, #107e54)',
                 borderRadius: '9999px',
                 transition: 'width 0.35s ease-in-out'
               }} />
@@ -969,8 +969,8 @@ export default function MockInterviewPage({ selectedInternshipId, setSelectedInt
           <div className="glass-panel" style={{
             padding: '2.5rem 2rem',
             textAlign: 'center',
-            background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(16, 185, 129, 0.12) 100%)',
-            border: '1px solid rgba(99, 102, 241, 0.3)'
+            background: 'linear-gradient(135deg, rgba(255, 225, 124, 0.22) 0%, rgba(248, 249, 250, 0.95) 100%)',
+            border: '1px solid rgba(23, 30, 25, 0.12)'
           }}>
             <div style={{
               width: '3.8rem',

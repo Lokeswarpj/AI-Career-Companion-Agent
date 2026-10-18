@@ -94,8 +94,8 @@ export default function Sidebar({ activeTab, setActiveTab, isCollapsed, setIsCol
                   height: '2.4rem',
                   borderRadius: '10px',
                   objectFit: 'cover',
-                  boxShadow: '0 0 14px rgba(99, 102, 241, 0.45)',
-                  border: '1px solid rgba(255, 255, 255, 0.15)'
+                  boxShadow: '0 2px 8px rgba(23, 30, 25, 0.12)',
+                  border: '1px solid var(--border-subtle)'
                 }}
               />
               <div>
@@ -120,8 +120,8 @@ export default function Sidebar({ activeTab, setActiveTab, isCollapsed, setIsCol
                   height: '2.4rem',
                   borderRadius: '10px',
                   objectFit: 'cover',
-                  boxShadow: '0 0 14px rgba(99, 102, 241, 0.45)',
-                  border: '1px solid rgba(255, 255, 255, 0.15)'
+                  boxShadow: '0 2px 8px rgba(23, 30, 25, 0.12)',
+                  border: '1px solid var(--border-subtle)'
                 }}
               />
             </div>
@@ -194,15 +194,15 @@ export default function Sidebar({ activeTab, setActiveTab, isCollapsed, setIsCol
                     borderRadius: 'var(--radius-md)',
                     border: 'none',
                     background: isActive 
-                      ? 'linear-gradient(135deg, rgba(79, 70, 229, 0.1) 0%, rgba(2, 132, 199, 0.06) 100%)' 
-                      : (isHovered ? 'var(--bg-tertiary)' : 'transparent'),
-                    color: isActive ? 'var(--accent-primary)' : (isHovered ? 'var(--text-primary)' : 'var(--text-secondary)'),
-                    fontWeight: isActive ? 700 : 500,
+                      ? '#ffe17c' 
+                      : (isHovered ? 'rgba(23, 30, 25, 0.05)' : 'transparent'),
+                    color: isActive ? '#171e19' : (isHovered ? 'var(--text-primary)' : 'var(--text-secondary)'),
+                    fontWeight: isActive ? 800 : 500,
                     fontSize: '0.88rem',
                     cursor: 'pointer',
                     transition: 'all 0.18s ease',
                     position: 'relative',
-                    boxShadow: isActive ? 'inset 0 0 0 1px rgba(79, 70, 229, 0.25), 0 2px 8px rgba(79, 70, 229, 0.08)' : 'none'
+                    boxShadow: isActive ? 'inset 0 0 0 1px rgba(23, 30, 25, 0.15), 0 2px 8px rgba(255, 225, 124, 0.35)' : 'none'
                   }}
                 >
                   {/* Active Indicator Bar */}
@@ -212,10 +212,9 @@ export default function Sidebar({ activeTab, setActiveTab, isCollapsed, setIsCol
                       left: '2px',
                       top: '20%',
                       bottom: '20%',
-                      width: '3px',
+                      width: '3.5px',
                       borderRadius: '4px',
-                      background: 'var(--accent-primary)',
-                      boxShadow: '0 0 8px rgba(79, 70, 229, 0.4)'
+                      background: '#171e19'
                     }} />
                   )}
 
@@ -223,7 +222,7 @@ export default function Sidebar({ activeTab, setActiveTab, isCollapsed, setIsCol
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    color: isActive ? 'var(--accent-primary)' : (isHovered ? 'var(--text-primary)' : 'var(--text-secondary)')
+                    color: isActive ? '#171e19' : (isHovered ? 'var(--text-primary)' : 'var(--text-secondary)')
                   }}>
                     <Icon size={19} />
                   </div>
@@ -244,8 +243,8 @@ export default function Sidebar({ activeTab, setActiveTab, isCollapsed, setIsCol
                           fontWeight: 700,
                           padding: '0.15rem 0.45rem',
                           borderRadius: '6px',
-                          background: isActive ? 'rgba(79, 70, 229, 0.15)' : 'var(--bg-tertiary)',
-                          color: isActive ? 'var(--accent-primary)' : 'var(--text-muted)'
+                          background: isActive ? '#171e19' : 'rgba(23, 30, 25, 0.08)',
+                          color: isActive ? '#ffe17c' : '#171e19'
                         }}>
                           {item.badge}
                         </span>

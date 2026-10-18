@@ -117,7 +117,7 @@ export default function SkillGapPage({ selectedInternshipId, setSelectedInternsh
   const aiInsights = gapData?.aiInsights;
 
   const readinessScore = metrics?.readinessScore || metrics?.matchPercentage || 0;
-  const scoreColor = readinessScore >= 80 ? '#10b981' : readinessScore >= 60 ? '#6366f1' : '#f59e0b';
+  const scoreColor = readinessScore >= 80 ? '#107e54' : readinessScore >= 60 ? '#171e19' : '#d97706';
 
   return (
     <div className="container" style={{ padding: '2.5rem 1.5rem', maxWidth: '1150px' }}>
@@ -189,7 +189,7 @@ export default function SkillGapPage({ selectedInternshipId, setSelectedInternsh
                 width: '64px',
                 height: '64px',
                 borderRadius: '50%',
-                background: 'rgba(99, 102, 241, 0.12)',
+                background: 'rgba(23, 30, 25, 0.06)',
                 color: 'var(--accent-primary)',
                 display: 'flex',
                 alignItems: 'center',
@@ -243,8 +243,8 @@ export default function SkillGapPage({ selectedInternshipId, setSelectedInternsh
             <>
               {gapData.hasProfileSkills === false && showPreview && (
                 <div style={{
-                  background: 'rgba(99, 102, 241, 0.08)',
-                  border: '1px solid rgba(99, 102, 241, 0.25)',
+                  background: 'rgba(255, 225, 124, 0.25)',
+                  border: '1px solid rgba(23, 30, 25, 0.18)',
                   borderRadius: 'var(--radius-md)',
                   padding: '1rem 1.25rem',
                   display: 'flex',
@@ -317,8 +317,8 @@ export default function SkillGapPage({ selectedInternshipId, setSelectedInternsh
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '0.75rem', marginTop: '0.5rem' }}>
                     {aiInsights.top3ActionPriorities.map((item, idx) => (
                       <div key={idx} style={{
-                        background: 'rgba(99, 102, 241, 0.06)',
-                        border: '1px solid rgba(99, 102, 241, 0.2)',
+                        background: 'rgba(23, 30, 25, 0.04)',
+                        border: '1px solid rgba(23, 30, 25, 0.12)',
                         borderRadius: 'var(--radius-sm)',
                         padding: '0.75rem 1rem',
                         fontSize: '0.85rem'
@@ -496,8 +496,8 @@ export default function SkillGapPage({ selectedInternshipId, setSelectedInternsh
                 ) : (
                   gaps?.preferredGaps?.map((s, idx) => (
                     <div key={idx} style={{
-                      background: 'rgba(99, 102, 241, 0.05)',
-                      border: '1px solid rgba(99, 102, 241, 0.2)',
+                      background: 'rgba(23, 30, 25, 0.03)',
+                      border: '1px solid rgba(23, 30, 25, 0.12)',
                       borderRadius: 'var(--radius-md)',
                       padding: '1.25rem'
                     }}>
@@ -593,7 +593,7 @@ export default function SkillGapPage({ selectedInternshipId, setSelectedInternsh
                       </ul>
                     </div>
 
-                    <div style={{ background: 'rgba(99, 102, 241, 0.05)', padding: '0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(99, 102, 241, 0.15)', fontSize: '0.82rem' }}>
+                    <div style={{ background: 'rgba(255, 225, 124, 0.2)', padding: '0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(23, 30, 25, 0.12)', fontSize: '0.82rem' }}>
                       <strong style={{ color: 'var(--accent-primary)' }}>🚀 Portfolio Project Idea:</strong>
                       <p style={{ marginTop: '0.2rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>{item.projectIdea}</p>
                     </div>
@@ -611,7 +611,8 @@ export default function SkillGapPage({ selectedInternshipId, setSelectedInternsh
             alignItems: 'center',
             flexWrap: 'wrap',
             gap: '1.25rem',
-            background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.12) 0%, rgba(16, 185, 129, 0.12) 100%)'
+            background: 'linear-gradient(135deg, rgba(255, 225, 124, 0.22) 0%, rgba(248, 249, 250, 0.95) 100%)',
+            border: '1px solid rgba(23, 30, 25, 0.12)'
           }}>
             <div>
               <div style={{ fontSize: '1.2rem', fontWeight: 800 }}>Ready to close gaps and apply for {internship?.title}?</div>

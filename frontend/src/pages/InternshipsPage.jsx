@@ -187,8 +187,8 @@ export default function InternshipsPage({ setActiveTab, setSelectedInternshipId 
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
           gap: '1rem',
-          background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(6, 182, 212, 0.05) 100%)',
-          border: '1px solid rgba(99, 102, 241, 0.2)'
+          background: 'linear-gradient(135deg, rgba(255, 225, 124, 0.22) 0%, rgba(248, 249, 250, 0.95) 100%)',
+          border: '1px solid rgba(23, 30, 25, 0.12)'
         }}>
           <div>
             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>Knowledge Base</div>
@@ -354,7 +354,7 @@ export default function InternshipsPage({ setActiveTab, setSelectedInternshipId 
             const semScore = item.semanticScore;
             const resumeMatch = resumeMatchMap[item.id];
             const matchScore = resumeMatch ? resumeMatch.matchScore : null;
-            const cardBorderColor = matchScore ? (matchScore >= 80 ? '#10b981' : matchScore >= 65 ? '#6366f1' : '#f59e0b') : (semScore ? (semScore >= 60 ? '#10b981' : '#6366f1') : null);
+            const cardBorderColor = matchScore ? (matchScore >= 80 ? '#107e54' : matchScore >= 65 ? '#171e19' : '#d97706') : (semScore ? (semScore >= 60 ? '#107e54' : '#171e19') : null);
 
             return (
               <div 
@@ -426,7 +426,7 @@ export default function InternshipsPage({ setActiveTab, setSelectedInternshipId 
                 {item.bestMatchedChunk && (
                   <div style={{
                     padding: '0.6rem 0.85rem',
-                    background: 'rgba(99, 102, 241, 0.08)',
+                    background: 'rgba(23, 30, 25, 0.04)',
                     borderRadius: 'var(--radius-sm)',
                     borderLeft: '3px solid var(--accent-primary)',
                     fontSize: '0.78rem',
@@ -532,7 +532,7 @@ export default function InternshipsPage({ setActiveTab, setSelectedInternshipId 
             {resumeMatchMap[selectedItem.id] && (
               <div style={{
                 padding: '1.1rem 1.25rem',
-                background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(16, 185, 129, 0.08) 100%)',
+                background: 'linear-gradient(135deg, rgba(255, 225, 124, 0.22) 0%, rgba(248, 249, 250, 0.95) 100%)',
                 borderRadius: 'var(--radius-md)',
                 border: '1px solid rgba(16, 185, 129, 0.35)',
                 display: 'flex',

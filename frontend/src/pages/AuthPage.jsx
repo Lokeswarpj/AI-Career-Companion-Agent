@@ -472,8 +472,8 @@ export default function AuthPage({ onSuccess, authMode = 'login', setAuthMode })
               objectFit: 'cover',
               margin: '0 auto 1rem auto',
               display: 'block',
-              boxShadow: '0 0 20px rgba(99, 102, 241, 0.5)',
-              border: '1px solid rgba(255, 255, 255, 0.2)'
+              boxShadow: '0 4px 14px rgba(23, 30, 25, 0.12)',
+              border: '1px solid var(--border-subtle)'
             }}
           />
           <h2 style={{ fontSize: '1.75rem', fontWeight: 800 }}>
@@ -798,8 +798,8 @@ export default function AuthPage({ onSuccess, authMode = 'login', setAuthMode })
         {step === 'onboarding' && (
           <form onSubmit={handleFinalRegistrationSubmit} noValidate>
             <div style={{
-              background: 'rgba(99, 102, 241, 0.1)',
-              border: '1px solid rgba(99, 102, 241, 0.25)',
+              background: 'rgba(255, 225, 124, 0.25)',
+              border: '1px solid rgba(23, 30, 25, 0.18)',
               borderRadius: '12px',
               padding: '0.9rem',
               marginBottom: '1.5rem',
@@ -807,7 +807,7 @@ export default function AuthPage({ onSuccess, authMode = 'login', setAuthMode })
               alignItems: 'center',
               gap: '0.65rem'
             }}>
-              <CheckCircle size={20} color="#6366f1" style={{ flexShrink: 0 }} />
+              <CheckCircle size={20} color="#171e19" style={{ flexShrink: 0 }} />
               <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
                 {pendingGooglePayload ? (
                   <span>Google Account connected: <strong>{email}</strong>. Please complete compulsory details below.</span>

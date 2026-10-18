@@ -46,12 +46,12 @@ export default function Background3D() {
     window.addEventListener('resize', handleResize, { passive: true });
     document.addEventListener('visibilitychange', handleVisibility);
 
-    // Optimized Color Palette Precomputations (Tailored for presentation clarity)
+    // High-Contrast Editorial SaaS Constellation Palette (#ffe17c, #171e19, #272727, #b7c6c2)
     const PALETTES = [
-      { core: '#0284c7', r: 2, g: 132, b: 199 },   // Sky / Cyan
-      { core: '#4f46e5', r: 79, g: 70, b: 229 },   // Indigo
-      { core: '#7c3aed', r: 124, g: 58, b: 237 },  // Violet
-      { core: '#059669', r: 5, g: 150, b: 105 }    // Emerald
+      { core: '#ffe17c', r: 255, g: 225, b: 124 }, // Signature Golden Yellow
+      { core: '#171e19', r: 23, g: 30, b: 25 },    // Charcoal
+      { core: '#272727', r: 39, g: 39, b: 39 },    // Dark Gray
+      { core: '#b7c6c2', r: 183, g: 198, b: 194 }  // Sage
     ];
 
     // High-performance 28-node neural vector constellation
@@ -146,7 +146,7 @@ export default function Background3D() {
           const p2y = centerY + (y2_proj * focalLength) / z2_;
 
           const alpha = Math.max(0, Math.min(0.08, (1 - z1_ / 900) * 0.12));
-          ctx.strokeStyle = `rgba(79, 70, 229, ${alpha * 0.75})`;
+          ctx.strokeStyle = `rgba(183, 198, 194, ${alpha * 0.9})`;
           ctx.beginPath();
           ctx.moveTo(p1x, p1y);
           ctx.lineTo(p2x, p2y);
@@ -195,7 +195,7 @@ export default function Background3D() {
           if (distSq < 10000) { // dist < 100px
             const dist = Math.sqrt(distSq);
             const lineAlpha = (1 - dist / 100) * Math.min(p1.alpha, p2.alpha) * 0.28;
-            ctx.strokeStyle = `rgba(79, 70, 229, ${lineAlpha * 0.75})`;
+            ctx.strokeStyle = `rgba(23, 30, 25, ${lineAlpha * 0.35})`;
             ctx.lineWidth = 0.75;
             ctx.beginPath();
             ctx.moveTo(p1.px, p1.py);
@@ -227,7 +227,7 @@ export default function Background3D() {
         // Label for primary nodes (high contrast slate text)
         if (p.node.hasLabel && p.scale > 0.7 && p.alpha > 0.4) {
           ctx.font = `600 ${Math.max(9, Math.round(11 * p.scale))}px sans-serif`;
-          ctx.fillStyle = `rgba(30, 41, 59, ${p.alpha * 0.75})`;
+          ctx.fillStyle = `rgba(23, 30, 25, ${p.alpha * 0.65})`;
           ctx.textAlign = 'center';
           ctx.fillText(p.node.label, p.px, p.py - p.radius - 4);
         }

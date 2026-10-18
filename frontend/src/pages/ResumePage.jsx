@@ -171,7 +171,7 @@ EXPERIENCE & LEADERSHIP
           padding: '2.5rem 1.5rem',
           textAlign: 'center',
           border: `2px dashed ${dragActive ? 'var(--accent-primary)' : 'var(--border-card)'}`,
-          background: dragActive ? 'rgba(99, 102, 241, 0.08)' : 'var(--bg-card)',
+          background: dragActive ? 'rgba(255, 225, 124, 0.25)' : 'var(--bg-card)',
           borderRadius: 'var(--radius-lg)',
           marginBottom: '2.5rem',
           cursor: 'pointer',
@@ -462,7 +462,7 @@ EXPERIENCE & LEADERSHIP
                   const score = rec.matchScore;
                   const matrix = rec.skillMatrix || { matchingSkills: [], missingSkills: [] };
                   const breakdown = rec.breakdown || {};
-                  const scoreColor = score >= 80 ? '#10b981' : score >= 65 ? '#6366f1' : '#f59e0b';
+                  const scoreColor = score >= 80 ? '#107e54' : score >= 65 ? '#171e19' : '#d97706';
                   const scoreLabel = score >= 85 ? 'Exceptional Fit' : score >= 75 ? 'Strong Match' : score >= 60 ? 'Moderate Match' : 'Potential Fit';
 
                   return (
@@ -672,16 +672,16 @@ EXPERIENCE & LEADERSHIP
                       {rec.explanation?.whyItMatches && (
                         <div style={{
                           padding: '0.6rem 0.85rem',
-                          background: 'rgba(99, 102, 241, 0.08)',
+                          background: 'rgba(23, 30, 25, 0.04)',
                           borderRadius: 'var(--radius-sm)',
-                          borderLeft: '3px solid #818cf8',
+                          borderLeft: '3px solid #171e19',
                           fontSize: '0.82rem',
                           color: 'var(--text-secondary)',
                           display: 'flex',
                           alignItems: 'center',
                           gap: '0.5rem'
                         }}>
-                          <Sparkles size={14} color="#818cf8" style={{ flexShrink: 0 }} />
+                          <Sparkles size={14} color="#171e19" style={{ flexShrink: 0 }} />
                           <span><strong>AI Insight:</strong> {rec.explanation.whyItMatches}</span>
                         </div>
                       )}
@@ -704,7 +704,7 @@ EXPERIENCE & LEADERSHIP
                           className="btn btn-secondary btn-sm"
                           style={{ gap: '0.35rem' }}
                         >
-                          <Sliders size={14} color="#818cf8" />
+                          <Sliders size={14} color="#171e19" />
                           <span>Skill Gap Matrix</span>
                         </button>
 
@@ -740,9 +740,9 @@ EXPERIENCE & LEADERSHIP
                 {/* Bottom CTA Card to explore all 180+ postings */}
                 <div style={{
                   padding: '1.25rem 1.5rem',
-                  background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(6, 182, 212, 0.08) 100%)',
+                  background: 'linear-gradient(135deg, rgba(255, 225, 124, 0.2) 0%, rgba(248, 249, 250, 0.95) 100%)',
                   borderRadius: 'var(--radius-md)',
-                  border: '1px dashed rgba(99, 102, 241, 0.3)',
+                  border: '1px dashed rgba(23, 30, 25, 0.25)',
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',

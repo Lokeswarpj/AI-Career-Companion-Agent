@@ -137,7 +137,7 @@ export default function InterviewHistoryPage({ setActiveTab }) {
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           {sessions.map((sess) => {
-            const scoreColor = sess.overall_score >= 80 ? '#10b981' : sess.overall_score >= 60 ? '#6366f1' : '#f59e0b';
+            const scoreColor = sess.overall_score >= 80 ? '#107e54' : sess.overall_score >= 60 ? '#171e19' : '#d97706';
             return (
               <div
                 key={sess.id}

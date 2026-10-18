@@ -68,14 +68,15 @@ export default function Navbar({
                   height: '2.4rem',
                   borderRadius: '10px',
                   objectFit: 'cover',
-                  boxShadow: '0 2px 10px rgba(79, 70, 229, 0.25)',
+                  boxShadow: '0 2px 10px rgba(23, 30, 25, 0.12)',
                   border: '1px solid var(--border-subtle)'
                 }}
               />
               <div>
                 <div style={{ fontSize: '1.2rem', fontWeight: 800, letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                   <span>CareerPulse</span>
-                  <span className="gradient-text">AI</span>
+                  <span style={{ color: '#171e19', fontWeight: 900 }}>AI</span>
+                  <span style={{ color: '#ffe17c', fontSize: '1.35rem', lineHeight: 1 }}>.</span>
                 </div>
               </div>
             </div>
@@ -104,12 +105,12 @@ export default function Navbar({
             >
               {theme === 'dark' ? (
                 <>
-                  <Sun size={15} color="#fbbf24" />
+                  <Sun size={15} color="#ffe17c" />
                   <span style={{ fontWeight: 600 }}>Light UI</span>
                 </>
               ) : (
                 <>
-                  <Moon size={15} color="var(--accent-primary)" />
+                  <Moon size={15} color="#171e19" />
                   <span style={{ fontWeight: 600 }}>Dark UI</span>
                 </>
               )}
@@ -125,30 +126,37 @@ export default function Navbar({
                   display: 'flex', 
                   alignItems: 'center', 
                   gap: '0.45rem',
-                  fontWeight: 700
+                  fontWeight: 700,
+                  borderRadius: 'var(--radius-full)',
+                  padding: '0.45rem 1.15rem'
                 }}
               >
-                <Sparkles size={15} />
+                <Sparkles size={15} color="#171e19" />
                 <span>Go to Dashboard →</span>
               </button>
             ) : (
               <>
-                {/* Sign Up Button (Left of Log In) */}
+                {/* Sign Up Button (Pill in #171e19 charcoal with white text & yellow accent) */}
                 <button 
-                  className="btn btn-primary btn-sm"
+                  className="btn btn-sm"
                   onClick={handleOpenRegister}
                   style={{ 
                     display: 'flex', 
                     alignItems: 'center', 
                     gap: '0.45rem',
-                    fontWeight: 700
+                    fontWeight: 700,
+                    background: '#171e19',
+                    color: '#ffffff',
+                    borderRadius: 'var(--radius-full)',
+                    padding: '0.45rem 1.25rem',
+                    boxShadow: '0 2px 8px rgba(23, 30, 25, 0.2)'
                   }}
                 >
-                  <UserPlus size={15} />
+                  <UserPlus size={15} color="#ffe17c" />
                   <span>Sign Up</span>
                 </button>
 
-                {/* Log In Button (Right of Sign Up) */}
+                {/* Log In Button (Text/Outline in #171e19) */}
                 <button 
                   className="btn btn-outline btn-sm"
                   onClick={handleOpenLogin}
@@ -157,10 +165,13 @@ export default function Navbar({
                     alignItems: 'center', 
                     gap: '0.45rem',
                     borderColor: 'var(--border-card)',
-                    fontWeight: 600
+                    color: '#171e19',
+                    fontWeight: 600,
+                    borderRadius: 'var(--radius-full)',
+                    padding: '0.45rem 1.15rem'
                   }}
                 >
-                  <LogIn size={15} color="var(--accent-primary)" />
+                  <LogIn size={15} color="#171e19" />
                   <span>Log In</span>
                 </button>
               </>

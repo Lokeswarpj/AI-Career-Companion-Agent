@@ -220,7 +220,7 @@ export default function ApplicationCustomizerPage({ selectedInternshipId, setSel
             width: '64px',
             height: '64px',
             borderRadius: '50%',
-            background: 'rgba(99, 102, 241, 0.12)',
+            background: 'rgba(23, 30, 25, 0.06)',
             color: 'var(--accent-primary)',
             display: 'flex',
             alignItems: 'center',
@@ -316,8 +316,8 @@ export default function ApplicationCustomizerPage({ selectedInternshipId, setSel
 
       {hasProfileSkills === false && previewAnyway && (
         <div style={{
-          background: 'rgba(99, 102, 241, 0.08)',
-          border: '1px solid rgba(99, 102, 241, 0.25)',
+          background: 'rgba(255, 225, 124, 0.25)',
+          border: '1px solid rgba(23, 30, 25, 0.18)',
           borderRadius: 'var(--radius-md)',
           padding: '1rem 1.25rem',
           marginBottom: '1.5rem',
@@ -429,15 +429,15 @@ export default function ApplicationCustomizerPage({ selectedInternshipId, setSel
                 <div style={{
                   marginTop: '1.25rem',
                   padding: '0.75rem 1rem',
-                  background: 'rgba(99, 102, 241, 0.05)',
+                  background: 'rgba(23, 30, 25, 0.03)',
                   borderRadius: 'var(--radius-sm)',
-                  border: '1px solid rgba(99, 102, 241, 0.15)',
+                  border: '1px solid rgba(23, 30, 25, 0.12)',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '0.6rem',
                   fontSize: '0.84rem'
                 }}>
-                  <ShieldCheck size={18} color="#6366f1" />
+                  <ShieldCheck size={18} color="#171e19" />
                   <span style={{ color: 'var(--text-secondary)' }}>
                     <strong>Anti-Hallucination Guarantee:</strong> All skills, metrics enhancements, and project scopes are strictly grounded in your verified profile without fabricating unearned credentials.
                   </span>

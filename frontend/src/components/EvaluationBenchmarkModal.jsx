@@ -17,7 +17,7 @@ const BENCHMARK_PROFILES = [
     name: "Aanya Sharma",
     track: "Artificial Intelligence & ML",
     icon: Cpu,
-    color: "#4f46e5",
+    color: "#171e19",
     degree: "B.Tech in Artificial Intelligence & Data Science",
     university: "Institute of Technology",
     graduation_year: 2026,
@@ -163,9 +163,9 @@ export default function EvaluationBenchmarkModal({ isOpen, onClose }) {
           gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
           gap: '0.75rem',
           padding: '1rem',
-          background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.12) 0%, rgba(16, 185, 129, 0.08) 100%)',
+          background: 'linear-gradient(135deg, rgba(255, 225, 124, 0.22) 0%, rgba(248, 249, 250, 0.95) 100%)',
           borderRadius: 'var(--radius-md)',
-          border: '1px solid rgba(99, 102, 241, 0.25)'
+          border: '1px solid rgba(23, 30, 25, 0.12)'
         }}>
           <div>
             <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>MRR Metric</div>
@@ -258,7 +258,7 @@ export default function EvaluationBenchmarkModal({ isOpen, onClose }) {
                     key={item.id}
                     style={{
                       padding: '1rem 1.25rem',
-                      background: isTop1 ? 'linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(16, 185, 129, 0.05) 100%)' : 'var(--bg-tertiary)',
+                      background: isTop1 ? 'linear-gradient(135deg, rgba(255, 225, 124, 0.2) 0%, rgba(248, 249, 250, 0.95) 100%)' : 'var(--bg-tertiary)',
                       borderRadius: 'var(--radius-md)',
                       border: isTop1 ? '1.5px solid var(--accent-emerald)' : '1px solid var(--border-card)',
                       display: 'flex',

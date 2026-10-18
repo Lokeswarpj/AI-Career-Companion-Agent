@@ -317,11 +317,11 @@ export default function AssistantPage() {
                 width: '2rem',
                 height: '2rem',
                 borderRadius: '50%',
-                background: msg.role === 'user' ? 'var(--accent-primary)' : 'linear-gradient(135deg, #6366f1, #10b981)',
+                background: msg.role === 'user' ? '#171e19' : '#ffe17c',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: '#ffffff',
+                color: msg.role === 'user' ? '#ffffff' : '#171e19',
                 flexShrink: 0
               }}>
                 {msg.role === 'user' ? <User size={15} /> : <Bot size={15} />}
@@ -350,11 +350,11 @@ export default function AssistantPage() {
                 width: '2rem',
                 height: '2rem',
                 borderRadius: '50%',
-                background: 'linear-gradient(135deg, #6366f1, #10b981)',
+                background: '#ffe17c',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: '#ffffff',
+                color: '#171e19',
                 flexShrink: 0
               }}>
                 <Bot size={15} />
@@ -380,7 +380,7 @@ export default function AssistantPage() {
         {/* Quick Suggestion Chips */}
         <div style={{
           padding: '0.6rem 1.25rem',
-          background: 'rgba(99, 102, 241, 0.04)',
+          background: 'rgba(23, 30, 25, 0.03)',
           borderTop: '1px solid var(--border-subtle)',
           display: 'flex',
           gap: '0.5rem',
