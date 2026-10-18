@@ -69,32 +69,6 @@ export async function seedDefaultAccountsIfNeeded() {
         console.log(`[SeedData] ✅ Auto-seeded demo student account: ${acc.email}`);
       }
     }
-
-    // 🧹 Auto-clean any previously hardcoded mock profile data from real user accounts (e.g. lokeswarpj4@gmail.com or newly registered users)
-    // if they have not yet uploaded an authentic resume.
-    const nonDemoUsers = await db.all("SELECT id, email FROM users WHERE email != 'student.demo@infosys.com'");
-    if (Array.isArray(nonDemoUsers)) {
-      for (const u of nonDemoUsers) {
-        const resumeRow = await db.get("SELECT COUNT(*) as count FROM resumes WHERE user_id = ?", [u.id]);
-        const resumeCount = resumeRow ? parseInt(resumeRow.count, 10) || 0 : 0;
-        if (resumeCount === 0) {
-          const prof = await db.get("SELECT * FROM profiles WHERE user_id = ?", [u.id]);
-          if (prof) {
-            await db.run(
-              `UPDATE profiles SET
-                technical_skills = '[]',
-                soft_skills = '[]',
-                projects_json = '[]',
-                experience_json = '[]',
-                updated_at = CURRENT_TIMESTAMP
-               WHERE user_id = ?`,
-              [u.id]
-            );
-            console.log(`[SeedData] 🧹 Cleared orphaned profile skills for user without resume: ${u.email}`);
-          }
-        }
-      }
-    }
   } catch (err) {
     console.error('[SeedData] Error seeding default accounts:', err);
   }

@@ -97,19 +97,28 @@ router.post('/start', authenticateToken, async (req, res) => {
       internship = await db.get('SELECT * FROM internships WHERE id = ?', [internshipId]);
     }
 
-    const effectiveRole = roleTitle || internship?.title || 'Full-Stack Software Engineer';
-    const dummyInternship = internship || {
-      title: effectiveRole,
-      company: 'Premier Tech Enterprise',
-      required_skills_json: JSON.stringify(['JavaScript', 'Python', 'React', 'Node.js', 'System Design'])
-    };
-
     const studentProfile = await getStudentProfile(req.user.id);
+    const effectiveRole = roleTitle || internship?.title || (studentProfile?.preferred_roles?.[0] || 'Software Engineer Intern');
+    
+    let targetInternship = internship;
+    if (!targetInternship) {
+      targetInternship = await db.get('SELECT * FROM internships WHERE title LIKE ? LIMIT 1', [`%${effectiveRole}%`]);
+      if (!targetInternship) {
+        targetInternship = {
+          title: effectiveRole,
+          company: 'Technology Partner',
+          required_skills_json: JSON.stringify(
+            studentProfile?.skills?.length ? studentProfile.skills.slice(0, 6) : ['Computer Science Foundations', 'System Architecture', 'Problem Solving']
+          )
+        };
+      }
+    }
+
     const parsedCount = Math.min(10, Math.max(1, parseInt(questionCount, 10) || 5));
 
     // Generate user-specified count of role-tailored categorized questions
     const generatedQuestions = await generateCategorizedInterviewQuestions(
-      dummyInternship,
+      targetInternship,
       studentProfile,
       difficulty,
       parsedCount,

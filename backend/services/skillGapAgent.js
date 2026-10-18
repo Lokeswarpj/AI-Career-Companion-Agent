@@ -296,7 +296,7 @@ Provide structured JSON:
 
   const systemPrompt = "You are a Principal Engineering Career Mentor and Staff Technical Recruiter. Provide clear, direct, and constructive skill gap diagnoses.";
 
-  aiInsights = await callGemini(prompt, systemPrompt, true);
+  aiInsights = await callGemini(prompt, systemPrompt, true, { timeoutMs: 2500 });
 
   if (!aiInsights || !aiInsights.summaryAssessment) {
     // Deterministic fallback insights

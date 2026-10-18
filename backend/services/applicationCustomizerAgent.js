@@ -118,12 +118,12 @@ export function verifyAntiHallucination(tailoredResumeText, originalProfile) {
  */
 export async function tailorResumeForRole(candidateProfile, internship) {
   const name = candidateProfile.full_name || candidateProfile.name || 'Candidate';
-  const email = candidateProfile.email || 'candidate@university.edu';
-  const phone = candidateProfile.phone || '+91 98765 43210';
-  const degree = candidateProfile.degree || 'B.Tech in Computer Science and Engineering';
-  const university = candidateProfile.university || 'National Institute of Technology';
-  const gradYear = candidateProfile.graduation_year || 2026;
-  const location = candidateProfile.location || 'Bengaluru, India';
+  const email = candidateProfile.email || '';
+  const phone = candidateProfile.phone || '';
+  const degree = candidateProfile.degree || 'Computer Science & Engineering';
+  const university = candidateProfile.university || '';
+  const gradYear = candidateProfile.graduation_year || '';
+  const location = candidateProfile.location || '';
 
   // Extract candidate verified skills
   let techSkills = [];
@@ -316,11 +316,11 @@ Return strictly valid JSON:
  */
 export async function generateCustomizedCoverLetter(candidateProfile, internship, tone = 'Professional & Enthusiastic') {
   const name = candidateProfile.full_name || candidateProfile.name || 'Candidate';
-  const email = candidateProfile.email || 'candidate@university.edu';
-  const phone = candidateProfile.phone || '+91 98765 43210';
-  const degree = candidateProfile.degree || 'B.Tech in Computer Science and Engineering';
-  const university = candidateProfile.university || 'National Institute of Technology';
-  const gradYear = candidateProfile.graduation_year || 2026;
+  const email = candidateProfile.email || '';
+  const phone = candidateProfile.phone || '';
+  const degree = candidateProfile.degree || 'Computer Science & Engineering';
+  const university = candidateProfile.university || '';
+  const gradYear = candidateProfile.graduation_year || '';
 
   let techSkills = [];
   if (Array.isArray(candidateProfile.skills)) techSkills = candidateProfile.skills;

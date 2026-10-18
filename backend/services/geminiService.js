@@ -4,11 +4,10 @@ dotenv.config();
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
 const GEMINI_MODELS = [
   'gemini-flash-lite-latest',
-  'gemini-3.5-flash-lite',
   'gemini-3.5-flash',
-  'gemini-3.7-flash',
-  'gemini-3.6-flash',
-  'gemini-2.5-flash'
+  'gemini-3.5-flash-lite',
+  'gemini-3-flash-preview',
+  'gemini-3.1-flash-lite'
 ];
 
 /**
@@ -20,13 +19,17 @@ export async function callGemini(prompt, systemInstruction = '', jsonFormat = tr
     return null; // Will trigger the domain-specific fallback logic
   }
 
-  const primaryTimeout = options.timeoutMs || 8000;
+  const startTime = Date.now();
+  const totalBudgetMs = options.timeoutMs || 9000;
   const maxOutputTokens = options.maxOutputTokens || (jsonFormat ? 1500 : 2000);
 
   for (let i = 0; i < GEMINI_MODELS.length; i++) {
+    const elapsed = Date.now() - startTime;
+    const remainingMs = totalBudgetMs - elapsed;
+    if (remainingMs < 1000) break; // Exhausted caller time budget, break to heuristic fallback
+
     const model = GEMINI_MODELS[i];
-    // Give primary model full timeout; give secondary backup a healthy window to prevent premature aborts
-    const timeoutMs = i === 0 ? primaryTimeout : Math.min(5000, primaryTimeout);
+    const timeoutMs = Math.min(remainingMs, i === 0 ? remainingMs : 4500);
 
     try {
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
@@ -144,8 +147,8 @@ Return strictly valid JSON:
 
   const systemPrompt = "You are a Senior Technical Career Advisor and Resume Screener. Return concise, structured JSON without conversational commentary.";
 
-  // Bound call to 4500ms max with 1200 maxOutputTokens for fast streaming completion without JSON truncation
-  const aiResult = await callGemini(prompt, systemPrompt, true, { timeoutMs: 4500, maxOutputTokens: 1200 });
+  // Bound call to 9000ms max with 1500 maxOutputTokens for fast streaming completion without JSON truncation
+  const aiResult = await callGemini(prompt, systemPrompt, true, { timeoutMs: 9000, maxOutputTokens: 1500 });
   if (aiResult && aiResult.summary && aiResult.skills) {
     // Combine Gemini's categorization with instant heuristic extraction for 100% skill recall
     return {
