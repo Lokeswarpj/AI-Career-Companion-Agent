@@ -2,7 +2,14 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
-const GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-flash-latest'];
+const GEMINI_MODELS = [
+  'gemini-flash-lite-latest',
+  'gemini-3.5-flash-lite',
+  'gemini-3.5-flash',
+  'gemini-3.7-flash',
+  'gemini-3.6-flash',
+  'gemini-2.5-flash'
+];
 
 /**
  * Executes a Gemini prompt with JSON output support, fallback models, and offline mock resilience.
@@ -13,13 +20,13 @@ export async function callGemini(prompt, systemInstruction = '', jsonFormat = tr
     return null; // Will trigger the domain-specific fallback logic
   }
 
-  const primaryTimeout = options.timeoutMs || 5000;
+  const primaryTimeout = options.timeoutMs || 8000;
   const maxOutputTokens = options.maxOutputTokens || (jsonFormat ? 1500 : 2000);
 
   for (let i = 0; i < GEMINI_MODELS.length; i++) {
     const model = GEMINI_MODELS[i];
-    // Give primary model full timeout; give secondary backup a brief window to prevent long delays
-    const timeoutMs = i === 0 ? primaryTimeout : Math.min(3000, primaryTimeout);
+    // Give primary model full timeout; give secondary backup a healthy window to prevent premature aborts
+    const timeoutMs = i === 0 ? primaryTimeout : Math.min(5000, primaryTimeout);
 
     try {
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
@@ -251,12 +258,15 @@ Role: ${roleTitle} (${difficulty} level)
 Question: "${questionText}"
 Candidate's Answer: "${userAnswer}"
 
-Evaluate strictly on:
-1. Technical correctness and depth (0-100)
-2. Communication clarity and structure (0-100)
-3. Relevance and completeness to what was asked (0-100)
-
-Provide actionable constructive feedback, highlighting strong points, missed concepts, and an ideal model answer outline.
+CRITICAL RIGOR RULES:
+1. If the candidate's answer is gibberish, nonsensical characters (e.g. "fsefesd", "asdf"), keyboard mashing, or completely blank/irrelevant:
+   - Score overallScore, technicalScore, communicationScore, and relevanceScore 0 to 5.
+   - "keyPointsMentioned" MUST be empty []. Do NOT give false praise.
+   - In "feedback", explicitly state that the response was unintelligible or random keystrokes.
+2. If real answer, evaluate strictly on:
+   - Technical correctness and depth (0-100)
+   - Communication clarity and structure (0-100)
+   - Relevance and completeness to what was asked (0-100)
 
 Return JSON:
 {
@@ -424,7 +434,51 @@ function generateHeuristicQuestions(internship, difficulty, interviewType) {
   ];
 }
 
+function isGibberishOrTrivial(text) {
+  if (!text || typeof text !== 'string') return true;
+  const trimmed = text.trim();
+  if (trimmed.length < 5) return true;
+  
+  const words = trimmed.split(/\s+/).filter(Boolean);
+  const techKeywords = ['python', 'java', 'react', 'sql', 'docker', 'git', 'c++', 'aws', 'node', 'api', 'http', 'rest', 'oop'];
+  if (words.length === 1) {
+    if (!techKeywords.includes(words[0].toLowerCase())) {
+      return true;
+    }
+  }
+
+  if (/^([a-zA-Z])\1+$/.test(trimmed)) return true;
+  if (/^[bcdfghjklmnpqrstvwxyz]{5,}$/i.test(trimmed)) return true;
+  
+  const vowels = (trimmed.match(/[aeiou]/gi) || []).length;
+  if (trimmed.length > 5 && vowels === 0) return true;
+
+  if (words.length < 3) {
+    const commonWords = ['i', 'built', 'used', 'my', 'the', 'a', 'in', 'and', 'to', 'for', 'we', 'with', 'tested', 'code', 'database', 'model', 'system'];
+    const hasRecognizedWord = words.some(w => techKeywords.includes(w.toLowerCase()) || commonWords.includes(w.toLowerCase()));
+    if (!hasRecognizedWord) return true;
+  }
+
+  return false;
+}
+
 function generateHeuristicAnswerEvaluation(questionText, userAnswer) {
+  if (isGibberishOrTrivial(userAnswer)) {
+    return {
+      score: 5,
+      technicalScore: 0,
+      communicationScore: 5,
+      relevanceScore: 0,
+      feedback: `The submitted response ("${(userAnswer || '').trim().slice(0, 30)}") appears to be random keystrokes or unintelligible text and does not address the question. In an interview, please provide a coherent technical explanation.`,
+      keyPointsMentioned: [],
+      missedPoints: [
+        "Directly addressing the question: " + (questionText.length > 80 ? questionText.slice(0, 80) + '...' : questionText),
+        "Providing technical concepts, tools, and concrete architecture examples"
+      ],
+      idealAnswerSummary: "An exemplary answer defines the core technical mechanism, explains a real-world scenario with architectural choices, and discusses performance, scalability, and error resilience."
+    };
+  }
+
   const words = (userAnswer || '').trim().split(/\s+/).filter(Boolean);
   const length = words.length;
 

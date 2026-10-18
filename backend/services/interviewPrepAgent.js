@@ -483,10 +483,17 @@ Question: "${qText}"
 Candidate's Answer: "${userAnswer}"
 Ideal Concepts to Cover: ${JSON.stringify(idealPoints)}
 
-Evaluate strictly on 3 dimensions (0 - 100):
-1. technicalCorrectness: Technical accuracy, depth of explanation, correct terminology.
-2. communicationClarity: Logical progression, structured delivery, concise articulation.
-3. relevanceAndCompleteness: Directly answered what was asked without wandering off-topic.
+CRITICAL EVALUATION RULES:
+1. If the candidate's answer is gibberish, nonsensical characters (e.g. "fsefesd", "asdf", "qwerty"), keyboard mashing, blank, or completely off-topic:
+   - Score overallScore, technicalScore, communicationScore, and relevanceScore 0 to 5.
+   - "strengthsHighlighted" MUST be empty []. Never invent or falsely claim strengths for gibberish.
+   - In "feedback", explicitly state that the answer was random keystrokes or unintelligible and failed to address the question.
+2. If real answer, evaluate strictly on 3 dimensions (0 - 100):
+   - technicalScore: Technical accuracy, depth of explanation, correct terminology.
+   - communicationScore: Logical progression, structured delivery, concise articulation.
+   - relevanceScore: Directly answered what was asked without wandering off-topic.
+   - "strengthsHighlighted": list only the specific concepts the candidate actually mentioned.
+   - "missedConcepts": list the specific expected concepts they omitted.
 
 Return valid JSON:
 {
@@ -494,24 +501,18 @@ Return valid JSON:
   "technicalScore": 86,
   "communicationScore": 84,
   "relevanceScore": 85,
-  "feedback": "2-3 constructive sentences highlighting what went well and specific areas to refine",
-  "strengthsHighlighted": [
-    "Identified correct architectural approach",
-    "Clear explanation of asynchronous state management"
-  ],
-  "missedConcepts": [
-    "Did not mention error handling / fallback strategies",
-    "Could have quantified performance or time complexity"
-  ],
-  "idealModelAnswer": "A concise 3-4 sentence breakdown of what a 100/100 candidate response covers"
+  "feedback": "2-3 constructive sentences evaluating what was articulated and specific areas to refine",
+  "strengthsHighlighted": ["Identified correct approach"],
+  "missedConcepts": ["Did not mention error handling"],
+  "idealModelAnswer": "A concise 3-4 sentence breakdown of what a model candidate response covers"
 }`;
 
-  const systemPrompt = "You are a warm, rigorous engineering hiring lead. Evaluate candidate answers fairly and constructively.";
+  const systemPrompt = "You are a warm, rigorous engineering hiring lead. Evaluate candidate answers fairly, strictly, and constructively. Score random keystrokes as 0.";
 
   let aiResult = await callGemini(prompt, systemPrompt, true);
 
   if (!aiResult || typeof aiResult.overallScore !== 'number') {
-    aiResult = generateHeuristicAnswerEvaluationM3(qText, userAnswer, category);
+    aiResult = generateHeuristicAnswerEvaluationM3(qText, userAnswer, category, idealPoints);
   }
 
   return aiResult;
@@ -521,46 +522,125 @@ Return valid JSON:
 // HEURISTIC EVALUATION FOR INTERVIEW PREPARATION AGENT
 // -------------------------------------------------------------
 
-function generateHeuristicAnswerEvaluationM3(questionText, userAnswer, category) {
+function isGibberishOrTrivial(text) {
+  if (!text || typeof text !== 'string') return true;
+  const trimmed = text.trim();
+  if (trimmed.length < 5) return true;
+  
+  const words = trimmed.split(/\s+/).filter(Boolean);
+  const techKeywords = ['python', 'java', 'react', 'sql', 'docker', 'git', 'c++', 'aws', 'node', 'api', 'http', 'rest', 'oop'];
+  if (words.length === 1) {
+    if (!techKeywords.includes(words[0].toLowerCase())) {
+      return true;
+    }
+  }
+
+  if (/^([a-zA-Z])\1+$/.test(trimmed)) return true;
+  if (/^[bcdfghjklmnpqrstvwxyz]{5,}$/i.test(trimmed)) return true;
+  
+  const vowels = (trimmed.match(/[aeiou]/gi) || []).length;
+  if (trimmed.length > 5 && vowels === 0) return true;
+
+  if (words.length < 3) {
+    const commonWords = ['i', 'built', 'used', 'my', 'the', 'a', 'in', 'and', 'to', 'for', 'we', 'with', 'tested', 'code', 'database', 'model', 'system'];
+    const hasRecognizedWord = words.some(w => techKeywords.includes(w.toLowerCase()) || commonWords.includes(w.toLowerCase()));
+    if (!hasRecognizedWord) return true;
+  }
+
+  return false;
+}
+
+function generateHeuristicAnswerEvaluationM3(questionText, userAnswer, category, idealPoints = []) {
+  if (isGibberishOrTrivial(userAnswer)) {
+    const missed = Array.isArray(idealPoints) && idealPoints.length > 0 
+      ? idealPoints 
+      : [
+          "Directly answering the question: " + (questionText.length > 70 ? questionText.slice(0, 70) + '...' : questionText),
+          "Providing technical reasoning, tools used, and concrete examples"
+        ];
+
+    return {
+      overallScore: 0,
+      technicalScore: 0,
+      communicationScore: 0,
+      relevanceScore: 0,
+      feedback: `The submitted response ("${(userAnswer || '').trim().slice(0, 25)}") appears to be random keystrokes or unintelligible text and does not address the question. In an interview, please formulate a coherent technical response.`,
+      strengthsHighlighted: [],
+      missedConcepts: missed,
+      idealModelAnswer: "A comprehensive answer begins with a clear 1-sentence definition, walks through a concrete architecture/code scenario with trade-offs, and concludes with testing and monitoring best practices."
+    };
+  }
+
+  // Real technical answer processing
   const words = (userAnswer || '').trim().split(/\s+/).filter(Boolean);
   const wordCount = words.length;
+  const lowerAnswer = (userAnswer || '').toLowerCase();
 
-  let techScore = 70;
-  let commScore = 72;
-  let relScore = 75;
+  // Dynamically detect matching expected points
+  const matchedPoints = [];
+  const missedPoints = [];
 
-  if (wordCount > 60) {
-    techScore = Math.min(95, 82 + Math.floor(Math.random() * 10));
-    commScore = Math.min(94, 80 + Math.floor(Math.random() * 12));
-    relScore = Math.min(96, 84 + Math.floor(Math.random() * 10));
-  } else if (wordCount > 25) {
-    techScore = 74 + Math.floor(Math.random() * 8);
-    commScore = 76 + Math.floor(Math.random() * 8);
-    relScore = 78 + Math.floor(Math.random() * 8);
+  if (Array.isArray(idealPoints) && idealPoints.length > 0) {
+    for (const pt of idealPoints) {
+      const ptWords = pt.toLowerCase().split(/\s+/).filter(w => w.length > 3);
+      const hasMatch = ptWords.some(w => lowerAnswer.includes(w));
+      if (hasMatch) {
+        matchedPoints.push(pt);
+      } else {
+        missedPoints.push(pt);
+      }
+    }
+  }
+
+  let techScore = 60;
+  let commScore = 65;
+  let relScore = 65;
+
+  if (matchedPoints.length > 0) {
+    const matchRatio = matchedPoints.length / idealPoints.length;
+    techScore = Math.min(95, Math.round(65 + matchRatio * 30));
+    relScore = Math.min(95, Math.round(70 + matchRatio * 25));
+    commScore = Math.min(92, Math.round(65 + (wordCount > 30 ? 20 : 10)));
+  } else if (wordCount > 50) {
+    techScore = 75;
+    commScore = 80;
+    relScore = 72;
+  } else if (wordCount > 20) {
+    techScore = 65;
+    commScore = 70;
+    relScore = 65;
   } else {
-    techScore = Math.max(45, 50 + wordCount);
-    commScore = Math.max(50, 52 + wordCount);
-    relScore = Math.max(55, 55 + wordCount);
+    techScore = 50;
+    commScore = 55;
+    relScore = 50;
   }
 
   const overallScore = Math.round((techScore * 0.45) + (commScore * 0.30) + (relScore * 0.25));
+
+  const strengths = matchedPoints.length > 0 
+    ? matchedPoints.map(p => `Addressed: ${p}`)
+    : [
+        `Maintained an engineering-oriented response flow`,
+        `Demonstrated technical intent relevant to ${category}`
+      ];
+
+  const missed = missedPoints.length > 0
+    ? missedPoints
+    : [
+        "Could have explicitly outlined edge cases or potential failure modes",
+        "Consider mentioning concrete performance benchmarks or testing verification"
+      ];
 
   return {
     overallScore,
     technicalScore: techScore,
     communicationScore: commScore,
     relevanceScore: relScore,
-    feedback: wordCount > 35
-      ? `Strong, well-structured response. You clearly articulated the core principles of ${category} reasoning and used appropriate engineering terminology.`
-      : `Good starting intuition, but the answer lacks technical depth and concrete real-world examples. Expanding on trade-offs and error handling will significantly boost your score.`,
-    strengthsHighlighted: [
-      `Directly addressed the fundamental concept of the question`,
-      `Maintained a clear, professional tone and logical explanation flow`
-    ],
-    missedConcepts: [
-      `Could have explicitly outlined edge cases or potential failure modes`,
-      `Consider mentioning concrete performance benchmarks or testing verification`
-    ],
+    feedback: matchedPoints.length > 0
+      ? `Good answer addressing key aspects of ${category}. You highlighted ${matchedPoints[0]} and showed relevant reasoning.`
+      : `Reasonable initial attempt, but the response would benefit from deeper technical specificity, concrete tools, and structured trade-offs.`,
+    strengthsHighlighted: strengths,
+    missedConcepts: missed,
     idealModelAnswer: `A comprehensive answer begins with a clear 1-sentence definition, walks through a concrete architecture/code scenario with trade-offs, and concludes with testing and monitoring best practices.`
   };
 }
