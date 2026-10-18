@@ -7,6 +7,7 @@ import {
   Sun,
   Moon
 } from 'lucide-react';
+import brandLogo from '../assets/careerpulse_logo.png';
 
 export default function Navbar({ 
   activeTab, 
@@ -61,7 +62,7 @@ export default function Navbar({
               style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', cursor: 'pointer' }}
             >
               <img 
-                src="/careerpulse_logo.png" 
+                src={brandLogo} 
                 alt="CareerPulse AI Logo" 
                 style={{
                   width: '2.4rem',

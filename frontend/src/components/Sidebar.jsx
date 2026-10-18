@@ -21,6 +21,7 @@ import {
   PanelLeftOpen,
   ClipboardList
 } from 'lucide-react';
+import brandLogo from '../assets/careerpulse_logo.png';
 
 export default function Sidebar({ activeTab, setActiveTab, isCollapsed, setIsCollapsed }) {
   const { user, logout } = useAuth();
@@ -87,7 +88,7 @@ export default function Sidebar({ activeTab, setActiveTab, isCollapsed, setIsCol
               style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', cursor: 'pointer' }}
             >
               <img 
-                src="/careerpulse_logo.png" 
+                src={brandLogo} 
                 alt="CareerPulse AI Logo" 
                 style={{
                   width: '2.4rem',
@@ -101,7 +102,8 @@ export default function Sidebar({ activeTab, setActiveTab, isCollapsed, setIsCol
               <div>
                 <div style={{ fontSize: '1.15rem', fontWeight: 800, letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
                   <span>CareerPulse</span>
-                  <span className="gradient-text">AI</span>
+                  <span style={{ color: '#171e19', fontWeight: 900 }}>AI</span>
+                  <span style={{ color: '#ffe17c', fontSize: '1.35rem', lineHeight: 1 }}>.</span>
                 </div>
               </div>
             </div>
@@ -113,7 +115,7 @@ export default function Sidebar({ activeTab, setActiveTab, isCollapsed, setIsCol
               title="CareerPulse AI Dashboard"
             >
               <img 
-                src="/careerpulse_logo.png" 
+                src={brandLogo} 
                 alt="CareerPulse AI Logo" 
                 style={{
                   width: '2.4rem',

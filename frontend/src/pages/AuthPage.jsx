@@ -22,6 +22,7 @@ import {
   Building2,
   ArrowLeft
 } from 'lucide-react';
+import brandLogo from '../assets/careerpulse_logo.png';
 
 const GOOGLE_OAUTH_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '887000506417-t38na8vq0j0qg13vih6dvutohrhh8ivi.apps.googleusercontent.com';
 
@@ -463,7 +464,7 @@ export default function AuthPage({ onSuccess, authMode = 'login', setAuthMode })
         {/* Top Header */}
         <div style={{ textAlign: 'center', marginBottom: '1.75rem' }}>
           <img 
-            src="/careerpulse_logo.png" 
+            src={brandLogo} 
             alt="CareerPulse AI Logo" 
             style={{
               width: '3.6rem',
