@@ -242,12 +242,12 @@ Return strictly valid JSON:
   "atsTargetKeywordAlignment": [
     { "keyword": "Keyword Name", "status": "Integrated naturally", "location": "Skills & Projects" }
   ],
-  "fullMarkdownResume": "Full clean Markdown resume ready to export"
+  "fullMarkdownResume": "Full clean Markdown resume ready to export with standard sections: ## 🎯 PROFESSIONAL SUMMARY, ## 🛠️ TECHNICAL COMPETENCIES, ## 🚀 FEATURED TECHNICAL PROJECTS, ## 🎓 EDUCATION"
 }`;
 
   const systemPrompt = "You are an ATS Optimization & Technical Resume Specialist. Deliver honest, powerful, hallucination-free tailored resumes in JSON.";
 
-  let aiResult = await callGemini(prompt, systemPrompt, true);
+  let aiResult = await callGemini(prompt, systemPrompt, true, { maxOutputTokens: 3500 });
 
   if (!aiResult || !aiResult.tailoredSummary || !aiResult.fullMarkdownResume) {
     // Deterministic High-Efficiency Engine Fallback
@@ -269,6 +269,16 @@ Return strictly valid JSON:
       preferredSkills,
       allTargetKeywords
     });
+  } else if (aiResult.fullMarkdownResume) {
+    if (name && !aiResult.fullMarkdownResume.includes(name)) {
+      aiResult.fullMarkdownResume = `# ${name}\n` + aiResult.fullMarkdownResume;
+    }
+    if (!aiResult.fullMarkdownResume.includes('## 🎯 PROFESSIONAL SUMMARY')) {
+      aiResult.fullMarkdownResume = aiResult.fullMarkdownResume.replace(/##\s*(?:🎯\s*)?PROFESSIONAL\s*SUMMARY/i, '## 🎯 PROFESSIONAL SUMMARY');
+      if (!aiResult.fullMarkdownResume.includes('## 🎯 PROFESSIONAL SUMMARY')) {
+        aiResult.fullMarkdownResume = `## 🎯 PROFESSIONAL SUMMARY\n${aiResult.tailoredSummary}\n\n` + aiResult.fullMarkdownResume;
+      }
+    }
   }
 
   // Calculate ATS Metrics

@@ -476,6 +476,11 @@ export async function evaluateInterviewAnswerM3(question, userAnswer, roleTitle,
   const category = (typeof question === 'object' && question.category) ? question.category : 'Technical';
   const idealPoints = (typeof question === 'object' && question.expectedKeyPoints) ? question.expectedKeyPoints : [];
 
+  // Deterministic guard: if answer is gibberish or trivial keyboard mashing, immediately return 0s
+  if (isGibberishOrTrivial(userAnswer)) {
+    return generateHeuristicAnswerEvaluationM3(qText, userAnswer, category, idealPoints);
+  }
+
   const prompt = `You are a Technical Interview Evaluator.
 Role: ${roleTitle} (${difficulty})
 Question Category: ${category}
@@ -484,8 +489,8 @@ Candidate's Answer: "${userAnswer}"
 Ideal Concepts to Cover: ${JSON.stringify(idealPoints)}
 
 CRITICAL EVALUATION RULES:
-1. If the candidate's answer is gibberish, nonsensical characters (e.g. "fsefesd", "asdf", "qwerty"), keyboard mashing, blank, or completely off-topic:
-   - Score overallScore, technicalScore, communicationScore, and relevanceScore 0 to 5.
+1. If the candidate's answer is gibberish, nonsensical characters, keyboard mashing, blank, or completely off-topic:
+   - Score overallScore, technicalScore, communicationScore, and relevanceScore strictly as 0.
    - "strengthsHighlighted" MUST be empty []. Never invent or falsely claim strengths for gibberish.
    - In "feedback", explicitly state that the answer was random keystrokes or unintelligible and failed to address the question.
 2. If real answer, evaluate strictly on 3 dimensions (0 - 100):
@@ -495,24 +500,38 @@ CRITICAL EVALUATION RULES:
    - "strengthsHighlighted": list only the specific concepts the candidate actually mentioned.
    - "missedConcepts": list the specific expected concepts they omitted.
 
-Return valid JSON:
+Return valid JSON with numeric values strictly between 0 and 100:
 {
-  "overallScore": 85,
-  "technicalScore": 86,
-  "communicationScore": 84,
-  "relevanceScore": 85,
+  "overallScore": <integer between 0 and 100>,
+  "technicalScore": <integer between 0 and 100>,
+  "communicationScore": <integer between 0 and 100>,
+  "relevanceScore": <integer between 0 and 100>,
   "feedback": "2-3 constructive sentences evaluating what was articulated and specific areas to refine",
-  "strengthsHighlighted": ["Identified correct approach"],
-  "missedConcepts": ["Did not mention error handling"],
+  "strengthsHighlighted": ["specific concept correctly articulated"],
+  "missedConcepts": ["specific concept omitted"],
   "idealModelAnswer": "A concise 3-4 sentence breakdown of what a model candidate response covers"
 }`;
 
-  const systemPrompt = "You are a warm, rigorous engineering hiring lead. Evaluate candidate answers fairly, strictly, and constructively. Score random keystrokes as 0.";
+  const systemPrompt = "You are a warm, rigorous engineering hiring lead. Evaluate candidate answers fairly, strictly, and constructively. Score random keystrokes as 0 across all dimensions.";
 
   let aiResult = await callGemini(prompt, systemPrompt, true);
 
   if (!aiResult || typeof aiResult.overallScore !== 'number') {
     aiResult = generateHeuristicAnswerEvaluationM3(qText, userAnswer, category, idealPoints);
+  } else {
+    // Sanitize any score inconsistencies from LLM
+    if (aiResult.overallScore <= 15) {
+      aiResult.overallScore = 0;
+      aiResult.technicalScore = 0;
+      aiResult.communicationScore = 0;
+      aiResult.relevanceScore = 0;
+      aiResult.strengthsHighlighted = [];
+    } else {
+      aiResult.overallScore = Math.min(100, Math.max(0, Math.round(aiResult.overallScore)));
+      aiResult.technicalScore = Math.min(100, Math.max(0, Math.round(aiResult.technicalScore ?? aiResult.overallScore)));
+      aiResult.communicationScore = Math.min(100, Math.max(0, Math.round(aiResult.communicationScore ?? aiResult.overallScore)));
+      aiResult.relevanceScore = Math.min(100, Math.max(0, Math.round(aiResult.relevanceScore ?? aiResult.overallScore)));
+    }
   }
 
   return aiResult;
@@ -528,7 +547,12 @@ function isGibberishOrTrivial(text) {
   if (trimmed.length < 5) return true;
   
   const words = trimmed.split(/\s+/).filter(Boolean);
-  const techKeywords = ['python', 'java', 'react', 'sql', 'docker', 'git', 'c++', 'aws', 'node', 'api', 'http', 'rest', 'oop'];
+  const techKeywords = [
+    'python', 'java', 'react', 'sql', 'docker', 'git', 'c++', 'aws', 'node', 'api', 'http',
+    'rest', 'oop', 'spring', 'boot', 'typescript', 'html', 'css', 'database', 'frontend',
+    'backend', 'openapi', 'redux', 'mapstruct', 'dto', 'kafka', 'redis', 'graphql'
+  ];
+
   if (words.length === 1) {
     if (!techKeywords.includes(words[0].toLowerCase())) {
       return true;
@@ -541,11 +565,19 @@ function isGibberishOrTrivial(text) {
   const vowels = (trimmed.match(/[aeiou]/gi) || []).length;
   if (trimmed.length > 5 && vowels === 0) return true;
 
-  if (words.length < 3) {
-    const commonWords = ['i', 'built', 'used', 'my', 'the', 'a', 'in', 'and', 'to', 'for', 'we', 'with', 'tested', 'code', 'database', 'model', 'system'];
-    const hasRecognizedWord = words.some(w => techKeywords.includes(w.toLowerCase()) || commonWords.includes(w.toLowerCase()));
-    if (!hasRecognizedWord) return true;
-  }
+  const commonWords = [
+    'i', 'built', 'used', 'my', 'the', 'a', 'an', 'in', 'and', 'to', 'for', 'we', 'with', 'tested', 'code', 'database',
+    'model', 'system', 'use', 'by', 'on', 'at', 'from', 'as', 'is', 'are', 'was', 'were', 'have', 'has', 'had', 'it',
+    'this', 'that', 'our', 'project', 'application', 'service', 'client', 'server', 'data', 'function', 'class', 'method',
+    'table', 'query', 'cache', 'request', 'response', 'component', 'state', 'hook', 'context', 'promise', 'async'
+  ];
+
+  const hasRecognizedWord = words.some(w => {
+    const cleanW = w.toLowerCase().replace(/[^a-z]/g, '');
+    return techKeywords.includes(cleanW) || commonWords.includes(cleanW) || cleanW.length >= 7;
+  });
+
+  if (!hasRecognizedWord) return true;
 
   return false;
 }
@@ -564,7 +596,7 @@ function generateHeuristicAnswerEvaluationM3(questionText, userAnswer, category,
       technicalScore: 0,
       communicationScore: 0,
       relevanceScore: 0,
-      feedback: `The submitted response ("${(userAnswer || '').trim().slice(0, 25)}") appears to be random keystrokes or unintelligible text and does not address the question. In an interview, please formulate a coherent technical response.`,
+      feedback: `The candidate's response consists of random keystrokes or unintelligible text ("${(userAnswer || '').trim().slice(0, 30)}") and fails to address the question. In an interview, please provide a coherent technical response.`,
       strengthsHighlighted: [],
       missedConcepts: missed,
       idealModelAnswer: "A comprehensive answer begins with a clear 1-sentence definition, walks through a concrete architecture/code scenario with trade-offs, and concludes with testing and monitoring best practices."

@@ -253,6 +253,10 @@ Return JSON in this format:
  * 4. AI Answer Evaluation
  */
 export async function evaluateInterviewAnswer(questionText, userAnswer, roleTitle, difficulty) {
+  if (isGibberishOrTrivial(userAnswer)) {
+    return generateHeuristicAnswerEvaluation(questionText, userAnswer);
+  }
+
   const prompt = `Evaluate the candidate's answer for an internship interview question.
 Role: ${roleTitle} (${difficulty} level)
 Question: "${questionText}"
@@ -260,7 +264,7 @@ Candidate's Answer: "${userAnswer}"
 
 CRITICAL RIGOR RULES:
 1. If the candidate's answer is gibberish, nonsensical characters (e.g. "fsefesd", "asdf"), keyboard mashing, or completely blank/irrelevant:
-   - Score overallScore, technicalScore, communicationScore, and relevanceScore 0 to 5.
+   - Score score, technicalScore, communicationScore, and relevanceScore strictly as 0.
    - "keyPointsMentioned" MUST be empty []. Do NOT give false praise.
    - In "feedback", explicitly state that the response was unintelligible or random keystrokes.
 2. If real answer, evaluate strictly on:
@@ -268,22 +272,34 @@ CRITICAL RIGOR RULES:
    - Communication clarity and structure (0-100)
    - Relevance and completeness to what was asked (0-100)
 
-Return JSON:
+Return JSON with numeric scores strictly between 0 and 100:
 {
-  "score": 85,
-  "technicalScore": 88,
-  "communicationScore": 82,
-  "relevanceScore": 85,
+  "score": <integer between 0 and 100>,
+  "technicalScore": <integer between 0 and 100>,
+  "communicationScore": <integer between 0 and 100>,
+  "relevanceScore": <integer between 0 and 100>,
   "feedback": "Concise 2-3 sentence assessment of the response",
-  "keyPointsMentioned": ["Point 1", "Point 2"],
-  "missedPoints": ["Point candidate forgot"],
+  "keyPointsMentioned": ["specific technical point 1"],
+  "missedPoints": ["point candidate omitted"],
   "idealAnswerSummary": "A concise breakdown of what an exemplary answer would cover"
 }`;
 
   const systemPrompt = "You are a warm, constructive, and rigorous technical interviewer. Score candidates fairly based on depth, clarity, and accuracy.";
 
-  const aiResult = await callGemini(prompt, systemPrompt, true);
+  let aiResult = await callGemini(prompt, systemPrompt, true);
   if (aiResult && typeof aiResult.score === 'number') {
+    if (aiResult.score <= 15) {
+      aiResult.score = 0;
+      aiResult.technicalScore = 0;
+      aiResult.communicationScore = 0;
+      aiResult.relevanceScore = 0;
+      aiResult.keyPointsMentioned = [];
+    } else {
+      aiResult.score = Math.min(100, Math.max(0, Math.round(aiResult.score)));
+      aiResult.technicalScore = Math.min(100, Math.max(0, Math.round(aiResult.technicalScore ?? aiResult.score)));
+      aiResult.communicationScore = Math.min(100, Math.max(0, Math.round(aiResult.communicationScore ?? aiResult.score)));
+      aiResult.relevanceScore = Math.min(100, Math.max(0, Math.round(aiResult.relevanceScore ?? aiResult.score)));
+    }
     return aiResult;
   }
 

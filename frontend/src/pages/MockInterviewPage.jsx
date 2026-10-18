@@ -62,7 +62,12 @@ export default function MockInterviewPage({ selectedInternshipId, setSelectedInt
   const [isRecording, setIsRecording] = useState(false);
   const [recognitionInstance, setRecognitionInstance] = useState(null);
   const baseTextRef = useRef('');
+  const userAnswerRef = useRef('');
   const pageTopRef = useRef(null);
+
+  useEffect(() => {
+    userAnswerRef.current = userAnswer;
+  }, [userAnswer]);
 
   // Resume status validation
   const [hasResume, setHasResume] = useState(null);
@@ -147,63 +152,90 @@ export default function MockInterviewPage({ selectedInternshipId, setSelectedInt
   }
 
   function setupSpeechRecognition() {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const SpeechRecognition = typeof window !== 'undefined' ? (window.SpeechRecognition || window.webkitSpeechRecognition) : null;
     if (SpeechRecognition) {
-      const rec = new SpeechRecognition();
-      rec.continuous = true;
-      rec.interimResults = true;
-      rec.lang = 'en-US';
+      try {
+        const rec = new SpeechRecognition();
+        rec.continuous = true;
+        rec.interimResults = true;
+        rec.lang = 'en-US';
 
-      rec.onresult = (event) => {
-        let finalTranscripts = '';
-        let interimTranscripts = '';
+        rec.onresult = (event) => {
+          let finalTranscripts = '';
+          let interimTranscripts = '';
 
-        for (let i = 0; i < event.results.length; i++) {
-          const result = event.results[i];
-          if (result.isFinal) {
-            finalTranscripts += result[0].transcript + ' ';
-          } else {
-            interimTranscripts += result[0].transcript;
+          for (let i = 0; i < event.results.length; i++) {
+            const result = event.results[i];
+            if (result.isFinal) {
+              finalTranscripts += result[0].transcript + ' ';
+            } else {
+              interimTranscripts += result[0].transcript;
+            }
           }
-        }
 
-        const fullSpoken = (finalTranscripts + interimTranscripts).trim();
-        const base = baseTextRef.current ? baseTextRef.current.trim() : '';
-        const combined = base ? `${base} ${fullSpoken}` : fullSpoken;
-        setUserAnswer(combined);
-      };
+          const fullSpoken = (finalTranscripts + interimTranscripts).trim();
+          const base = (baseTextRef.current || '').trim();
+          const combined = base ? `${base} ${fullSpoken}` : fullSpoken;
+          setUserAnswer(combined);
+        };
 
-      rec.onerror = (event) => {
-        console.warn('Speech recognition error:', event.error);
-        setIsRecording(false);
-      };
+        rec.onerror = (event) => {
+          console.warn('Speech recognition error:', event.error);
+          setIsRecording(false);
+          if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+            notify.error('Microphone access was denied. Please allow microphone permissions in your browser URL bar.');
+          } else if (event.error === 'network') {
+            notify.error('Voice dictation network error. Please try again or type your answer.');
+          }
+        };
 
-      rec.onend = () => {
-        setIsRecording(false);
-      };
+        rec.onend = () => {
+          setIsRecording(false);
+        };
 
-      setRecognitionInstance(rec);
+        setRecognitionInstance(rec);
+        return rec;
+      } catch (e) {
+        console.warn('Could not initialize SpeechRecognition:', e);
+      }
     }
+    return null;
   }
 
   const toggleRecording = () => {
-    if (!recognitionInstance) {
-      notify.info('Speech recognition is not supported in this browser. Please type your response.');
+    const SpeechRecognition = typeof window !== 'undefined' ? (window.SpeechRecognition || window.webkitSpeechRecognition) : null;
+    if (!SpeechRecognition) {
+      notify.info('Speech recognition is not supported in this browser. Please use Chrome, Edge, or type your response.');
       return;
     }
+
     if (isRecording) {
-      recognitionInstance.stop();
+      if (recognitionInstance) {
+        try {
+          recognitionInstance.stop();
+        } catch (e) {}
+      }
       setIsRecording(false);
-      baseTextRef.current = userAnswerRef.current;
+      baseTextRef.current = userAnswerRef.current || '';
       notify.info('Voice recording paused.');
     } else {
       try {
-        baseTextRef.current = userAnswerRef.current;
-        recognitionInstance.start();
+        baseTextRef.current = userAnswerRef.current || '';
+        let rec = recognitionInstance;
+        if (!rec) {
+          rec = setupSpeechRecognition();
+        }
+        if (!rec) {
+          notify.error('Unable to initialize speech recognition engine.');
+          return;
+        }
+        rec.start();
         setIsRecording(true);
-        notify.success('Microphone listening! Speak clearly...');
+        notify.success('🎙️ Microphone active! Speak clearly to dictate your response.');
       } catch (err) {
-        console.error(err);
+        console.error('Speech recognition start error:', err);
+        setIsRecording(false);
+        notify.error('Could not activate microphone: ' + (err.message || 'Please check browser microphone permissions.'));
       }
     }
   };
@@ -282,6 +314,7 @@ export default function MockInterviewPage({ selectedInternshipId, setSelectedInt
     } else {
       setUserAnswer('');
       baseTextRef.current = '';
+      userAnswerRef.current = '';
       setCurrentEvaluation(null);
       setShowHint(false);
       setStage('question');

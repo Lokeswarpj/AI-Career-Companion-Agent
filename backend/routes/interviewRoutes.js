@@ -270,24 +270,46 @@ router.post('/complete/:sessionId', authenticateToken, async (req, res) => {
       [sessionId]
     );
 
-    const answeredExchanges = exchanges.filter(e => typeof e.score === 'number' && e.score > 0);
-    const count = answeredExchanges.length || 1;
+    const answeredExchanges = exchanges.filter(e => e.user_answer !== null && e.user_answer !== undefined && typeof e.score === 'number');
+    const count = answeredExchanges.length || exchanges.length || 1;
 
     const avgOverall = Math.round(answeredExchanges.reduce((acc, e) => acc + (e.score || 0), 0) / count);
     const avgTech = Math.round(answeredExchanges.reduce((acc, e) => acc + (e.technical_score || 0), 0) / count);
     const avgComm = Math.round(answeredExchanges.reduce((acc, e) => acc + (e.communication_score || 0), 0) / count);
     const avgRel = Math.round(answeredExchanges.reduce((acc, e) => acc + (e.relevance_score || 0), 0) / count);
 
-    const strengths = [
-      avgTech >= 75 ? 'Solid understanding of core software paradigms and syntax' : 'Good foundational awareness of basic problem types',
-      avgComm >= 75 ? 'Structured and articulate communication style' : 'Clear and concise responses',
-      'Demonstrated structured thinking across technical and behavioral questions'
-    ];
+    let strengths = [];
+    let improvements = [];
 
-    const improvements = [
-      avgTech < 80 ? 'Deepen practical knowledge with concrete implementation examples' : 'Explore advanced edge cases and time-complexity trade-offs',
-      avgComm < 80 ? 'Structure technical answers with the STAR framework' : 'Practice explaining architectural decisions succinctly'
-    ];
+    if (avgOverall >= 75) {
+      strengths = [
+        avgTech >= 75 ? 'Solid understanding of core software paradigms and syntax' : 'Good foundational awareness of technical concepts',
+        avgComm >= 75 ? 'Structured and articulate communication style' : 'Clear and concise responses',
+        'Demonstrated structured engineering mindset across technical questions'
+      ];
+      improvements = [
+        'Explore advanced distributed systems edge cases and performance trade-offs',
+        'Prepare 2-3 deep-dive architecture diagrams for complex design questions'
+      ];
+    } else if (avgOverall >= 40) {
+      strengths = [
+        'Attempted technical questions with foundational intent',
+        'Maintained active participation throughout the mock session'
+      ];
+      improvements = [
+        'Deepen hands-on technical syntax and concrete real-world implementation examples',
+        'Structure answers using the STAR framework (Situation, Task, Action, Result)'
+      ];
+    } else {
+      strengths = [
+        'Completed the mock interview session under timed conditions'
+      ];
+      improvements = [
+        'Formulate complete, coherent technical explanations for every question',
+        'Avoid submitting empty or random keystrokes during formal evaluations',
+        'Review core role-specific requirements before re-attempting'
+      ];
+    }
 
     const recommendations = [
       `Review key architectural patterns for ${session.role_title}`,
@@ -295,7 +317,11 @@ router.post('/complete/:sessionId', authenticateToken, async (req, res) => {
       'Prepare 2-3 project deep-dives with metrics and architecture diagrams'
     ];
 
-    const summary = `Overall interview performance score: ${avgOverall}/100. Demonstrated solid ${session.interview_type.toLowerCase()} competency with key strengths in ${avgTech >= avgComm ? 'technical fundamentals' : 'articulate reasoning'}.`;
+    const summary = avgOverall >= 75
+      ? `Overall interview performance score: ${avgOverall}/100. Demonstrated strong ${session.interview_type.toLowerCase()} competency with key strengths in ${avgTech >= avgComm ? 'technical fundamentals' : 'articulate reasoning'}.`
+      : avgOverall >= 40
+      ? `Overall interview performance score: ${avgOverall}/100. Moderate competency demonstrated. Further preparation on core technical concepts and structured delivery will boost scores.`
+      : `Overall interview performance score: ${avgOverall}/100. Substantial review required. Multiple questions received minimal, off-topic, or unintelligible responses.`;
 
     await db.run(
       `UPDATE interview_sessions SET
