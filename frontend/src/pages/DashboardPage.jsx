@@ -171,7 +171,7 @@ export default function DashboardPage({ setActiveTab, setSelectedInternshipId })
             {recommendations.length}
           </div>
           <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>
-            Highest match: <strong style={{ color: '#ffffff' }}>{recommendations[0]?.matchScore || 0}%</strong>
+            Highest match: <strong style={{ color: 'var(--text-primary)' }}>{recommendations[0]?.matchScore || 0}%</strong>
           </div>
           <div 
             onClick={() => setActiveTab('matching')}

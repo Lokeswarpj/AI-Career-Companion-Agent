@@ -563,8 +563,8 @@ export default function ApplicationsPage({ setActiveTab, setSelectedInternshipId
               <div
                 key={col.id}
                 style={{
-                  background: 'rgba(15, 23, 42, 0.65)',
-                  border: '1px solid rgba(255, 255, 255, 0.08)',
+                  background: 'var(--bg-tertiary)',
+                  border: '1px solid var(--border-card)',
                   borderRadius: 'var(--radius-lg)',
                   padding: '1.25rem',
                   display: 'flex',
@@ -574,7 +574,7 @@ export default function ApplicationsPage({ setActiveTab, setSelectedInternshipId
                 }}
               >
                 {/* Column Header */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '0.75rem', borderBottom: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '0.75rem', borderBottom: '1px solid var(--border-subtle)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <div style={{
                       width: '28px',
@@ -687,7 +687,7 @@ export default function ApplicationsPage({ setActiveTab, setSelectedInternshipId
                         }}
                       >
                         {Object.keys(STAGE_CONFIG).map(st => (
-                          <option key={st} value={st} style={{ background: '#0f172a', color: '#fff' }}>
+                          <option key={st} value={st}>
                             {st}
                           </option>
                         ))}
@@ -784,7 +784,7 @@ export default function ApplicationsPage({ setActiveTab, setSelectedInternshipId
           left: 0,
           right: 0,
           bottom: 0,
-          background: 'rgba(0, 0, 0, 0.75)',
+          background: 'rgba(15, 23, 42, 0.45)',
           backdropFilter: 'blur(8px)',
           display: 'flex',
           alignItems: 'center',
@@ -1172,7 +1172,7 @@ function KanbanCard({ app, onEdit, onDelete, onStatusChange, setActiveTab, setSe
           }}
         >
           {allStages.map(s => (
-            <option key={s} value={s} style={{ background: '#0f172a', color: '#fff' }}>
+            <option key={s} value={s}>
               {s}
             </option>
           ))}

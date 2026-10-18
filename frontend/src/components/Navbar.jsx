@@ -3,10 +3,20 @@ import { useAuth } from '../context/AuthContext';
 import { 
   Sparkles, 
   LogIn, 
-  UserPlus 
+  UserPlus,
+  Sun,
+  Moon
 } from 'lucide-react';
 
-export default function Navbar({ activeTab, setActiveTab, isSidebarCollapsed, setIsSidebarCollapsed, setAuthMode }) {
+export default function Navbar({ 
+  activeTab, 
+  setActiveTab, 
+  isSidebarCollapsed, 
+  setIsSidebarCollapsed, 
+  setAuthMode,
+  theme = 'light',
+  toggleTheme
+}) {
   const { isAuthenticated } = useAuth();
 
   const isLanding = activeTab === 'landing';
@@ -30,7 +40,7 @@ export default function Navbar({ activeTab, setActiveTab, isSidebarCollapsed, se
         top: 0, 
         zIndex: 900, 
         height: '4.25rem',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.08)'
+        borderBottom: '1px solid var(--border-subtle)'
       }}
     >
       <div 
@@ -58,8 +68,8 @@ export default function Navbar({ activeTab, setActiveTab, isSidebarCollapsed, se
                   height: '2.4rem',
                   borderRadius: '10px',
                   objectFit: 'cover',
-                  boxShadow: '0 0 14px rgba(99, 102, 241, 0.45)',
-                  border: '1px solid rgba(255, 255, 255, 0.15)'
+                  boxShadow: '0 2px 10px rgba(79, 70, 229, 0.25)',
+                  border: '1px solid var(--border-subtle)'
                 }}
               />
               <div>
@@ -74,6 +84,38 @@ export default function Navbar({ activeTab, setActiveTab, isSidebarCollapsed, se
 
         {/* Right Side: Header actions based on page context */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          
+          {/* Quick Theme Switcher Pill (Presentation Light / Dark) */}
+          {toggleTheme && (
+            <button
+              onClick={toggleTheme}
+              className="btn btn-outline btn-sm"
+              title={theme === 'dark' ? 'Switch to Light Presentation Mode' : 'Switch to Dark Mode'}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+                padding: '0.35rem 0.65rem',
+                borderRadius: 'var(--radius-md)',
+                borderColor: 'var(--border-card)',
+                background: 'var(--bg-secondary)',
+                fontSize: '0.78rem'
+              }}
+            >
+              {theme === 'dark' ? (
+                <>
+                  <Sun size={15} color="#fbbf24" />
+                  <span style={{ fontWeight: 600 }}>Light UI</span>
+                </>
+              ) : (
+                <>
+                  <Moon size={15} color="var(--accent-primary)" />
+                  <span style={{ fontWeight: 600 }}>Dark UI</span>
+                </>
+              )}
+            </button>
+          )}
+
           {isLanding ? (
             isAuthenticated ? (
               <button 
@@ -83,8 +125,7 @@ export default function Navbar({ activeTab, setActiveTab, isSidebarCollapsed, se
                   display: 'flex', 
                   alignItems: 'center', 
                   gap: '0.45rem',
-                  fontWeight: 700,
-                  boxShadow: '0 2px 10px rgba(99, 102, 241, 0.35)'
+                  fontWeight: 700
                 }}
               >
                 <Sparkles size={15} />
@@ -100,8 +141,7 @@ export default function Navbar({ activeTab, setActiveTab, isSidebarCollapsed, se
                     display: 'flex', 
                     alignItems: 'center', 
                     gap: '0.45rem',
-                    fontWeight: 700,
-                    boxShadow: '0 2px 10px rgba(99, 102, 241, 0.35)'
+                    fontWeight: 700
                   }}
                 >
                   <UserPlus size={15} />
@@ -116,11 +156,11 @@ export default function Navbar({ activeTab, setActiveTab, isSidebarCollapsed, se
                     display: 'flex', 
                     alignItems: 'center', 
                     gap: '0.45rem',
-                    borderColor: 'rgba(255, 255, 255, 0.2)',
+                    borderColor: 'var(--border-card)',
                     fontWeight: 600
                   }}
                 >
-                  <LogIn size={15} color="#818cf8" />
+                  <LogIn size={15} color="var(--accent-primary)" />
                   <span>Log In</span>
                 </button>
               </>
@@ -151,7 +191,7 @@ export default function Navbar({ activeTab, setActiveTab, isSidebarCollapsed, se
                 title="Log in with another account"
                 style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', padding: '0.4rem 0.7rem' }}
               >
-                <LogIn size={14} color="#818cf8" />
+                <LogIn size={14} color="var(--accent-primary)" />
                 <span>Switch Account</span>
               </button>
             </>

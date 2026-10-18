@@ -25,7 +25,7 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = '65
       left: 0,
       right: 0,
       bottom: 0,
-      background: 'rgba(5, 8, 15, 0.8)',
+      background: 'rgba(15, 23, 42, 0.45)',
       backdropFilter: 'blur(8px)',
       display: 'flex',
       alignItems: 'center',

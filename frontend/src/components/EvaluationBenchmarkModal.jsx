@@ -273,7 +273,7 @@ export default function EvaluationBenchmarkModal({ isOpen, onClose }) {
                           height: '24px',
                           borderRadius: '50%',
                           background: isTop1 ? 'var(--accent-emerald)' : 'var(--bg-secondary)',
-                          color: isTop1 ? '#000000' : 'var(--text-primary)',
+                          color: isTop1 ? '#ffffff' : 'var(--text-primary)',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',

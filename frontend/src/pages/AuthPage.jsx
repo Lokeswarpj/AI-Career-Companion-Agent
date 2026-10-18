@@ -567,24 +567,24 @@ export default function AuthPage({ onSuccess, authMode = 'login', setAuthMode })
                 justifyContent: 'center',
                 gap: '0.75rem',
                 padding: '0.75rem 1rem',
-                background: 'rgba(255, 255, 255, 0.05)',
-                border: '1px solid rgba(255, 255, 255, 0.15)',
+                background: '#ffffff',
+                border: '1px solid var(--border-card)',
                 borderRadius: 'var(--radius-md)',
                 color: 'var(--text-primary)',
                 fontWeight: 600,
                 fontSize: '0.92rem',
                 cursor: 'pointer',
                 transition: 'all 0.2s',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                boxShadow: '0 1px 3px rgba(15, 23, 42, 0.05)',
                 marginBottom: '1.25rem'
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
-                e.currentTarget.style.borderColor = 'rgba(99, 102, 241, 0.4)';
+                e.currentTarget.style.background = 'var(--bg-tertiary)';
+                e.currentTarget.style.borderColor = 'var(--accent-primary)';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.15)';
+                e.currentTarget.style.background = '#ffffff';
+                e.currentTarget.style.borderColor = 'var(--border-card)';
               }}
             >
               <svg width="18" height="18" viewBox="0 0 24 24">
@@ -726,9 +726,9 @@ export default function AuthPage({ onSuccess, authMode = 'login', setAuthMode })
                 <div style={{
                   marginTop: '0.75rem',
                   padding: '0.75rem',
-                  background: 'rgba(0,0,0,0.25)',
+                  background: 'var(--bg-tertiary)',
                   borderRadius: '10px',
-                  border: '1px solid rgba(255,255,255,0.08)'
+                  border: '1px solid var(--border-subtle)'
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
                     <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>Password Strength:</span>
@@ -738,7 +738,7 @@ export default function AuthPage({ onSuccess, authMode = 'login', setAuthMode })
                   </div>
 
                   {/* Strength Bar */}
-                  <div style={{ height: '5px', background: 'rgba(255,255,255,0.1)', borderRadius: '3px', overflow: 'hidden', marginBottom: '0.65rem' }}>
+                  <div style={{ height: '5px', background: 'var(--border-subtle)', borderRadius: '3px', overflow: 'hidden', marginBottom: '0.65rem' }}>
                     <div style={{ height: '100%', width: `${strength.percent}%`, background: strength.color, transition: 'all 0.3s ease' }} />
                   </div>
 
@@ -1023,7 +1023,7 @@ export default function AuthPage({ onSuccess, authMode = 'login', setAuthMode })
         <div style={{
           position: 'fixed',
           inset: 0,
-          background: 'rgba(0, 0, 0, 0.75)',
+          background: 'rgba(15, 23, 42, 0.45)',
           backdropFilter: 'blur(8px)',
           display: 'flex',
           alignItems: 'center',
@@ -1036,10 +1036,10 @@ export default function AuthPage({ onSuccess, authMode = 'login', setAuthMode })
             style={{
               width: '100%',
               maxWidth: '460px',
-              background: '#131827',
+              background: '#ffffff',
               borderRadius: '20px',
-              border: '1px solid rgba(255, 255, 255, 0.15)',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 30px rgba(66, 133, 244, 0.15)',
+              border: '1px solid var(--border-card)',
+              boxShadow: '0 25px 50px -12px rgba(15, 23, 42, 0.15)',
               overflow: 'hidden'
             }}
           >
@@ -1048,7 +1048,7 @@ export default function AuthPage({ onSuccess, authMode = 'login', setAuthMode })
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              borderBottom: '1px solid rgba(255, 255, 255, 0.08)'
+              borderBottom: '1px solid var(--border-subtle)'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                 <svg width="24" height="24" viewBox="0 0 24 24">
@@ -1058,14 +1058,14 @@ export default function AuthPage({ onSuccess, authMode = 'login', setAuthMode })
                   <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
                 </svg>
                 <div>
-                  <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0, color: '#ffffff' }}>Choose a Google Account</h3>
+                  <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>Choose a Google Account</h3>
                   <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: 0 }}>to auto-fill your profile data</p>
                 </div>
               </div>
               <button
                 onClick={() => setShowGoogleModal(false)}
                 style={{
-                  background: 'rgba(255, 255, 255, 0.06)',
+                  background: 'var(--bg-tertiary)',
                   border: 'none',
                   borderRadius: '50%',
                   width: '32px',

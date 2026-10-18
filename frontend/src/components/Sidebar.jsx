@@ -55,17 +55,17 @@ export default function Sidebar({ activeTab, setActiveTab, isCollapsed, setIsCol
         left: 0,
         bottom: 0,
         width: isCollapsed ? '4.5rem' : '16rem',
-        background: 'rgba(11, 15, 25, 0.94)',
+        background: 'var(--bg-glass)',
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
-        borderRight: '1px solid rgba(255, 255, 255, 0.1)',
+        borderRight: '1px solid var(--border-card)',
         zIndex: 1000,
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
         transition: 'width 0.28s cubic-bezier(0.4, 0, 0.2, 1)',
         overflowX: 'hidden',
-        boxShadow: '4px 0 25px rgba(0, 0, 0, 0.45)'
+        boxShadow: '4px 0 25px rgba(15, 23, 42, 0.05)'
       }}
     >
       {/* 1. TOP HEADER: Logo & Collapse Toggle */}
@@ -76,7 +76,7 @@ export default function Sidebar({ activeTab, setActiveTab, isCollapsed, setIsCol
             alignItems: 'center',
             justifyContent: isCollapsed ? 'center' : 'space-between',
             padding: isCollapsed ? '1.15rem 0' : '1.15rem 1rem',
-            borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+            borderBottom: '1px solid var(--border-subtle)',
             height: '4.25rem'
           }}
         >
@@ -139,7 +139,7 @@ export default function Sidebar({ activeTab, setActiveTab, isCollapsed, setIsCol
                 alignItems: 'center',
                 justifyContent: 'center',
                 color: 'var(--text-secondary)',
-                border: '1px solid rgba(255, 255, 255, 0.1)'
+                border: '1px solid var(--border-subtle)'
               }}
               title="Minimize Sidebar"
             >
@@ -160,9 +160,9 @@ export default function Sidebar({ activeTab, setActiveTab, isCollapsed, setIsCol
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: '#818cf8',
-                border: '1px solid rgba(99, 102, 241, 0.3)',
-                background: 'rgba(99, 102, 241, 0.1)'
+                color: 'var(--accent-primary)',
+                border: '1px solid var(--border-card)',
+                background: 'var(--bg-tertiary)'
               }}
               title="Expand Sidebar"
             >
@@ -194,15 +194,15 @@ export default function Sidebar({ activeTab, setActiveTab, isCollapsed, setIsCol
                     borderRadius: 'var(--radius-md)',
                     border: 'none',
                     background: isActive 
-                      ? 'linear-gradient(135deg, rgba(99, 102, 241, 0.25) 0%, rgba(6, 182, 212, 0.15) 100%)' 
-                      : (isHovered ? 'rgba(255, 255, 255, 0.06)' : 'transparent'),
-                    color: isActive ? '#ffffff' : (isHovered ? 'var(--text-primary)' : 'var(--text-secondary)'),
+                      ? 'linear-gradient(135deg, rgba(79, 70, 229, 0.1) 0%, rgba(2, 132, 199, 0.06) 100%)' 
+                      : (isHovered ? 'var(--bg-tertiary)' : 'transparent'),
+                    color: isActive ? 'var(--accent-primary)' : (isHovered ? 'var(--text-primary)' : 'var(--text-secondary)'),
                     fontWeight: isActive ? 700 : 500,
                     fontSize: '0.88rem',
                     cursor: 'pointer',
                     transition: 'all 0.18s ease',
                     position: 'relative',
-                    boxShadow: isActive ? 'inset 0 0 0 1px rgba(99, 102, 241, 0.4), 0 2px 10px rgba(99, 102, 241, 0.2)' : 'none'
+                    boxShadow: isActive ? 'inset 0 0 0 1px rgba(79, 70, 229, 0.25), 0 2px 8px rgba(79, 70, 229, 0.08)' : 'none'
                   }}
                 >
                   {/* Active Indicator Bar */}
@@ -214,8 +214,8 @@ export default function Sidebar({ activeTab, setActiveTab, isCollapsed, setIsCol
                       bottom: '20%',
                       width: '3px',
                       borderRadius: '4px',
-                      background: 'var(--accent-cyan)',
-                      boxShadow: '0 0 8px var(--accent-cyan)'
+                      background: 'var(--accent-primary)',
+                      boxShadow: '0 0 8px rgba(79, 70, 229, 0.4)'
                     }} />
                   )}
 
@@ -223,7 +223,7 @@ export default function Sidebar({ activeTab, setActiveTab, isCollapsed, setIsCol
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    color: isActive ? '#818cf8' : (isHovered ? '#ffffff' : 'var(--text-secondary)')
+                    color: isActive ? 'var(--accent-primary)' : (isHovered ? 'var(--text-primary)' : 'var(--text-secondary)')
                   }}>
                     <Icon size={19} />
                   </div>
@@ -244,8 +244,8 @@ export default function Sidebar({ activeTab, setActiveTab, isCollapsed, setIsCol
                           fontWeight: 700,
                           padding: '0.15rem 0.45rem',
                           borderRadius: '6px',
-                          background: isActive ? 'rgba(99, 102, 241, 0.4)' : 'rgba(255, 255, 255, 0.08)',
-                          color: isActive ? '#a5b4fc' : 'var(--text-muted)'
+                          background: isActive ? 'rgba(79, 70, 229, 0.15)' : 'var(--bg-tertiary)',
+                          color: isActive ? 'var(--accent-primary)' : 'var(--text-muted)'
                         }}>
                           {item.badge}
                         </span>
@@ -286,7 +286,7 @@ export default function Sidebar({ activeTab, setActiveTab, isCollapsed, setIsCol
       {/* 3. BOTTOM: Account Section Aligned in Left Sidebar */}
       <div style={{
         padding: isCollapsed ? '0.75rem 0.5rem' : '0.85rem',
-        borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+        borderTop: '1px solid var(--border-subtle)',
         position: 'relative'
       }}>
         {/* Account Dropup Menu */}
@@ -300,18 +300,18 @@ export default function Sidebar({ activeTab, setActiveTab, isCollapsed, setIsCol
               right: isCollapsed ? 'auto' : '0.85rem',
               width: isCollapsed ? '220px' : 'auto',
               padding: '0.6rem',
-              background: 'rgba(17, 24, 39, 0.97)',
+              background: 'var(--bg-secondary)',
               backdropFilter: 'blur(20px)',
-              border: '1px solid rgba(255, 255, 255, 0.15)',
+              border: '1px solid var(--border-card)',
               borderRadius: 'var(--radius-lg)',
-              boxShadow: '0 12px 35px rgba(0, 0, 0, 0.6)',
+              boxShadow: '0 12px 35px rgba(15, 23, 42, 0.12)',
               display: 'flex',
               flexDirection: 'column',
               gap: '0.35rem',
               zIndex: 1200
             }}
           >
-            <div style={{ padding: '0.5rem 0.75rem', borderBottom: '1px solid rgba(255, 255, 255, 0.08)' }}>
+            <div style={{ padding: '0.5rem 0.75rem', borderBottom: '1px solid var(--border-subtle)' }}>
               <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 Logged In
               </div>
@@ -340,10 +340,10 @@ export default function Sidebar({ activeTab, setActiveTab, isCollapsed, setIsCol
                 textAlign: 'left',
                 transition: 'background 0.15s ease'
               }}
-              onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)'}
+              onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg-tertiary)'}
               onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
             >
-              <User size={16} color="#818cf8" />
+              <User size={16} color="var(--accent-primary)" />
               <span>Profile & Skills</span>
             </button>
 
@@ -367,14 +367,14 @@ export default function Sidebar({ activeTab, setActiveTab, isCollapsed, setIsCol
                 textAlign: 'left',
                 transition: 'background 0.15s ease'
               }}
-              onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)'}
+              onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg-tertiary)'}
               onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
             >
-              <History size={16} color="#06b6d4" />
+              <History size={16} color="var(--accent-cyan)" />
               <span>Interview History</span>
             </button>
 
-            <div style={{ height: '1px', background: 'rgba(255, 255, 255, 0.08)', margin: '0.2rem 0' }} />
+            <div style={{ height: '1px', background: 'var(--border-subtle)', margin: '0.2rem 0' }} />
 
             <button
               onClick={() => {
@@ -388,16 +388,16 @@ export default function Sidebar({ activeTab, setActiveTab, isCollapsed, setIsCol
                 padding: '0.6rem 0.75rem',
                 borderRadius: 'var(--radius-md)',
                 border: 'none',
-                background: 'rgba(244, 63, 94, 0.1)',
-                color: '#f87171',
+                background: '#fff1f2',
+                color: 'var(--accent-rose)',
                 fontSize: '0.84rem',
                 fontWeight: 600,
                 cursor: 'pointer',
                 textAlign: 'left',
                 transition: 'background 0.15s ease'
               }}
-              onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(244, 63, 94, 0.2)'}
-              onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(244, 63, 94, 0.1)'}
+              onMouseEnter={(e) => e.currentTarget.style.background = '#ffe4e6'}
+              onMouseLeave={(e) => e.currentTarget.style.background = '#fff1f2'}
             >
               <LogOut size={16} />
               <span>Sign Out</span>
@@ -414,21 +414,21 @@ export default function Sidebar({ activeTab, setActiveTab, isCollapsed, setIsCol
             justifyContent: isCollapsed ? 'center' : 'space-between',
             gap: '0.75rem',
             padding: isCollapsed ? '0.5rem 0' : '0.55rem 0.75rem',
-            background: accountMenuOpen ? 'rgba(99, 102, 241, 0.15)' : 'rgba(255, 255, 255, 0.04)',
+            background: accountMenuOpen ? 'rgba(79, 70, 229, 0.08)' : 'var(--bg-tertiary)',
             borderRadius: 'var(--radius-md)',
-            border: `1px solid ${accountMenuOpen ? 'rgba(99, 102, 241, 0.4)' : 'rgba(255, 255, 255, 0.08)'}`,
+            border: `1px solid ${accountMenuOpen ? 'rgba(79, 70, 229, 0.35)' : 'var(--border-subtle)'}`,
             cursor: 'pointer',
             transition: 'all 0.18s ease',
             userSelect: 'none'
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.borderColor = 'rgba(99, 102, 241, 0.4)';
-            e.currentTarget.style.background = 'rgba(99, 102, 241, 0.12)';
+            e.currentTarget.style.borderColor = 'rgba(79, 70, 229, 0.35)';
+            e.currentTarget.style.background = 'rgba(79, 70, 229, 0.08)';
           }}
           onMouseLeave={(e) => {
             if (!accountMenuOpen) {
-              e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)';
-              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.04)';
+              e.currentTarget.style.borderColor = 'var(--border-subtle)';
+              e.currentTarget.style.background = 'var(--bg-tertiary)';
             }
           }}
           title={isCollapsed ? `${user?.full_name || 'My Account'} (Click for Options)` : 'Account Settings & Profile'}
@@ -448,7 +448,7 @@ export default function Sidebar({ activeTab, setActiveTab, isCollapsed, setIsCol
                   justifyContent: 'center',
                   fontWeight: 800,
                   fontSize: '0.8rem',
-                  boxShadow: '0 2px 8px rgba(99, 102, 241, 0.4)'
+                  boxShadow: '0 2px 8px rgba(79, 70, 229, 0.3)'
                 }}
               >
                 {initials}
@@ -462,7 +462,7 @@ export default function Sidebar({ activeTab, setActiveTab, isCollapsed, setIsCol
                   height: '9px',
                   borderRadius: '50%',
                   background: '#10b981',
-                  border: '2px solid #0b0f19',
+                  border: '2px solid #ffffff',
                   boxShadow: '0 0 5px #10b981'
                 }}
               />

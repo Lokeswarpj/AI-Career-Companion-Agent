@@ -735,10 +735,10 @@ export default function ApplicationCustomizerPage({ selectedInternshipId, setSel
                     lineHeight: 1.8,
                     padding: '1.5rem',
                     borderRadius: 'var(--radius-md)',
-                    background: '#0f172a',
-                    color: '#f8fafc',
-                    border: '1px solid rgba(255, 255, 255, 0.16)',
-                    boxShadow: 'inset 0 2px 10px rgba(0, 0, 0, 0.5)',
+                    background: '#ffffff',
+                    color: 'var(--text-primary)',
+                    border: '1px solid var(--border-card)',
+                    boxShadow: 'inset 0 1px 4px rgba(15, 23, 42, 0.05)',
                     resize: 'vertical',
                     letterSpacing: '0.01em'
                   }}

@@ -34,7 +34,7 @@ export default function LandingPage({ onGetStarted, onDemoLogin }) {
           transform: 'translateX(-50%)',
           width: '600px',
           height: '350px',
-          background: 'radial-gradient(ellipse at center, rgba(99, 102, 241, 0.25) 0%, rgba(6, 182, 212, 0.1) 50%, rgba(11, 15, 25, 0) 80%)',
+          background: 'radial-gradient(ellipse at center, rgba(79, 70, 229, 0.12) 0%, rgba(2, 132, 199, 0.06) 50%, rgba(255, 255, 255, 0) 80%)',
           pointerEvents: 'none',
           zIndex: 0
         }} />

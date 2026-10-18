@@ -46,12 +46,12 @@ export default function Background3D() {
     window.addEventListener('resize', handleResize, { passive: true });
     document.addEventListener('visibilitychange', handleVisibility);
 
-    // Optimized Color Palette Precomputations
+    // Optimized Color Palette Precomputations (Tailored for presentation clarity)
     const PALETTES = [
-      { core: '#06b6d4', r: 6, g: 182, b: 212 },   // Cyan
-      { core: '#818cf8', r: 129, g: 140, b: 248 }, // Indigo
-      { core: '#a855f7', r: 168, g: 85, b: 247 },  // Purple
-      { core: '#10b981', r: 16, g: 185, b: 129 }   // Emerald
+      { core: '#0284c7', r: 2, g: 132, b: 199 },   // Sky / Cyan
+      { core: '#4f46e5', r: 79, g: 70, b: 229 },   // Indigo
+      { core: '#7c3aed', r: 124, g: 58, b: 237 },  // Violet
+      { core: '#059669', r: 5, g: 150, b: 105 }    // Emerald
     ];
 
     // High-performance 28-node neural vector constellation
@@ -146,7 +146,7 @@ export default function Background3D() {
           const p2y = centerY + (y2_proj * focalLength) / z2_;
 
           const alpha = Math.max(0, Math.min(0.08, (1 - z1_ / 900) * 0.12));
-          ctx.strokeStyle = `rgba(99, 102, 241, ${alpha})`;
+          ctx.strokeStyle = `rgba(79, 70, 229, ${alpha * 0.75})`;
           ctx.beginPath();
           ctx.moveTo(p1x, p1y);
           ctx.lineTo(p2x, p2y);
@@ -195,7 +195,7 @@ export default function Background3D() {
           if (distSq < 10000) { // dist < 100px
             const dist = Math.sqrt(distSq);
             const lineAlpha = (1 - dist / 100) * Math.min(p1.alpha, p2.alpha) * 0.28;
-            ctx.strokeStyle = `rgba(99, 102, 241, ${lineAlpha})`;
+            ctx.strokeStyle = `rgba(79, 70, 229, ${lineAlpha * 0.75})`;
             ctx.lineWidth = 0.75;
             ctx.beginPath();
             ctx.moveTo(p1.px, p1.py);
@@ -224,10 +224,10 @@ export default function Background3D() {
         ctx.fill();
         ctx.globalAlpha = 1.0;
 
-        // Label for primary nodes
+        // Label for primary nodes (high contrast slate text)
         if (p.node.hasLabel && p.scale > 0.7 && p.alpha > 0.4) {
           ctx.font = `600 ${Math.max(9, Math.round(11 * p.scale))}px sans-serif`;
-          ctx.fillStyle = `rgba(241, 245, 249, ${p.alpha * 0.7})`;
+          ctx.fillStyle = `rgba(30, 41, 59, ${p.alpha * 0.75})`;
           ctx.textAlign = 'center';
           ctx.fillText(p.node.label, p.px, p.py - p.radius - 4);
         }
@@ -255,7 +255,7 @@ export default function Background3D() {
         height: '100vh',
         pointerEvents: 'none',
         zIndex: 0,
-        opacity: 0.9,
+        opacity: 0.65,
         willChange: 'transform',
         transform: 'translate3d(0,0,0)',
         contain: 'strict'

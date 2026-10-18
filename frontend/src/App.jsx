@@ -118,6 +118,20 @@ export default function App() {
     localStorage.setItem('careerpulse_sidebar_collapsed', isSidebarCollapsed.toString());
   }, [isSidebarCollapsed]);
 
+  // Theme Management (Defaulting to light presentation mode)
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem('careerpulse_theme') || 'light';
+  });
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('careerpulse_theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
+  };
+
   // Navigate helper to keep state, localStorage, and URL hash in 100% sync
   const handleNavigate = (tab) => {
     if (!tab) return;
@@ -248,6 +262,8 @@ export default function App() {
           isSidebarCollapsed={isSidebarCollapsed}
           setIsSidebarCollapsed={setIsSidebarCollapsed}
           setAuthMode={setAuthMode}
+          theme={theme}
+          toggleTheme={toggleTheme}
         />
       </div>
 
