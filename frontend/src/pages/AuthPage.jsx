@@ -352,10 +352,7 @@ export default function AuthPage({ onSuccess, authMode = 'login', setAuthMode })
       hasError = true;
     }
 
-    if (!technicalSkills.trim()) {
-      setSkillsError('Please enter at least 1-2 technical skills.');
-      hasError = true;
-    }
+    // Technical skills are optional during registration (skills can be auto-extracted from resume)
 
     if (hasError) {
       notify.error('Please fix all errors in compulsory fields marked with * before submitting.');
@@ -959,23 +956,30 @@ export default function AuthPage({ onSuccess, authMode = 'login', setAuthMode })
                 {locationError && <span style={{ color: '#ef4444', fontSize: '0.75rem', marginTop: '0.25rem', display: 'block' }}>{locationError}</span>}
               </div>
 
-              {/* Technical Skills * */}
+              {/* Technical Skills (Optional) */}
               <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-                <label className="form-label">
-                  Primary Technical Skills (Comma-separated) <span style={{ color: '#ef4444' }}>*</span>
-                </label>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem', flexWrap: 'wrap', gap: '0.25rem' }}>
+                  <label className="form-label" style={{ marginBottom: 0 }}>
+                    Technical Skills <span style={{ color: 'var(--text-muted)', fontWeight: 400, fontSize: '0.8rem' }}>(Optional)</span>
+                  </label>
+                  <span style={{ fontSize: '0.74rem', color: 'var(--accent-primary)', fontWeight: 600 }}>
+                    ⚡ Skills can be auto-extracted from your resume
+                  </span>
+                </div>
                 <div style={{ position: 'relative' }}>
                   <input
                     type="text"
                     className="form-input"
                     value={technicalSkills}
                     onChange={(e) => { setTechnicalSkills(e.target.value); if (skillsError) setSkillsError(''); }}
-                    placeholder="e.g. React, Node.js, Python, SQL, Git"
+                    placeholder="e.g. React, Node.js, Python, SQL (Optional — or leave blank to auto-extract)"
                     style={{ paddingLeft: '2.5rem', borderColor: skillsError ? '#ef4444' : undefined }}
-                    required
                   />
                   <Code2 size={18} style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                 </div>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.35rem', display: 'block', lineHeight: 1.4 }}>
+                  💡 You can leave this blank! When you upload your resume on the platform, our AI Resume Parser will extract, verify, and populate all your technical and soft skills automatically.
+                </span>
                 {skillsError && <span style={{ color: '#ef4444', fontSize: '0.78rem', marginTop: '0.25rem', display: 'block' }}>{skillsError}</span>}
               </div>
             </div>
