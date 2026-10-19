@@ -3,9 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { 
   Sparkles, 
   LogIn, 
-  UserPlus,
-  Sun,
-  Moon
+  UserPlus 
 } from 'lucide-react';
 import brandLogo from '../assets/careerpulse_logo.png';
 
@@ -87,37 +85,6 @@ export default function Navbar({
         {/* Right Side: Header actions based on page context */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           
-          {/* Quick Theme Switcher Pill (Presentation Light / Dark) */}
-          {toggleTheme && (
-            <button
-              onClick={toggleTheme}
-              className="btn btn-outline btn-sm"
-              title={theme === 'dark' ? 'Switch to Light Presentation Mode' : 'Switch to Dark Mode'}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.4rem',
-                padding: '0.35rem 0.65rem',
-                borderRadius: 'var(--radius-md)',
-                borderColor: 'var(--border-card)',
-                background: 'var(--bg-secondary)',
-                fontSize: '0.78rem'
-              }}
-            >
-              {theme === 'dark' ? (
-                <>
-                  <Sun size={15} color="#ffe17c" />
-                  <span style={{ fontWeight: 600 }}>Light UI</span>
-                </>
-              ) : (
-                <>
-                  <Moon size={15} color="#171e19" />
-                  <span style={{ fontWeight: 600 }}>Dark UI</span>
-                </>
-              )}
-            </button>
-          )}
-
           {isLanding ? (
             isAuthenticated ? (
               <button 
