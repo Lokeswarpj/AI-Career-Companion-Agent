@@ -12,9 +12,7 @@ export default function Navbar({
   setActiveTab, 
   isSidebarCollapsed, 
   setIsSidebarCollapsed, 
-  setAuthMode,
-  theme = 'light',
-  toggleTheme
+  setAuthMode
 }) {
   const { isAuthenticated } = useAuth();
 
